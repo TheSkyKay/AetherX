@@ -1,0 +1,1534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heatwise — India heatwave season outlook (prototype)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b4551f'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23fdf6ec'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box}
+:root{
+  --ink:#2b332e;--muted:#6a736c;--line:#e6dfd0;--paper:#f7f3ea;--card:#fff;
+  --accent:#b4551f;--green:#3f6a52;--hw:#b4551f;--sev:#8f2418;--cool:#2f6f86;
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 "DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3,h4{font-family:"Manrope",system-ui,sans-serif;line-height:1.25;margin:0}
+h2{font-size:19px}h3{font-size:14.5px}h4{font-size:13px}
+a{color:#8a3f17}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #b4551f;outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;padding:10px 14px;z-index:20}
+.skip:focus{left:12px;top:12px}
+.top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Manrope",sans-serif;font-weight:800;font-size:18px;letter-spacing:-.2px}
+.brand .mark{width:24px;height:24px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:13px}
+.brand small{font-weight:600;font-size:11px;color:var(--muted);letter-spacing:.2px}
+.nav{display:flex;gap:6px;flex-wrap:wrap;font-size:12.5px}
+.nav a{text-decoration:none;color:#4b544d;border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff}
+.nav a:hover{background:#f6f2e8}
+.nav a[aria-current=page]{background:#f1eadb;border-color:#d9cfb8;color:#2f3a34;font-weight:700}
+.notice{display:flex;gap:10px;align-items:flex-start;background:#fff8ec;border:1px solid #ecdcc0;border-radius:12px;padding:12px 14px;margin:16px 0 0;font-size:13px;color:#4a463c}
+.notice .icon{color:var(--accent);font-size:16px;line-height:1.3}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:16px 0;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:12.5px;margin:2px 0 0}
+.sectionlead{color:var(--muted);font-size:12.5px;margin:3px 0 0}
+.chip{display:inline-block;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;letter-spacing:.2px;border:1px solid #ddd6c6;background:#f7f3e9;color:#4c554e;white-space:nowrap}
+.chip.gov{background:#eef2fa;border-color:#cfd9ea;color:#2c4a72}
+.chip.obs{background:#eef4ef;border-color:#cfe0d2;color:#2f5c42}
+.chip.model{background:#fdf1e8;border-color:#eccdb8;color:#7c3a15}
+.chip.stress{background:#f0eef7;border-color:#d8d2e6;color:#4d3d6b}
+.chip.warn{background:#fdeae4;border-color:#efc8ba;color:#8f2418}
+.chip.ok{background:#eef4ef;border-color:#cfe0d2;color:#2f5c42}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.grid4{grid-template-columns:1fr}}
+.kind{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fdfbf6}
+.kind h4{display:flex;gap:6px;align-items:center;margin-bottom:5px;flex-wrap:wrap}
+.kind p{margin:0;font-size:12.5px;color:#4a534c;line-height:1.5}
+.kind .tag{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.controls .controlrow{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:700;color:#3d4640}
+.field .help{font-weight:500;color:var(--muted);font-size:11px}
+select,input[type=search],input[type=number]{font:inherit;font-size:13.5px;padding:9px 10px;border:1px solid #d8d2c5;border-radius:9px;background:#fff;color:var(--ink);min-width:150px}
+.btn{font:inherit;font-size:13px;font-weight:700;border:1px solid #9d4412;background:var(--accent);color:#fff;border-radius:9px;padding:9px 14px;cursor:pointer}
+.btn:hover{background:#9d4412}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn-quiet{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #d8d2c5;background:#fff;color:#2f3a34;border-radius:9px;padding:7px 11px;cursor:pointer}
+.btn-quiet:hover{background:#f5f2ea}
+.statusline{margin:10px 0 0;font-size:12.5px;display:flex;gap:8px;align-items:center}
+.status{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:4px 10px;font-weight:700;font-size:11.5px;border:1px solid #ddd6c6;background:#f7f3e9;color:#4c554e}
+.status[data-kind=loading]{background:#fdf4e7;border-color:#ecd6b6;color:#7c4a12}
+.status[data-kind=ready]{background:#eef4ef;border-color:#cfe0d2;color:#2f5c42}
+.status[data-kind=error]{background:#fdeae4;border-color:#efc8ba;color:#8f2418}
+.status[data-kind=nodata]{background:#f1eef7;border-color:#dcd5e7;color:#4d3d6b}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.kpis{grid-template-columns:1fr}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px}
+.kpi .lab{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800}
+.kpi .val{font-family:"Manrope",sans-serif;font-size:24px;font-weight:800;margin-top:5px;letter-spacing:-.5px}
+.kpi .sub{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+.kpi[data-tone=hw]{border-color:#eccbb8;background:#fffaf6}
+.kpi[data-tone=sev]{border-color:#e7b6a9;background:#fdf2ee}
+.kpi[data-tone=ok]{border-color:#cfe0d2;background:#f8fbf8}
+.brief{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+@media(max-width:820px){.brief{grid-template-columns:1fr}}
+.brief .item{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fdfbf6}
+.brief .item b{display:block;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.brief .item p{margin:0;font-size:13px;line-height:1.5}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+caption{caption-side:top;text-align:left;padding:0 0 8px;color:var(--muted);font-size:11.5px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid #efe9dc;vertical-align:top}
+thead th{background:#f6f2e8;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#4c554e;position:sticky;top:0}
+tbody tr:hover{background:#fdfbf6}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.tablewrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:12px}
+.tablewrap table{min-width:640px}
+.barcell{min-width:150px}
+.bar{height:11px;border-radius:3px;background:#e8dfcd;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;background:#d08a52}
+.bar i.sev{background:#8f2418}
+.bar i.hw{background:#b4551f}
+.yearbtn{border:0;background:none;font:inherit;font-weight:700;color:#8a3f17;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.yearbtn:hover{color:#5f2a0f}
+tr.thisyear td{background:#fff5ec;font-weight:700}
+tr.thisyear td:first-child::before{content:"▶ ";color:var(--accent)}
+.factor{border-left:4px solid var(--accent);background:#fdf6ef;border-radius:0 10px 10px 0;padding:11px 13px;margin:0 0 9px;font-size:13px}
+.factor b{color:#6c3a21}
+.factor .stat{font-variant-numeric:tabular-nums;font-weight:700}
+.callout{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#f8f6ef;font-size:12.5px;color:#40483f}
+.callout strong{color:#2f3a34}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+details{border:1px solid var(--line);border-radius:11px;padding:10px 13px;background:#fdfbf6;margin-top:10px}
+summary{cursor:pointer;font-weight:700;font-size:13px}
+details ul,details ol{margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.55;color:#3d4640}
+details li{margin-bottom:4px}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:#f6f3ea;border:1px solid #e6e0d2;border-radius:8px;padding:8px 10px;margin:8px 0;overflow-x:auto;white-space:nowrap;color:#3b463f}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+.swatch{width:11px;height:11px;border-radius:3px;display:inline-block}
+ul.actions{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.actions li{display:flex;gap:9px;border:1px solid #e8e2d4;border-radius:10px;padding:9px 11px;font-size:13px;background:#fff;line-height:1.5}
+ul.actions li .tick{flex:none;width:19px;height:19px;border-radius:50%;background:#eaf2ea;color:#2f5c42;display:grid;place-items:center;font-size:10px;font-weight:800;margin-top:1px}
+ul.actions li.urgent{background:#fdf1ec;border-color:#efcbbd}
+ul.actions li.urgent .tick{background:#f7ddd2;color:#8f2418}
+.err{border:1px solid #efc8ba;background:#fdf2ee;border-radius:11px;padding:12px 14px;font-size:13px;color:#7c2416}
+.skel{height:12px;border-radius:6px;background:#efe9db;margin:8px 0;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.mini{font-size:11.5px;color:var(--muted)}
+footer{padding:22px 0 36px;font-size:11.5px;color:#7c857e;line-height:1.6}
+footer p{margin:0 0 4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.ranknote{font-size:12px;color:var(--muted);margin:6px 0 0}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="top">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true">☼</span>heatwise <small>India · season outlook</small></div>
+    <nav class="nav" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="heat-risk-model.html">Risk model</a>
+      <a href="heatwave-outlook.html" aria-current="page">Season outlook</a>
+      <a href="heat-response.html">Alert &amp; response</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="notice" role="note">
+    <span class="icon" aria-hidden="true">⚠</span>
+    <span><strong>Planning prototype — not an official heatwave warning.</strong> Days are classified by applying IMD temperature criteria to a weather-model grid cell; IMD declares heat waves from station observations across a meteorological sub-division. Official warnings come only from the <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a> and your district authority. Nothing here is medical advice.</span>
+  </div>
+</div>
+
+<main id="main" class="wrap">
+
+  <section class="card" aria-labelledby="sepTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="sepTitle">Four different things, kept separate</h2>
+        <p class="sectionlead">A quiet season is a result, not a failure: the page reports what the data shows even when no heatwave occurred.</p>
+      </div>
+    </div>
+    <div class="grid4">
+      <div class="kind">
+        <h4><span class="chip gov">Official</span><span class="tag">IMD warnings</span></h4>
+        <p>Not reproduced or generated here. This page shows no official alert, colour code or bulletin. Check IMD for the current warning status of your district.</p>
+      </div>
+      <div class="kind">
+        <h4><span class="chip obs">Observed</span><span class="tag">past and season-to-date</span></h4>
+        <p>Grid-cell days that meet or miss the IMD temperature criteria, from ERA5 reanalysis and recent model analysis. These are calculated conditions, not declarations.</p>
+      </div>
+      <div class="kind">
+        <h4><span class="chip model">Model-estimated</span><span class="tag">likelihood</span></h4>
+        <p>Climatological frequency of qualifying days later in the season, plus the 16-day deterministic forecast. Experimental; not a probability forecast from an ensemble.</p>
+      </div>
+      <div class="kind">
+        <h4><span class="chip stress">Heat stress</span><span class="tag">general indicator</span></h4>
+        <p>Apparent temperature ("feels like") is shown and labelled as such. WBGT is not shown, because a valid WBGT needs globe temperature and solar/wind inputs that this data does not provide.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card controls" aria-labelledby="controlsTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="controlsTitle">City and season</h2>
+        <p class="sectionlead">Timezones are the city's own. The season determines which days count.</p>
+      </div>
+      <span class="chip chip-quiet" id="placeChip">—</span>
+    </div>
+    <div class="controlrow">
+      <div class="field">
+        <label for="city">City <span class="help">listed Indian cities</span></label>
+        <select id="city"></select>
+      </div>
+      <div class="field">
+        <label for="placeSearch">Or search an Indian city or town</label>
+        <input type="search" id="placeSearch" placeholder="e.g. Jaisalmer, Kurnool, Silchar" autocomplete="off" list="cityList">
+        <datalist id="cityList"></datalist>
+      </div>
+      <div class="field">
+        <label for="zone">IMD region type <span class="help">sets the entry threshold</span></label>
+        <select id="zone">
+          <option value="plains">Plains (≥ 40 °C)</option>
+          <option value="coastal">Coastal (≥ 37 °C)</option>
+          <option value="hilly">Hilly (≥ 30 °C)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="season">Season</label>
+        <select id="season"></select>
+      </div>
+      <div class="field">
+        <label for="year">Year <span class="help">1991 to this year</span></label>
+        <select id="year"></select>
+      </div>
+      <div class="field">
+        <button type="button" class="btn" id="run">Run analysis</button>
+      </div>
+    </div>
+    <p class="statusline" id="statusLine" role="status" aria-live="polite">
+      <span class="status" id="status" data-kind="idle">Loading the historical baseline…</span>
+    </p>
+    <div class="mini" id="searchNote" hidden></div>
+  </section>
+
+  <section aria-label="Headline results">
+    <div class="kpis" id="kpis">
+      <div class="kpi"><div class="lab">Season status</div><div class="val">—</div><div class="sub">Run the analysis for a city.</div></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="briefTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="briefTitle">City briefing</h2>
+        <p class="sectionlead">Plain language, same criteria and data as the detail below.</p>
+      </div>
+      <span class="chip chip-quiet" id="briefChip">—</span>
+    </div>
+    <div id="briefing"><div class="skel"></div><div class="skel" style="width:70%"></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="timelineTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="timelineTitle">Heatwave days by year</h2>
+        <p class="sectionlead">Same city, same season, same criteria, same method for every year. Bars show heatwave days; the darker segment is severe heatwave days.</p>
+      </div>
+      <span class="chip chip-quiet" id="timelineChip">—</span>
+    </div>
+    <div id="timeline"><div class="skel"></div><div class="skel" style="width:85%"></div></div>
+    <div class="legend">
+      <span><i class="swatch" style="background:#b4551f"></i> heatwave day</span>
+      <span><i class="swatch" style="background:#8f2418"></i> severe heatwave day</span>
+      <span>Selected year highlighted. Select a year to re-run.</span>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="compareTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="compareTitle">This season against the baseline</h2>
+        <p class="sectionlead" id="compareSub">Like-for-like window: season start to the same point in the season in every earlier year.</p>
+      </div>
+      <span class="chip chip-quiet" id="compareChip">—</span>
+    </div>
+    <div class="two">
+      <div id="compare"><div class="skel"></div></div>
+      <div id="outlookBox"><div class="skel"></div></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="changeTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="changeTitle">What changed?</h2>
+        <p class="sectionlead">Only differences this data can measure are reported. Weather correlations cannot establish a cause.</p>
+      </div>
+      <span class="chip chip-quiet" id="changeChip">—</span>
+    </div>
+    <div id="whatChanged"><div class="skel"></div><div class="skel" style="width:60%"></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="horizonTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="horizonTitle">16-day forecast horizon</h2>
+        <p class="sectionlead" id="horizonSub">Deterministic model output, classified with the same criteria. Beyond about day 7, skill is limited.</p>
+      </div>
+      <span class="chip chip-quiet" id="horizonChip">—</span>
+    </div>
+    <div id="horizon"><div class="skel"></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="valTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="valTitle">Model validation (hindcast)</h2>
+        <p class="sectionlead">Trained on earlier years, tested on later years. This validates the seasonal-likelihood rule, not the 16-day forecast.</p>
+      </div>
+      <span class="chip chip-quiet" id="valChip">—</span>
+    </div>
+    <div id="validation"><div class="skel"></div><div class="skel" style="width:75%"></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="rankTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="rankTitle">City ranking</h2>
+        <p class="sectionlead">Ranked climatological likelihood, not an alert map. Built only when you ask, because each city needs its own historical download.</p>
+      </div>
+      <button type="button" class="btn-quiet" id="rankBtn">Build ranking for the listed cities</button>
+    </div>
+    <div id="ranking"><p class="mini">No ranking yet. This uses temperature-only archive data for each listed city and is clearly separate from official warnings.</p></div>
+  </section>
+
+  <section class="card" aria-labelledby="srcTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="srcTitle">Data sets, units and limitations</h2>
+        <p class="sectionlead">Every number above traces to one of these rows.</p>
+      </div>
+    </div>
+    <div id="sources"><p class="mini">Data provenance appears after the first run.</p></div>
+  </section>
+
+  <section class="card" aria-labelledby="actTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="actTitle">Preparedness and official information</h2>
+        <p class="sectionlead">Actions depend on the season result, not on a promise that a heatwave will happen.</p>
+      </div>
+    </div>
+    <div id="actions"><p class="mini">Guidance appears after the first run.</p></div>
+  </section>
+
+  <section class="card" aria-labelledby="methodTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="methodTitle">How this works</h2>
+        <p class="sectionlead">Definitions, assumptions and what would improve the answer.</p>
+      </div>
+    </div>
+    <details open>
+      <summary>IMD criteria applied here</summary>
+      <ul>
+        <li><strong>Entry threshold by region:</strong> maximum temperature at least 40 °C for plains, 37 °C for coastal stations, 30 °C for hilly regions.</li>
+        <li><strong>Departure from normal:</strong> heatwave when the departure is 4.5 °C to 6.4 °C; severe heatwave when it is more than 6.4 °C.</li>
+        <li><strong>Absolute rule:</strong> heatwave when the maximum temperature reaches 45 °C; severe heatwave at 47 °C or more.</li>
+        <li><strong>Warm night:</strong> minimum-temperature departure of 4.5 °C to 6.4 °C (very warm night above 6.4 °C), considered only when the maximum temperature stays at 40 °C or above.</li>
+        <li><strong>Not applied:</strong> IMD declares a heat wave when the criteria are met at two or more stations in a meteorological sub-division for at least two consecutive days. A single grid cell cannot satisfy that rule, so this page counts qualifying grid-cell days and reports consecutive-day spells separately.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Normals, seasons and data method</summary>
+      <ul>
+        <li>Normals are the 1991–2020 mean for each calendar day, smoothed with a 15-day circular window, computed from ERA5 reanalysis at the city's grid cell. IMD normals are station-based and may differ.</li>
+        <li>Past seasons use ERA5 daily aggregates. The current season mixes the recent model analysis and the 16-day forecast with the archive, so its method is close to, but not identical with, past years.</li>
+        <li>Apparent temperature is shown as a heat-stress indicator. It encodes temperature, humidity, wind and solar radiation; it is not WBGT and not a personal risk measure.</li>
+        <li>Where daily values are missing, that day is excluded from the count and reported as a gap rather than filled.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>What the likelihood means — and does not</summary>
+      <ul>
+        <li>The seasonal figure is the share of baseline years (1991–2025) that had at least one qualifying day after the same point in the season. It is climatological frequency, shown with a 95% Wilson interval and the number of years behind it.</li>
+        <li>When the season so far has been quiet, a second figure conditions on that: among baseline years with no qualifying day by this date, how many later had one. Small samples are flagged.</li>
+        <li>The 16-day figure is deterministic model output, not a probability. It is not an ensemble spread and does not carry a calibrated chance.</li>
+        <li>No causal claim is made. Differences are concurrent measurements in one grid cell; they do not identify circulation patterns, land use, or any other cause.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Validation design and its limits</summary>
+      <ul>
+        <li>For each test year from 2005 to 2025, the rule is fitted on 1991 to the year before, then applied. Test years are never in their own training set.</li>
+        <li>Reported: hits, false alarms, misses, precision, recall, accuracy, Brier score, and the same for an always-negative baseline and a persistence baseline.</li>
+        <li>Only the climatological rule is validated. Verifying the 16-day forecast needs archived forecasts, which this page does not have.</li>
+        <li>Per-city results are shown for the selected city; the ranking table adds the same calculation for other listed cities.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>What would improve the answer</summary>
+      <ul>
+        <li>Station observations and IMD's official station normals, plus the district's meteorological sub-division, to apply the real declaration rule.</li>
+        <li>Archived IMD heatwave warnings and district heat-action plans for a proper event definition and lead-time evaluation.</li>
+        <li>Ensemble forecasts for calibrated probabilities by lead time, and hourly globe temperature for WBGT.</li>
+        <li>Local land-use and urban heat-island data, since a 25 km reanalysis cell smooths the hottest parts of a city.</li>
+        <li>Health outcome data (with appropriate governance) if the system is ever to be used for health impact, which this prototype does not attempt.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><strong>Heatwise · India heatwave season outlook (prototype).</strong> Weather data from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0), based on ERA5 reanalysis by the Copernicus Climate Change Service, ECMWF. IMD criteria are quoted from IMD's published heat-wave FAQ and forecasting SOP.</p>
+  <p>For warnings and instructions, follow the <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a>, your district disaster authority and local health services. Nothing here is medical advice, and no deaths, hospitalisations or economic losses are predicted.</p>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     Constants
+  ------------------------------------------------------------------ */
+  var NORMAL_START = 1991, NORMAL_END = 2020, BASELINE_END = 2025;
+  var DEP_HW = 4.5, DEP_SEV = 6.4, ABS_HW = 45, ABS_SEV = 47;
+  var WARM_NIGHT_DEP = 4.5, VERY_WARM_NIGHT_DEP = 6.4;
+  var CUTOFF_OFFSET = 75;          /* season day used for hindcast split */
+  var FORECAST_DAYS = 16;
+  var VARS = ['temperature_2m_max','temperature_2m_min','apparent_temperature_max','apparent_temperature_min',
+              'relative_humidity_2m_mean','wind_speed_10m_max','precipitation_sum','shortwave_radiation_sum','cloud_cover_mean'];
+  var VAR_KEYS = ['tmax','tmin','appMax','appMin','rh','wind','precip','srad','cloud'];
+
+  var ZONES = {
+    plains:{ label:'Plains', entry:40 },
+    coastal:{ label:'Coastal', entry:37 },
+    hilly:{ label:'Hilly', entry:30 }
+  };
+
+  var SEASONS = [
+    { key:'premonsoon', name:'Pre-monsoon', start:[3,1],  end:[6,30], short:'1 Mar – 30 Jun' },
+    { key:'summer',     name:'Summer',      start:[4,1],  end:[6,30], short:'1 Apr – 30 Jun' },
+    { key:'peak',       name:'Peak summer', start:[5,1],  end:[6,30], short:'1 May – 30 Jun' }
+  ];
+
+  var CITIES = [
+    { id:'delhi',       name:'Delhi',        lat:28.6139, lon:77.2090, zone:'plains'  },
+    { id:'mumbai',      name:'Mumbai',       lat:19.0760, lon:72.8777, zone:'coastal' },
+    { id:'chennai',     name:'Chennai',      lat:13.0827, lon:80.2707, zone:'coastal' },
+    { id:'kolkata',     name:'Kolkata',      lat:22.5726, lon:88.3639, zone:'plains'  },
+    { id:'ahmedabad',   name:'Ahmedabad',    lat:23.0225, lon:72.5714, zone:'plains'  },
+    { id:'jaipur',      name:'Jaipur',       lat:26.9124, lon:75.7873, zone:'plains'  },
+    { id:'jodhpur',     name:'Jodhpur',      lat:26.2389, lon:73.0243, zone:'plains'  },
+    { id:'nagpur',      name:'Nagpur',       lat:21.1458, lon:79.0882, zone:'plains'  },
+    { id:'bhopal',      name:'Bhopal',       lat:23.2599, lon:77.4126, zone:'plains'  },
+    { id:'lucknow',     name:'Lucknow',      lat:26.8467, lon:80.9462, zone:'plains'  },
+    { id:'patna',       name:'Patna',        lat:25.5941, lon:85.1376, zone:'plains'  },
+    { id:'bhubaneswar', name:'Bhubaneswar',  lat:20.2961, lon:85.8245, zone:'coastal' },
+    { id:'hyderabad',   name:'Hyderabad',    lat:17.3850, lon:78.4867, zone:'plains'  },
+    { id:'visakhapatnam',name:'Visakhapatnam',lat:17.6868,lon:83.2185, zone:'coastal' },
+    { id:'guwahati',    name:'Guwahati',     lat:26.1445, lon:91.7362, zone:'plains'  },
+    { id:'ranchi',      name:'Ranchi',       lat:23.3441, lon:85.3096, zone:'plains'  },
+    { id:'srinagar',    name:'Srinagar',     lat:34.0837, lon:74.7973, zone:'hilly'   },
+    { id:'shimla',      name:'Shimla',       lat:31.1048, lon:77.1734, zone:'hilly'   }
+  ];
+
+  var $ = function(sel){ return document.querySelector(sel); };
+
+  /* ------------------------------------------------------------------
+     Utilities
+  ------------------------------------------------------------------ */
+  function num(v){ return (typeof v === 'number' && isFinite(v)) ? v : null; }
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function isoOf(d){ return d.getUTCFullYear() + '-' + pad(d.getUTCMonth()+1) + '-' + pad(d.getUTCDate()); }
+  function isoFor(year, md){ return year + '-' + pad(md[0]) + '-' + pad(md[1]); }
+  function shiftISO(iso, days){
+    var d = new Date(iso + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + days);
+    return isoOf(d);
+  }
+  function todayISO(){
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+  var CUM = [0,31,59,90,120,151,181,212,243,273,304,334];
+  function mdIdx(iso){
+    var m = +iso.slice(5,7), d = +iso.slice(8,10);
+    if(m === 2 && d === 29) d = 28;
+    return CUM[m-1] + d;               /* 1..365 */
+  }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    var o = { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' };
+    return new Intl.DateTimeFormat('en-GB', o).format(new Date(iso + 'T12:00:00Z'));
+  }
+  function fmtDateShort(iso){
+    if(!iso) return '—';
+    var o = { day:'numeric', month:'short', timeZone:'UTC' };
+    return new Intl.DateTimeFormat('en-GB', o).format(new Date(iso + 'T12:00:00Z'));
+  }
+  function fmtDT(d){
+    if(!d) return '—';
+    return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', timeZoneName:'short' }).format(d);
+  }
+  function mean(arr){
+    var v = arr.filter(function(x){ return x !== null && x !== undefined && isFinite(x); });
+    if(!v.length) return null;
+    return v.reduce(function(s,x){ return s+x; }, 0) / v.length;
+  }
+  function sd(arr){
+    var v = arr.filter(function(x){ return x !== null && x !== undefined && isFinite(x); });
+    if(v.length < 2) return null;
+    var m = mean(v);
+    var ss = v.reduce(function(s,x){ return s + (x-m)*(x-m); }, 0);
+    return Math.sqrt(ss / (v.length - 1));
+  }
+  function median(arr){
+    var v = arr.filter(function(x){ return x !== null && isFinite(x); }).sort(function(a,b){ return a-b; });
+    if(!v.length) return null;
+    var mid = Math.floor(v.length/2);
+    return v.length % 2 ? v[mid] : (v[mid-1] + v[mid]) / 2;
+  }
+  function pct(v, digits){
+    if(v === null || v === undefined) return '—';
+    var d = digits === undefined ? 0 : digits;
+    var f = Math.pow(10, d);
+    return (Math.round(v * f) / f) + '%';
+  }
+  function round(v, d){
+    if(v === null || v === undefined || !isFinite(v)) return null;
+    var f = Math.pow(10, d === undefined ? 1 : d);
+    return Math.round(v * f) / f;
+  }
+  function signed(v, d){
+    if(v === null || v === undefined || !isFinite(v)) return '—';
+    var r = round(v, d === undefined ? 1 : d);
+    return (r > 0 ? '+' : '') + r;
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function wilson(p, n){
+    if(!n) return null;
+    var z = 1.96, denom = 1 + z*z/n;
+    var centre = (p + z*z/(2*n)) / denom;
+    var half = (z * Math.sqrt(p*(1-p)/n + z*z/(4*n*n))) / denom;
+    return { lo: Math.max(0, centre-half), hi: Math.min(1, centre+half) };
+  }
+  function setStatus(text, kind){
+    var el = $('#status');
+    el.textContent = text;
+    el.dataset.kind = kind || 'idle';
+  }
+
+  /* ------------------------------------------------------------------
+     State
+  ------------------------------------------------------------------ */
+  var state = {
+    place: null,
+    zone: 'plains',
+    season: SEASONS[0],
+    year: new Date().getFullYear(),
+    cache: new Map(),
+    analysis: null,
+    requestId: 0,
+    rankingBusy: false
+  };
+
+  /* ------------------------------------------------------------------
+     Data loading
+  ------------------------------------------------------------------ */
+  async function getJSON(url, timeoutMs, attempt){
+    attempt = attempt || 0;
+    var ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, timeoutMs || 30000);
+    try {
+      var res = await fetch(url, { signal: ctl.signal });
+      if(!res.ok){
+        if((res.status === 429 || res.status >= 500) && attempt < 3){
+          await new Promise(function(r){ setTimeout(r, 2000 * Math.pow(2, attempt)); });
+          return getJSON(url, timeoutMs, attempt + 1);
+        }
+        if(res.status === 429) throw new Error('The weather service is rate-limiting requests (HTTP 429). Wait a minute and run the analysis again.');
+        throw new Error('Weather service returned HTTP ' + res.status);
+      }
+      var json = await res.json();
+      if(json && json.error) throw new Error(json.reason || 'Weather service error');
+      return json;
+    } catch(err){
+      if(err && err.name === 'AbortError') throw new Error('The weather service did not respond in time');
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function archiveURL(place, start, end, vars){
+    return 'https://archive-api.open-meteo.com/v1/archive?latitude=' + place.lat +
+      '&longitude=' + place.lon + '&start_date=' + start + '&end_date=' + end +
+      '&daily=' + vars.join(',') + '&timezone=auto';
+  }
+  function forecastURL(place){
+    return 'https://api.open-meteo.com/v1/forecast?latitude=' + place.lat +
+      '&longitude=' + place.lon + '&timezone=auto&past_days=92&forecast_days=' + FORECAST_DAYS +
+      '&daily=' + VARS.join(',');
+  }
+
+  function rowsFromDaily(json){
+    var d = json && json.daily;
+    if(!d || !d.time) return [];
+    var out = [];
+    for(var i=0; i<d.time.length; i++){
+      out.push({
+        d: d.time[i],
+        tmax: num(d.temperature_2m_max ? d.temperature_2m_max[i] : null),
+        tmin: num(d.temperature_2m_min ? d.temperature_2m_min[i] : null),
+        appMax: num(d.apparent_temperature_max ? d.apparent_temperature_max[i] : null),
+        appMin: num(d.apparent_temperature_min ? d.apparent_temperature_min[i] : null),
+        rh: num(d.relative_humidity_2m_mean ? d.relative_humidity_2m_mean[i] : null),
+        wind: num(d.wind_speed_10m_max ? d.wind_speed_10m_max[i] : null),
+        precip: num(d.precipitation_sum ? d.precipitation_sum[i] : null),
+        srad: num(d.shortwave_radiation_sum ? d.shortwave_radiation_sum[i] : null),
+        cloud: num(d.cloud_cover_mean ? d.cloud_cover_mean[i] : null)
+      });
+    }
+    return out;
+  }
+
+  function countMissing(rows){
+    var out = {};
+    VAR_KEYS.forEach(function(k){
+      out[k] = rows.filter(function(r){ return r[k] === null; }).length;
+    });
+    return out;
+  }
+  function indexRows(rows){
+    var m = new Map();
+    rows.forEach(function(r){ m.set(r.d, r); });
+    return m;
+  }
+
+  async function loadBaseline(place, cache, onProgress){
+    var key = 'base:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3);
+    if(cache.has(key)) return cache.get(key);
+    var years = [];
+    for(var y = NORMAL_START; y <= BASELINE_END; y++) years.push(y);
+    var rows = [], next = 0, done = 0, meta = null;
+    async function worker(){
+      while(next < years.length){
+        var yy = years[next++];
+        var json = await getJSON(archiveURL(place, yy + '-02-20', yy + '-07-10', VARS), 30000);
+        rows = rows.concat(rowsFromDaily(json));
+        if(!meta) meta = { elevation: num(json.elevation), timezone: json.timezone };
+        done += 1;
+        if(onProgress) onProgress(done, years.length);
+        await new Promise(function(r){ setTimeout(r, 500); });
+      }
+    }
+    /* Each year is fetched as its own light request: the season plus the
+       seven days either side that the 15-day normal window needs. */
+    /* One request at a time, with spacing: parallel requests trip the
+       public API rate limit. */
+    await worker();
+    rows.sort(function(a,b){ return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0); });
+    var out = {
+      rows: rows,
+      byDate: indexRows(rows),
+      elevation: meta ? meta.elevation : null,
+      timezone: meta ? meta.timezone : null,
+      fetchedAt: new Date(),
+      missing: countMissing(rows),
+      range: [rows.length ? rows[0].d : null, rows.length ? rows[rows.length-1].d : null]
+    };
+    cache.set(key, out);
+    return out;
+  }
+
+  async function loadCurrentSeries(place, year, season, cache){
+    var key = 'cur:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3) + ',' + year;
+    if(cache.has(key)) return cache.get(key);
+    var seasonStart = isoFor(year, season.start);
+    var forecast = await getJSON(forecastURL(place), 30000);
+    var rows = rowsFromDaily(forecast);
+    var firstForecastDate = rows.length ? rows[0].d : seasonStart;
+    var sources = [{ name:'Open-Meteo forecast API (recent analysis + 16-day forecast)', from: firstForecastDate, to: rows.length ? rows[rows.length-1].d : null, fetchedAt: new Date() }];
+    if(seasonStart < firstForecastDate){
+      var gapEnd = shiftISO(firstForecastDate, -1);
+      var arch = await getJSON(archiveURL(place, seasonStart, gapEnd, VARS), 45000);
+      var archRows = rowsFromDaily(arch);
+      rows = archRows.concat(rows);
+      sources.unshift({ name:'Open-Meteo archive API (ERA5)', from: seasonStart, to: gapEnd, fetchedAt: new Date() });
+    }
+    var out = {
+      rows: rows,
+      byDate: indexRows(rows),
+      elevation: num(forecast.elevation),
+      timezone: forecast.timezone,
+      fetchedAt: new Date(),
+      missing: countMissing(rows),
+      sources: sources,
+      forecastStart: firstForecastDate
+    };
+    cache.set(key, out);
+    return out;
+  }
+
+  async function loadTmaxSeries(place, cache){
+    var key = 'tmax:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3);
+    if(cache.has(key)) return cache.get(key);
+    var json = await getJSON(archiveURL(place, NORMAL_START + '-01-01', BASELINE_END + '-12-31', ['temperature_2m_max']), 45000);
+    var rows = rowsFromDaily(json);
+    var out = { rows: rows, byDate: indexRows(rows), fetchedAt: new Date() };
+    cache.set(key, out);
+    return out;
+  }
+
+  /* ------------------------------------------------------------------
+     Normals and classification
+  ------------------------------------------------------------------ */
+  function buildNormals(rows, fromYear, toYear){
+    var keys = VAR_KEYS;
+    var sum = {}, cnt = {};
+    keys.forEach(function(k){ sum[k] = new Float64Array(366); cnt[k] = new Float64Array(366); });
+    rows.forEach(function(r){
+      var y = +r.d.slice(0,4);
+      if(y < fromYear || y > toYear) return;
+      var i = mdIdx(r.d);
+      keys.forEach(function(k){
+        if(typeof r[k] === 'number' && isFinite(r[k])){ sum[k][i] += r[k]; cnt[k][i] += 1; }
+      });
+    });
+    var out = new Array(366);
+    for(var i=1; i<=365; i++){
+      var o = {};
+      keys.forEach(function(k){
+        var s = 0, c = 0;
+        for(var j=-7; j<=7; j++){
+          var t = ((i-1+j) % 365 + 365) % 365 + 1;
+          s += sum[k][t]; c += cnt[k][t];
+        }
+        o[k] = c ? s/c : null;
+      });
+      out[i] = o;
+    }
+    return out;
+  }
+
+  function classifyDay(date, row, normal, zone){
+    var entry = ZONES[zone].entry;
+    var tmax = row ? row.tmax : null;
+    var dep = (tmax !== null && normal && normal.tmax !== null) ? tmax - normal.tmax : null;
+    var cat = 0;
+    if(tmax !== null && tmax >= entry){
+      if(dep !== null && dep > DEP_SEV) cat = 2;
+      else if(dep !== null && dep >= DEP_HW) cat = 1;
+      if(tmax >= ABS_SEV) cat = 2;
+      else if(tmax >= ABS_HW && cat < 2) cat = 1;
+    }
+    var wnight = 0;
+    if(tmax !== null && tmax >= 40 && row.tmin !== null && normal && normal.tmin !== null){
+      var nd = row.tmin - normal.tmin;
+      if(nd > VERY_WARM_NIGHT_DEP) wnight = 2;
+      else if(nd >= WARM_NIGHT_DEP) wnight = 1;
+    }
+    return { date:date, row:row || null, normal:normal || null, tmax:tmax, tmin:row ? row.tmin : null, dep:dep, cat:cat, wnight:wnight };
+  }
+
+  function classifyDates(byDate, dates, normals, zone){
+    return dates.map(function(date){
+      return classifyDay(date, byDate.get(date) || null, normals[mdIdx(date)], zone);
+    });
+  }
+
+  function summarise(days){
+    var valid = days.filter(function(d){ return d.row && d.tmax !== null; });
+    var hw = days.filter(function(d){ return d.cat >= 1; });
+    var sev = days.filter(function(d){ return d.cat === 2; });
+    var runs = [], cur = null;
+    days.forEach(function(d){
+      if(d.cat >= 1){
+        if(!cur){ cur = { start:d.date, end:d.date, days:0, max:0 }; runs.push(cur); }
+        cur.end = d.date; cur.days += 1; cur.max = Math.max(cur.max, d.cat);
+      } else { cur = null; }
+    });
+    var peak = null;
+    valid.forEach(function(d){
+      if(!peak || (d.tmax !== null && d.tmax > peak.tmax)) peak = { tmax:d.tmax, dep:d.dep, date:d.date };
+    });
+    var deps = [];
+    days.forEach(function(d){ if(d.dep !== null) deps.push(d.dep); });
+    return {
+      days: days.length,
+      missingDays: days.length - valid.length,
+      hw: hw.length,
+      severe: sev.length,
+      first: hw.length ? hw[0].date : null,
+      last: hw.length ? hw[hw.length-1].date : null,
+      peak: peak,
+      spells: runs,
+      spellCount: runs.length,
+      longestRun: runs.reduce(function(m,r){ return Math.max(m, r.days); }, 0),
+      meanDep: mean(deps),
+      maxTmax: peak ? peak.tmax : null,
+      meanTmin: mean(days.map(function(d){ return d.tmin; })),
+      warmNights: days.filter(function(d){ return d.wnight >= 1; }).length,
+      meanRH: mean(days.map(function(d){ return d.row ? d.row.rh : null; })),
+      meanAppMax: mean(days.map(function(d){ return d.row ? d.row.appMax : null; })),
+      precip: (function(){
+        var vals = days.map(function(d){ return d.row ? d.row.precip : null; }).filter(function(v){ return v !== null; });
+        return vals.length ? vals.reduce(function(s,v){ return s+v; }, 0) : null;
+      })(),
+      meanWind: mean(days.map(function(d){ return d.row ? d.row.wind : null; })),
+      meanCloud: mean(days.map(function(d){ return d.row ? d.row.cloud : null; })),
+      meanSrad: mean(days.map(function(d){ return d.row ? d.row.srad : null; }))
+    };
+  }
+
+  function seasonDates(year, season){
+    var out = [];
+    var d = new Date(Date.UTC(year, season.start[0]-1, season.start[1]));
+    var end = new Date(Date.UTC(year, season.end[0]-1, season.end[1]));
+    while(d <= end){ out.push(isoOf(d)); d.setUTCDate(d.getUTCDate()+1); }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------
+     Analysis
+  ------------------------------------------------------------------ */
+  async function analyse(){
+    var token = ++state.requestId;
+    var place = state.place, season = state.season, zone = state.zone, year = state.year;
+    var today = todayISO();
+    renderLoading();
+
+    try {
+      var baseline = await loadBaseline(place, state.cache, function(done, total){
+        setStatus('Loading the historical baseline… ' + done + ' of ' + total + ' years', 'loading');
+      });
+      if(token !== state.requestId) return;
+
+      place.elevation = baseline.elevation;
+      if(place.autoZone && baseline.elevation !== null){
+        zone = baseline.elevation > 1000 ? 'hilly' : 'plains';
+        state.zone = zone;
+        place.zone = zone;
+        place.autoZone = false;
+        $('#zone').value = zone;
+      }
+
+      var normals = buildNormals(baseline.rows, NORMAL_START, NORMAL_END);
+      var currentSeries;
+      if(year <= BASELINE_END){
+        currentSeries = { byDate: baseline.byDate, sources: [{ name:'Open-Meteo archive API (ERA5)', from: isoFor(year, season.start), to: isoFor(year, season.end), fetchedAt: baseline.fetchedAt }], fetchedAt: baseline.fetchedAt, missing: baseline.missing, elevation: baseline.elevation, timezone: baseline.timezone };
+      } else {
+        currentSeries = await loadCurrentSeries(place, year, season, state.cache);
+      }
+      if(token !== state.requestId) return;
+
+      var seasonStart = isoFor(year, season.start);
+      var seasonEnd = isoFor(year, season.end);
+      var cutoff = today < seasonStart ? seasonStart : (today > seasonEnd ? seasonEnd : today);
+      var cutoffIdx = mdIdx(cutoff);
+
+      /* per-year baseline summaries for the full season */
+      var years = [];
+      for(var y = NORMAL_START; y <= BASELINE_END; y++){
+        var dates = seasonDates(y, season);
+        var days = classifyDates(baseline.byDate, dates, normals, zone);
+        years.push({ year: y, days: days, summary: summarise(days) });
+      }
+
+      var yearDates = seasonDates(year, season);
+      var yearDays = classifyDates(currentSeries.byDate, yearDates, normals, zone);
+      var soFarDates = yearDates.filter(function(d){ return mdIdx(d) <= cutoffIdx; });
+      var soFarDays = yearDays.filter(function(d){ return mdIdx(d.date) <= cutoffIdx; });
+      var seasonSummary = summarise(yearDays);
+      var soFarSummary = summarise(soFarDays);
+
+      var complete = today > seasonEnd;
+      var upcoming = today < seasonStart;
+
+      /* outlook over the remaining season */
+      var remFrom = upcoming ? mdIdx(seasonStart) - 1 : cutoffIdx;
+      var baseLater = years.map(function(entry){
+        var later = entry.days.filter(function(d){ return mdIdx(d.date) > remFrom && d.cat >= 1; }).length;
+        var sofar = entry.days.filter(function(d){ return mdIdx(d.date) <= remFrom && d.cat >= 1; }).length;
+        return { year: entry.year, later: later, sofar: sofar };
+      });
+      var nBase = baseLater.length;
+      var anyLater = baseLater.filter(function(r){ return r.later > 0; }).length;
+      var pLater = nBase ? anyLater / nBase : null;
+      var quiet = baseLater.filter(function(r){ return r.sofar === 0; });
+      var quietLater = quiet.filter(function(r){ return r.later > 0; }).length;
+      var pQuiet = quiet.length >= 10 ? quietLater / quiet.length : null;
+
+      var onsets = years.map(function(e){ return e.summary.first; }).filter(Boolean).map(mdIdx);
+      var onsetMedian = median(onsets);
+      var onsetP10 = onsets.length ? onsets.slice().sort(function(a,b){ return a-b; })[Math.floor(onsets.length*0.1)] : null;
+      var onsetP90 = onsets.length ? onsets.slice().sort(function(a,b){ return a-b; })[Math.floor(onsets.length*0.9)] : null;
+      var idxToDate = function(idx, yr){
+        for(var i=1; i<=365; i++){
+          var iso = yr + '-01-01';
+          var d = new Date(iso + 'T00:00:00Z');
+          d.setUTCDate(d.getUTCDate() + (idx - 1));
+          return isoOf(d);
+        }
+        return null;
+      };
+
+      /* forecast horizon */
+      var horizon = [];
+      if(year === new Date().getFullYear()){
+        var horizonDates = [];
+        for(var k=1; k<=FORECAST_DAYS; k++) horizonDates.push(shiftISO(today, k));
+        horizon = classifyDates(currentSeries.byDate, horizonDates, normals, zone);
+      }
+
+      /* what-changed window metrics */
+      var windowBase = years.map(function(entry){
+        var wd = entry.days.filter(function(d){ return mdIdx(d.date) <= cutoffIdx; });
+        return summarise(wd);
+      });
+      var curWindow = soFarSummary;
+
+      var METRICS = [
+        { key:'hw', label:'Heatwave days by this date', unit:'days', get:function(s){ return s.hw; }, digits:0 },
+        { key:'meanDep', label:'Mean daily maximum-temperature departure', unit:'°C', get:function(s){ return s.meanDep; }, digits:1 },
+        { key:'maxTmax', label:'Highest maximum temperature', unit:'°C', get:function(s){ return s.maxTmax; }, digits:1 },
+        { key:'meanTmin', label:'Mean night-time minimum', unit:'°C', get:function(s){ return s.meanTmin; }, digits:1 },
+        { key:'warmNights', label:'Warm or very warm nights', unit:'nights', get:function(s){ return s.warmNights; }, digits:0 },
+        { key:'meanRH', label:'Mean relative humidity', unit:'%', get:function(s){ return s.meanRH; }, digits:0 },
+        { key:'meanAppMax', label:'Mean apparent maximum (feels-like)', unit:'°C', get:function(s){ return s.meanAppMax; }, digits:1 },
+        { key:'precip', label:'Total rainfall', unit:'mm', get:function(s){ return s.precip; }, digits:0 },
+        { key:'meanWind', label:'Mean daily maximum wind', unit:'km/h', get:function(s){ return s.meanWind; }, digits:1 },
+        { key:'meanCloud', label:'Mean cloud cover', unit:'%', get:function(s){ return s.meanCloud; }, digits:0 },
+        { key:'meanSrad', label:'Mean daily solar radiation', unit:'MJ/m²', get:function(s){ return s.meanSrad; }, digits:1 },
+        { key:'longestRun', label:'Longest run of consecutive heatwave days', unit:'days', get:function(s){ return s.longestRun; }, digits:0 }
+      ];
+      var metrics = METRICS.map(function(m){
+        var baseVals = windowBase.map(function(s){ return m.get(s); }).filter(function(v){ return v !== null && v !== undefined && isFinite(v); });
+        var cur = m.get(curWindow);
+        var bm = mean(baseVals), bsd = sd(baseVals);
+        var z = (cur !== null && bm !== null && bsd) ? (cur - bm) / bsd : null;
+        return { key:m.key, label:m.label, unit:m.unit, digits:m.digits, cur:cur, baseMean:bm, baseSd:bsd, z:z, n:baseVals.length };
+      });
+
+      var valIdx = Math.min(mdIdx(seasonStart) + CUTOFF_OFFSET, mdIdx(seasonEnd));
+      var validation = runValidation(years, season, valIdx, zone);
+
+      var analysis = {
+        place: place, zone: zone, season: season, year: year,
+        today: today, seasonStart: seasonStart, seasonEnd: seasonEnd, cutoff: cutoff,
+        complete: complete, upcoming: upcoming,
+        baseline: baseline, currentSeries: currentSeries, normals: normals,
+        years: years, yearDays: yearDays, seasonSummary: seasonSummary, soFar: soFarSummary,
+        outlook: {
+          n: nBase, anyLater: anyLater, p: pLater,
+          ci: pLater !== null ? wilson(pLater, nBase) : null,
+          quietN: quiet.length, quietLater: quietLater, pQuiet: pQuiet,
+          quietCi: pQuiet !== null ? wilson(pQuiet, quiet.length) : null,
+          onsetMedian: onsetMedian, onsetP10: onsetP10, onsetP90: onsetP90,
+          medianDate: onsetMedian ? idxToDate(onsetMedian, year) : null,
+          p10Date: onsetP10 ? idxToDate(onsetP10, year) : null,
+          p90Date: onsetP90 ? idxToDate(onsetP90, year) : null
+        },
+        horizon: horizon,
+        metrics: metrics,
+        validation: validation,
+        sources: [
+          { name:'Historical daily weather (baseline)', source:'Open-Meteo archive API — ERA5 reanalysis', location: place.name, range: NORMAL_START + '–' + BASELINE_END + ', 20 Feb – 10 Jul each year (season plus normal window)', units:'°C, %, mm, km/h, MJ/m²', missing: baseline.missing, fetchedAt: baseline.fetchedAt },
+          { name:'Selected season (' + year + ')', source: currentSeries.sources ? currentSeries.sources.map(function(s){ return s.name; }).join(' + ') : 'Open-Meteo archive API', location: place.name, range: seasonStart + ' → ' + seasonEnd, units:'°C, %, mm, km/h, MJ/m²', missing: currentSeries.missing, fetchedAt: currentSeries.fetchedAt }
+        ]
+      };
+      state.analysis = analysis;
+      renderAll(analysis);
+      setStatus('Analysis ready for ' + place.name + ' — ' + season.name + ' ' + year + '.', 'ready');
+    } catch(err){
+      if(token !== state.requestId) return;
+      renderError(err && err.message ? err.message : 'Unknown error');
+      setStatus('The analysis could not be completed.', 'error');
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Validation
+  ------------------------------------------------------------------ */
+  function runValidation(years, season, cutoffIdx, zone){
+    var out = { rows: [], tp:0, fp:0, fn:0, tn:0, brier:0, brierBase:0, brierPersist:0, n:0, firstTest:2005 };
+    var byYear = {};
+    years.forEach(function(e){ byYear[e.year] = e; });
+    var lastYear = years[years.length-1].year;
+
+    for(var testYear = out.firstTest; testYear <= lastYear; testYear++){
+      var train = years.filter(function(e){ return e.year < testYear && e.year >= NORMAL_START; });
+      if(train.length < 10) continue;
+      var trainLabels = train.map(function(e){
+        return e.days.some(function(d){ return mdIdx(d.date) > cutoffIdx && d.cat >= 1; }) ? 1 : 0;
+      });
+      var p = trainLabels.reduce(function(s,v){ return s+v; }, 0) / trainLabels.length;
+      var pred = p >= 0.5 ? 1 : 0;
+      var entry = byYear[testYear];
+      var obs = entry.days.some(function(d){ return mdIdx(d.date) > cutoffIdx && d.cat >= 1; }) ? 1 : 0;
+      var prev = byYear[testYear-1] ? (byYear[testYear-1].days.some(function(d){ return mdIdx(d.date) > cutoffIdx && d.cat >= 1; }) ? 1 : 0) : 0;
+
+      if(pred === 1 && obs === 1) out.tp++;
+      else if(pred === 1 && obs === 0) out.fp++;
+      else if(pred === 0 && obs === 1) out.fn++;
+      else out.tn++;
+
+      out.brier += Math.pow(p - obs, 2);
+      out.brierBase += Math.pow(0 - obs, 2);            /* always-negative baseline */
+      out.brierPersist += Math.pow(prev - obs, 2);
+      out.n++;
+      out.rows.push({ year:testYear, trainN:train.length, p:p, pred:pred, obs:obs, outcome: pred===1 ? (obs===1 ? 'hit' : 'false alarm') : (obs===1 ? 'miss' : 'correct negative') });
+    }
+    if(out.n){
+      out.brier = out.brier / out.n;
+      out.brierBase = out.brierBase / out.n;
+      out.brierPersist = out.brierPersist / out.n;
+      out.precision = (out.tp + out.fp) ? out.tp / (out.tp + out.fp) : null;
+      out.recall = (out.tp + out.fn) ? out.tp / (out.tp + out.fn) : null;
+      out.accuracy = (out.tp + out.tn) / out.n;
+      out.baseRate = (out.tp + out.fn) / out.n;
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------
+     Rendering
+  ------------------------------------------------------------------ */
+  function renderLoading(){
+    setStatus('Loading the historical baseline and the current season…', 'loading');
+    $('#kpis').innerHTML = '<div class="kpi"><div class="lab">Season status</div><div class="val">…</div><div class="sub">Fetching archive and forecast data.</div></div>';
+    ['#briefing','#timeline','#compare','#outlookBox','#whatChanged','#horizon','#validation'].forEach(function(sel){
+      var el = $(sel);
+      if(el) el.innerHTML = '<div class="skel"></div><div class="skel" style="width:65%"></div>';
+    });
+    $('#run').disabled = true;
+  }
+
+  function renderError(msg){
+    $('#kpis').innerHTML = '';
+    $('#briefing').innerHTML = '<div class="err"><strong>The analysis could not be loaded.</strong><br>' + esc(msg) +
+      '<br><br>Check the connection and try again. No values are invented when data is missing.</div>';
+    ['#timeline','#compare','#outlookBox','#whatChanged','#horizon','#validation'].forEach(function(sel){
+      var el = $(sel);
+      if(el) el.innerHTML = '<p class="mini">Unavailable because the data could not be loaded.</p>';
+    });
+    $('#run').disabled = false;
+  }
+
+  function statusText(a){
+    if(a.upcoming) return 'Season has not started';
+    if(a.complete) return 'Season complete';
+    return 'Season in progress';
+  }
+
+  function renderKPIs(a){
+    var hw = a.complete || a.upcoming ? a.seasonSummary.hw : a.soFar.hw;
+    var sev = a.complete || a.upcoming ? a.seasonSummary.severe : a.soFar.severe;
+    var tone = sev > 0 ? 'sev' : (hw > 0 ? 'hw' : 'ok');
+    var horizonHits = a.horizon.filter(function(d){ return d.cat >= 1; }).length;
+    var outlookVal, outlookSub;
+    if(a.complete){
+      outlookVal = '—';
+      outlookSub = 'Season ended ' + fmtDateShort(a.seasonEnd) + '; no remaining season to forecast.';
+    } else if(a.upcoming){
+      outlookVal = a.outlook.p === null ? '—' : pct(a.outlook.p * 100);
+      outlookSub = 'Share of ' + a.outlook.n + ' baseline years with any heatwave day this season.';
+    } else {
+      outlookVal = a.outlook.p === null ? '—' : pct(a.outlook.p * 100);
+      outlookSub = 'Climatological frequency for the rest of the season, from ' + a.outlook.n + ' years.';
+    }
+    var horizonVal = a.horizon.length ? (horizonHits ? horizonHits + ' day' + (horizonHits === 1 ? '' : 's') : 'None') : '—';
+    var horizonSub = a.horizon.length
+      ? 'Qualifying days in the ' + FORECAST_DAYS + '-day forecast from ' + fmtDateShort(a.today) + '.'
+      : 'Only available for the current year.';
+
+    $('#kpis').innerHTML =
+      '<div class="kpi" data-tone="' + tone + '"><div class="lab">' + esc(statusText(a)) + '</div>' +
+        '<div class="val">' + (a.upcoming ? 'Not begun' : hw + ' heatwave day' + (hw === 1 ? '' : 's')) + '</div>' +
+        '<div class="sub">' + esc(a.season.name) + ' ' + a.year + ' · ' + esc(ZONES[a.zone].label) + ' threshold ≥ ' + ZONES[a.zone].entry + ' °C' + (sev ? ' · ' + sev + ' severe' : '') + '</div></div>' +
+      '<div class="kpi"><div class="lab">Likelihood, rest of season</div><div class="val">' + outlookVal + '</div><div class="sub">' + esc(outlookSub) + '</div></div>' +
+      '<div class="kpi"><div class="lab">' + FORECAST_DAYS + '-day horizon</div><div class="val">' + horizonVal + '</div><div class="sub">' + esc(horizonSub) + '</div></div>' +
+      '<div class="kpi"><div class="lab">Confidence</div><div class="val">' + confidenceLabel(a) + '</div><div class="sub">' + esc(confidenceNote(a)) + '</div></div>';
+  }
+
+  function confidenceLabel(a){
+    if(a.complete) return 'Observed';
+    var n = a.outlook.n;
+    if(!n) return 'Low';
+    var ci = a.outlook.ci;
+    if(n >= 25 && ci && (ci.hi - ci.lo) <= 0.30) return 'Moderate';
+    return 'Low';
+  }
+  function confidenceNote(a){
+    if(a.complete) return 'Completed season: these are measured days, not a forecast.';
+    if(a.upcoming) return 'Climatological base rate only; no forecast for a season this far ahead.';
+    return 'Climatological frequency with a 95% interval; the 16-day horizon is deterministic model output.';
+  }
+
+  function renderBriefing(a){
+    var statusLine;
+    if(a.upcoming){
+      statusLine = 'The ' + a.season.name + ' season has not started. Nothing here is an observed result for ' + a.year + ' yet.';
+    } else if(a.complete){
+      statusLine = a.seasonSummary.hw > 0
+        ? 'Under the IMD temperature criteria applied to this ERA5 grid cell, ' + a.seasonSummary.hw + ' day' + (a.seasonSummary.hw === 1 ? '' : 's') + ' in the ' + a.season.name + ' season met heatwave conditions' + (a.seasonSummary.severe ? ' (' + a.seasonSummary.severe + ' severe)' : '') + '.'
+        : 'Under the IMD temperature criteria applied to this ERA5 grid cell, no day in the ' + a.season.name + ' season met heatwave conditions.';
+    } else {
+      statusLine = a.soFar.hw > 0
+        ? 'So far this ' + a.season.name + ' season, ' + a.soFar.hw + ' day' + (a.soFar.hw === 1 ? '' : 's') + ' have met heatwave conditions' + (a.soFar.severe ? ' (' + a.soFar.severe + ' severe)' : '') + ', up to ' + fmtDate(a.cutoff) + '.'
+        : 'No day has met heatwave conditions so far this ' + a.season.name + ' season, up to ' + fmtDate(a.cutoff) + '.';
+    }
+    var hwDays = a.complete || a.upcoming ? a.seasonSummary.hw : a.soFar.hw;
+    var baseYears = a.years;
+    var baseMean = mean(baseYears.map(function(e){ return e.summary.hw; }));
+    var baseMax = baseYears.reduce(function(m,e){ return Math.max(m, e.summary.hw); }, 0);
+    var baseYearsWithAny = baseYears.filter(function(e){ return e.summary.hw > 0; }).length;
+    var comparison = 'This season has ' + hwDays + ' heatwave day' + (hwDays === 1 ? '' : 's') + '. Across ' + baseYears.length + ' earlier years (' + NORMAL_START + '–' + BASELINE_END + ') the same season averaged ' + (baseMean === null ? '—' : round(baseMean,1)) + ' days, at most ' + baseMax + '; ' + baseYearsWithAny + ' of ' + baseYears.length + ' years had at least one.';
+    if(!a.complete && !a.upcoming && hwDays === 0 && baseYearsWithAny > 0) comparison += ' A quiet season to this date is therefore not unprecedented, but it is below the usual pattern.';
+
+    var chance;
+    if(a.complete){
+      chance = 'The season is over, so there is no future window to estimate for ' + a.year + '. The next ' + a.season.name + ' season begins around ' + fmtDate(isoFor(a.year + 1, a.season.start)) + '.';
+    } else if(a.upcoming){
+      chance = 'The season has not begun. In the baseline, ' + baseYearsWithAny + ' of ' + baseYears.length + ' years had at least one qualifying day (' + pct(baseYearsWithAny / baseYears.length * 100) + '), with a typical first date of ' + (a.outlook.medianDate ? fmtDateShort(a.outlook.medianDate) : '—') + '.';
+    } else {
+      chance = a.outlook.p === null ? 'Not enough baseline years to estimate.' :
+        'Estimated chance of at least one further qualifying day before ' + fmtDateShort(a.seasonEnd) + ': ' + pct(a.outlook.p * 100) + ' (95% interval ' + pct(a.outlook.ci.lo * 100) + '–' + pct(a.outlook.ci.hi * 100) + ', ' + a.outlook.n + ' baseline years)' +
+        (a.outlook.pQuiet !== null ? '; among years that were also quiet by this date, ' + pct(a.outlook.pQuiet * 100) + ' later had one (' + a.outlook.quietN + ' years).' : '.');
+      chance += ' The forecast horizon covers ' + (a.horizon.length ? FORECAST_DAYS + ' days from ' + fmtDateShort(a.today) : 'no dates') + '; no probability is attached to individual days.';
+    }
+
+    var change = a.changeSummary || '';
+    var uncertain = 'These estimates rest on one reanalysis grid cell, a 1991–2020 normal, and ' + a.years.length + ' baseline years. They do not distinguish circulation patterns, land use or indoor heat, and the 16-day forecast is not an ensemble probability.';
+    var official = 'No official IMD warning is shown on this page. Check the IMD district nowcast and warning bulletin, and your district disaster authority, before acting.';
+
+    var items = [
+      ['Heatwave this season', statusLine],
+      ['Compared with history', comparison],
+      ['Chance and horizon', chance],
+      ['What differs from typical years', change || 'No measurable difference identified in the available data.'],
+      ['What remains uncertain', uncertain],
+      ['Official warning and action', official + ' Practical actions are listed below and on IMD heat-health guidance.']
+    ];
+    $('#briefChip').textContent = a.place.name + ' · ' + a.season.name + ' ' + a.year;
+    $('#briefing').innerHTML = '<div class="brief">' + items.map(function(it){
+      return '<div class="item"><b>' + esc(it[0]) + '</b><p>' + it[1] + '</p></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderTimeline(a){
+    var rows = a.years.map(function(e){ return { year:e.year, summary:e.summary, current: e.year === a.year }; });
+    if(a.year > BASELINE_END) rows.push({ year:a.year, summary:a.seasonSummary, current:true });
+    var max = rows.reduce(function(m,r){ return Math.max(m, r.summary.hw); }, 0) || 1;
+    $('#timelineChip').textContent = 'Baseline ' + NORMAL_START + '–' + BASELINE_END;
+    var body = rows.map(function(r){
+      var s = r.summary;
+      var w = Math.max(s.hw ? 4 : 0, (s.hw / max) * 100);
+      var wsev = s.hw ? (s.severe / s.hw) * 100 : 0;
+      return '<tr' + (r.current ? ' class="thisyear"' : '') + '>' +
+        '<td><button type="button" class="yearbtn" data-year="' + r.year + '">' + r.year + '</button></td>' +
+        '<td class="barcell"><span class="bar" aria-hidden="true"><i class="hw" style="width:' + (w - w*wsev/100) + '%"></i><i class="sev" style="width:' + (w*wsev/100) + '%"></i></span></td>' +
+        '<td class="num">' + s.hw + '</td>' +
+        '<td class="num">' + s.severe + '</td>' +
+        '<td>' + (s.first ? fmtDateShort(s.first) : '—') + '</td>' +
+        '<td>' + (s.last ? fmtDateShort(s.last) : '—') + '</td>' +
+        '<td class="num">' + (s.maxTmax === null ? '—' : round(s.maxTmax,1)) + '</td>' +
+        '<td class="num">' + (s.spellCount ? s.spellCount + ' (' + s.longestRun + 'd)' : '0') + '</td>' +
+        '<td class="num">' + (s.missingDays ? s.missingDays : '0') + '</td>' +
+      '</tr>';
+    }).join('');
+    $('#timeline').innerHTML =
+      '<div class="tablewrap"><table><caption>Heatwave days by season for ' + esc(a.place.name) + ', ' + esc(a.season.name) + ' (' + esc(a.season.short) + '), ' + esc(ZONES[a.zone].label) + ' criteria. Spells in brackets show the longest run of consecutive days. Missing days are excluded, not filled.</caption>' +
+      '<thead><tr><th scope="col">Year</th><th scope="col">Distribution</th><th scope="col">Days</th><th scope="col">Severe</th><th scope="col">First</th><th scope="col">Last</th><th scope="col">Peak Tmax</th><th scope="col">Spells (longest)</th><th scope="col">Gaps</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+  }
+
+  function renderComparison(a){
+    var windowLabel = a.complete ? 'full season' : 'season start to ' + fmtDateShort(a.cutoff);
+    $('#compareSub').textContent = 'Like-for-like window (' + windowLabel + ') in every baseline year. Departures use the 1991–2020 normal for the same calendar day.';
+    $('#compareChip').textContent = 'Baseline ' + a.years.length + ' years';
+    var rows = a.metrics.map(function(m){
+      var zTxt = m.z === null ? '—' : signed(m.z, 1);
+      var sdTxt = m.baseSd === null ? '—' : '± ' + round(m.baseSd, m.digits);
+      return '<tr><th scope="row" style="font-weight:600">' + esc(m.label) + '</th>' +
+        '<td class="num">' + (m.cur === null ? '—' : round(m.cur, m.digits)) + ' ' + esc(m.unit) + '</td>' +
+        '<td class="num">' + (m.baseMean === null ? '—' : round(m.baseMean, m.digits)) + ' ' + esc(m.unit) + '</td>' +
+        '<td class="num">' + sdTxt + '</td>' +
+        '<td class="num">' + zTxt + '</td></tr>';
+    }).join('');
+    $('#compare').innerHTML =
+      '<div class="tablewrap" style="max-height:none"><table><caption>This season (' + windowLabel + ') against the ' + NORMAL_START + '–' + BASELINE_END + ' baseline. z is the difference in standard deviations; |z| ≥ 1 is treated as a material difference.</caption>' +
+      '<thead><tr><th scope="col">Measure</th><th scope="col">This season</th><th scope="col">Baseline mean</th><th scope="col">Baseline SD</th><th scope="col">z</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+
+    var o = a.outlook;
+    var html = '<div class="callout"><strong>Likelihood method.</strong> ' +
+      (a.complete
+        ? 'The season is complete, so the likelihood is not applied. The observed result above is the answer.'
+        : a.upcoming
+          ? 'The season has not started. The figure is the base rate across ' + o.n + ' baseline years: the share with at least one qualifying day anywhere in the season.'
+          : 'The figure is the share of ' + o.n + ' baseline years with at least one qualifying day after the same date in the season. It is climatological frequency, not a forecast probability, and carries a 95% interval of ' + pct(o.ci.lo*100) + '–' + pct(o.ci.hi*100) + '.') +
+      '</div>';
+    if(!a.complete && !a.upcoming && o.pQuiet !== null){
+      html += '<div class="callout" style="margin-top:8px"><strong>Given the quiet season so far.</strong> Among ' + o.quietN + ' baseline years with no qualifying day by ' + fmtDateShort(a.cutoff) + ', ' + pct(o.pQuiet*100) + ' later had at least one (95% interval ' + pct(o.quietCi.lo*100) + '–' + pct(o.quietCi.hi*100) + ').</div>';
+    }
+    html += '<div class="callout" style="margin-top:8px"><strong>Typical timing.</strong> Median first qualifying date across baseline years: ' +
+      (o.medianDate ? fmtDateShort(o.medianDate) : '—') +
+      (o.p10Date && o.p90Date ? ' (80% of first dates fall between ' + fmtDateShort(o.p10Date) + ' and ' + fmtDateShort(o.p90Date) + ').' : '.') + '</div>';
+    html += '<p class="mini" style="margin-top:8px">A low likelihood is not a guarantee of no heatwave, and a high one is not a prediction that one will occur. See validation below for how often this rule was right.</p>';
+    $('#outlookBox').innerHTML = html;
+  }
+
+  function renderChange(a){
+    var material = a.metrics.filter(function(m){ return m.z !== null && Math.abs(m.z) >= 1; })
+      .sort(function(x,y){ return Math.abs(y.z) - Math.abs(x.z); });
+    var windowLabel = a.complete ? 'the full season' : 'the season so far';
+    $('#changeChip').textContent = material.length ? material.length + ' measurable difference' + (material.length === 1 ? '' : 's') : 'Within normal spread';
+
+    var html = '';
+    if(!material.length){
+      html = '<div class="callout"><strong>No material difference was found.</strong> Across ' + a.metrics.length + ' measures, none differed from the ' + NORMAL_START + '–' + BASELINE_END + ' window average by at least one standard deviation (|z| ≥ 1). The season is consistent with ordinary year-to-year variability in this reanalysis cell, and the data does not identify any factor behind the count.</div>';
+    } else {
+      html = material.slice(0, 4).map(function(m){
+        return '<div class="factor"><b>' + esc(m.label) + '.</b> ' + changeSentence(m, a) +
+          ' <span class="stat">This season ' + (m.cur === null ? '—' : round(m.cur, m.digits)) + ' ' + esc(m.unit) +
+          ', baseline ' + (m.baseMean === null ? '—' : round(m.baseMean, m.digits)) + ' ' + esc(m.unit) +
+          ' (z = ' + signed(m.z, 1) + ').</span></div>';
+      }).join('');
+      html += '<p class="mini">These are concurrent differences in one grid cell. They are consistent with the season being quieter or more active, but weather correlations cannot show why.</p>';
+    }
+    html += '<div class="callout" style="margin-top:10px"><strong>Possible explanations, and their status.</strong> ' + possibleExplanations(a, material) + '</div>';
+    a.changeSummary = material.length
+      ? material.slice(0,2).map(function(m){ return m.label.toLowerCase() + ' was ' + (m.cur !== null && m.baseMean !== null ? (m.cur > m.baseMean ? 'higher' : 'lower') : 'different') + ' than the ' + NORMAL_START + '–' + BASELINE_END + ' average (z = ' + signed(m.z,1) + ')'; }).join('; ') + '.'
+      : 'no measure differed from the baseline by more than one standard deviation.';
+    $('#whatChanged').innerHTML = html;
+  }
+
+  function changeSentence(m, a){
+    var dir = (m.cur !== null && m.baseMean !== null) ? (m.cur > m.baseMean ? 'higher' : 'lower') : 'different';
+    switch(m.key){
+      case 'hw': return 'There were ' + (m.cur !== null ? m.cur : '—') + ' qualifying days by this point against a baseline average of ' + round(m.baseMean,1) + ', so the season has produced ' + (dir === 'lower' ? 'fewer' : 'more') + ' heatwave days than is typical by this date.';
+      case 'meanDep': return 'Daytime maxima ran ' + dir + ' than normal on average, which is the direct input to the departure criterion.';
+      case 'maxTmax': return 'The season\'s hottest day was ' + dir + ' than the baseline\'s typical peak, which matters for the absolute 45 °C test.';
+      case 'meanTmin': return 'Nights were ' + dir + ' than usual, and night-time temperature affects how much heat stress accumulates.';
+      case 'warmNights': return 'There were ' + (dir === 'lower' ? 'fewer' : 'more') + ' warm or very warm nights (IMD: minimum temperature departure of 4.5 °C or more while the maximum stays at 40 °C or above).';
+      case 'meanRH': return 'Mean relative humidity was ' + dir + ', which changes apparent temperature and can cap daytime maxima.';
+      case 'meanAppMax': return 'Mean apparent (feels-like) maximum was ' + dir + ', a heat-stress indicator rather than a heatwave criterion.';
+      case 'precip': return 'Rainfall to this point was ' + dir + ' than the baseline average.';
+      case 'meanWind': return 'Daily maximum wind was ' + dir + ', affecting ventilation and surface heating.';
+      case 'meanCloud': return 'Cloud cover was ' + dir + ', which affects how much solar radiation reaches the surface.';
+      case 'meanSrad': return 'Daily solar radiation was ' + dir + ', another surface-heating indicator.';
+      case 'longestRun': return 'The longest run of consecutive qualifying days was ' + (dir === 'lower' ? 'shorter' : 'longer') + ' than usual, which is close to the persistence that IMD\'s consecutive-day rule looks for.';
+      default: return 'This measure was ' + dir + ' than the baseline average.';
+    }
+  }
+
+  function possibleExplanations(a, material){
+    var keys = material.map(function(m){ return m.key; });
+    var bits = [];
+    if(keys.indexOf('meanDep') >= 0 || keys.indexOf('maxTmax') >= 0){
+      bits.push('Weaker or less frequent hot spells: supported by the measured temperature departures, but the data cannot say what suppressed them.');
+    }
+    if(keys.indexOf('meanTmin') >= 0 || keys.indexOf('warmNights') >= 0){
+      bits.push('Cooler nights: supported by the night-time values, which affects heat build-up but is not a cause of the daytime pattern.');
+    }
+    if(keys.indexOf('meanRH') >= 0 || keys.indexOf('precip') >= 0 || keys.indexOf('meanCloud') >= 0 || keys.indexOf('meanSrad') >= 0){
+      bits.push('More moisture, cloud or rainfall: these are measured together with the temperature differences, but whether they caused the quieter season is not established here.');
+    }
+    if(keys.indexOf('hw') >= 0 && a.outlook.medianDate && a.cutoff < a.outlook.medianDate){
+      bits.push('Delayed timing: this year\'s first qualifying date is later than the baseline median, so the season may simply be running late. Only the remaining-season record can test that.');
+    }
+    if(keys.indexOf('longestRun') >= 0){
+      bits.push('Less persistence: spells were shorter than usual, so the consecutive-day element of the IMD rule was met less often.');
+    }
+    if(a.years.some(function(e){ return e.summary.missingDays > 0; })){
+      bits.push('Data gaps: some baseline days are missing, which can bias counts slightly.');
+    }
+    if(!bits.length){
+      bits.push('Weather variability: nothing measurable stands out, so a quiet season may be ordinary interannual variation. That is an honest "not determined", not a cause.');
+    }
+    bits.push('Not identified by this data: circulation patterns, aerosol or land-use effects, and anything outside this grid cell.');
+    return bits.join(' ');
+  }
+
+  function renderHorizon(a){
+    if(!a.horizon.length){
+      $('#horizonChip').textContent = 'Current year only';
+      $('#horizon').innerHTML = '<p class="mini">The forecast horizon is only available when the selected year is the current year. Past seasons are shown as observations above.</p>';
+      return;
+    }
+    var hits = a.horizon.filter(function(d){ return d.cat >= 1; });
+    $('#horizonChip').textContent = hits.length ? hits.length + ' qualifying day' + (hits.length === 1 ? '' : 's') : 'No qualifying days';
+    $('#horizonSub').textContent = 'Deterministic model output from ' + fmtDateShort(a.today) + ' to ' + fmtDateShort(a.horizon[a.horizon.length-1].date) + ', classified with the same IMD criteria. Beyond about day 7, skill is limited.';
+    var rows = a.horizon.map(function(d){
+      var verdict = d.cat === 2 ? '<span class="chip warn">Severe</span>' : d.cat === 1 ? '<span class="chip model">Heatwave</span>' : '<span class="chip ok">Below criteria</span>';
+      var outside = (mdIdx(d.date) < mdIdx(a.seasonStart) || mdIdx(d.date) > mdIdx(a.seasonEnd));
+      return '<tr><td>' + fmtDateShort(d.date) + '</td><td class="num">' + (d.tmax === null ? '—' : round(d.tmax,1)) + '</td><td class="num">' + (d.normal && d.normal.tmax !== null ? round(d.normal.tmax,1) : '—') + '</td><td class="num">' + signed(d.dep,1) + '</td><td>' + verdict + (outside ? ' <span class="mini">outside season</span>' : '') + '</td></tr>';
+    }).join('');
+    $('#horizon').innerHTML = '<div class="tablewrap" style="max-height:none"><table><caption>Daily maximum temperature against the 1991–2020 normal. "Heatwave"/"Severe" here means the grid-cell day met the IMD temperature criteria; it is not an official declaration.</caption>' +
+      '<thead><tr><th scope="col">Date</th><th scope="col">Max °C</th><th scope="col">Normal °C</th><th scope="col">Departure °C</th><th scope="col">Criteria</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+
+  function renderValidation(a){
+    var v = a.validation;
+    $('#valChip').textContent = v.n ? v.n + ' test years' : 'Insufficient data';
+    if(!v.n){
+      $('#validation').innerHTML = '<div class="callout">Not enough historical years to validate. At least 10 training years are required before a test year. The outputs on this page must then be treated as experimental.</div>';
+      return;
+    }
+    var metrics = '' +
+      '<div class="grid4" style="margin-bottom:10px">' +
+        '<div class="kpi"><div class="lab">Hits / false alarms</div><div class="val">' + v.tp + ' / ' + v.fp + '</div><div class="sub">Missed events: ' + v.fn + ' · correct negatives: ' + v.tn + '</div></div>' +
+        '<div class="kpi"><div class="lab">Precision</div><div class="val">' + (v.precision === null ? '—' : pct(v.precision*100)) + '</div><div class="sub">Of predicted heatwave seasons, the share that occurred.</div></div>' +
+        '<div class="kpi"><div class="lab">Recall</div><div class="val">' + (v.recall === null ? '—' : pct(v.recall*100)) + '</div><div class="sub">Of seasons with a heatwave, the share predicted.</div></div>' +
+        '<div class="kpi"><div class="lab">Brier score</div><div class="val">' + round(v.brier,3) + '</div><div class="sub">Always-negative baseline ' + round(v.brierBase,3) + ' · persistence ' + round(v.brierPersist,3) + '. Lower is better.</div></div>' +
+      '</div>';
+    var rows = v.rows.map(function(r){
+      var outcome = r.outcome === 'hit' ? '<span class="chip ok">hit</span>' : r.outcome === 'miss' ? '<span class="chip warn">miss</span>' : r.outcome === 'false alarm' ? '<span class="chip model">false alarm</span>' : '<span class="chip">correct negative</span>';
+      return '<tr><td>' + r.year + '</td><td class="num">' + r.trainN + '</td><td class="num">' + pct(r.p*100) + '</td><td>' + (r.pred ? 'Yes' : 'No') + '</td><td>' + (r.obs ? 'Yes' : 'No') + '</td><td>' + outcome + '</td></tr>';
+    }).join('');
+    var notes = 'The rule is: predict a heatwave in the remaining season when at least half of the training years (1991 to the year before the test year) had one. Test years ' + v.firstTest + '–' + v.rows[v.rows.length-1].year + ', split ' + CUTOFF_OFFSET + ' days into the season (about mid-May). The observed event rate in test years was ' + pct(v.baseRate*100) + ', so an always-negative baseline scores accuracy ' + pct((1-v.baseRate)*100) + ' but finds nothing. The 16-day forecast is not validated here: that needs archived forecasts, which this page does not have.';
+    $('#validation').innerHTML = metrics +
+      '<div class="tablewrap"><table><caption>' + notes + '</caption><thead><tr><th scope="col">Test year</th><th scope="col">Training years</th><th scope="col">P(heatwave)</th><th scope="col">Predicted</th><th scope="col">Observed</th><th scope="col">Outcome</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+
+  function renderSources(a){
+    function missingText(m){
+      var bad = Object.keys(m).filter(function(k){ return m[k] > 0; });
+      if(!bad.length) return 'None in this window';
+      return bad.map(function(k){ return k + ': ' + m[k]; }).join(', ');
+    }
+    var rows = a.sources.map(function(s){
+      return '<tr><th scope="row" style="font-weight:600">' + esc(s.name) + '</th><td>' + esc(s.source) + '</td><td>' + esc(s.location) + '</td><td>' + esc(s.range) + '</td><td>' + esc(s.units) + '</td><td>' + esc(missingText(s.missing)) + '</td><td>' + fmtDT(s.fetchedAt) + '</td></tr>';
+    }).join('');
+    $('#sources').innerHTML = '<div class="tablewrap" style="max-height:none"><table><caption>Retrieved ' + fmtDT(new Date()) + '. Times and dates are the city\'s local dates. Missing counts are days where that variable was null and were excluded, not imputed.</caption>' +
+      '<thead><tr><th scope="col">Data set</th><th scope="col">Source</th><th scope="col">Location</th><th scope="col">Date range</th><th scope="col">Units</th><th scope="col">Missing</th><th scope="col">Retrieved</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="mini" style="margin-top:8px">Limitations: reanalysis is a ~25 km grid estimate, not a station reading, and smooths the hottest parts of a city. The archive has a delay of several days; the current season therefore mixes archive data with recent model analysis. Normals are ERA5-derived, not IMD station normals. No WBGT is displayed because the required globe temperature is not available.</p>';
+  }
+
+  function renderActions(a){
+    var hw = a.complete || a.upcoming ? a.seasonSummary.hw : a.soFar.hw;
+    var list = [];
+    if(hw > 0){
+      list.push('A heatwave has already occurred this season. Re-check the IMD bulletin before outdoor work, events or travel, and keep the local heat action plan available.');
+      list.push('Outdoor teams: keep water, shade and rest rotations, and schedule heavy work outside the hottest hours.');
+      list.push('Check on older adults, infants, pregnant people and anyone without a working fan or cooler, at least twice a day during hot spells.');
+    } else {
+      list.push('No qualifying heatwave day has been recorded for this season and city in this data. That is not a guarantee for the rest of the season: keep monitoring the IMD bulletin.');
+      list.push('Use the quiet period to prepare: water points, shaded rest areas, clinic supplies and a contact list for vulnerable residents.');
+      list.push('Watch apparent temperature, not air temperature alone, when planning outdoor activity.');
+    }
+    if(a.horizon.some(function(d){ return d.cat >= 1; })){
+      list.push('The 16-day forecast contains a qualifying day. Treat it as a planning signal only, confirm with IMD, and prepare cooling and hydration in advance.');
+    }
+    list.push('If someone is confused, faint, has hot dry skin or collapses, treat it as an emergency: cool them and call 108 in India (or your local emergency number).');
+    $('#actions').innerHTML = '<ul class="actions">' + list.map(function(t, i){
+      return '<li' + (i === 0 ? ' class="urgent"' : '') + '><span class="tick" aria-hidden="true">✓</span><span>' + esc(t) + '</span></li>';
+    }).join('') + '</ul>' +
+      '<p class="mini" style="margin-top:10px">Official warnings and instructions: <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a> · district disaster management authority · local health services. This page does not issue or replace warnings, and it does not predict deaths, hospital admissions or economic losses.</p>';
+  }
+
+  function renderAll(a){
+    $('#run').disabled = false;
+    $('#placeChip').textContent = a.place.name + ' · ' + (a.place.lat >= 0 ? a.place.lat.toFixed(2) + '°N' : Math.abs(a.place.lat).toFixed(2) + '°S') + ', ' + (a.place.lon >= 0 ? a.place.lon.toFixed(2) + '°E' : Math.abs(a.place.lon).toFixed(2) + '°W') + (a.place.elevation ? ' · ' + Math.round(a.place.elevation) + ' m' : '');
+    renderKPIs(a);
+    renderTimeline(a);
+    renderComparison(a);
+    renderChange(a);
+    renderBriefing(a);
+    renderHorizon(a);
+    renderValidation(a);
+    renderSources(a);
+    renderActions(a);
+  }
+
+  /* ------------------------------------------------------------------
+     Ranking
+  ------------------------------------------------------------------ */
+  async function buildRanking(){
+    if(state.rankingBusy) return;
+    state.rankingBusy = true;
+    var btn = $('#rankBtn');
+    btn.disabled = true;
+    var results = [];
+    try {
+      for(var i=0; i<CITIES.length; i++){
+        var city = CITIES[i];
+        btn.textContent = 'Loading ' + city.name + ' (' + (i+1) + '/' + CITIES.length + ')…';
+        var base = await loadTmaxSeries(city, state.cache);
+        var normals = buildNormals(base.rows, NORMAL_START, NORMAL_END);
+        var years = [];
+        var today = todayISO();
+        var year = state.year;
+        var seasonStart = isoFor(year, state.season.start);
+        var seasonEnd = isoFor(year, state.season.end);
+        var cutoff = today < seasonStart ? seasonStart : (today > seasonEnd ? seasonEnd : today);
+        var cutIdx = mdIdx(cutoff);
+        for(var y = NORMAL_START; y <= BASELINE_END; y++){
+          var days = classifyDates(base.byDate, seasonDates(y, state.season), normals, city.zone);
+          var later = days.filter(function(d){ return mdIdx(d.date) > cutIdx && d.cat >= 1; }).length;
+          var sofar = days.filter(function(d){ return mdIdx(d.date) <= cutIdx && d.cat >= 1; }).length;
+          years.push({ later:later, sofar:sofar, first:(days.filter(function(d){ return d.cat>=1; })[0] || {}).date || null });
+        }
+        var anySeason = years.filter(function(r){ return !!r.first; }).length;
+        var anyLater = years.filter(function(r){ return r.later > 0; }).length;
+        var pAny = anySeason / years.length;
+        var pLater = anyLater / years.length;
+        var quiet = years.filter(function(r){ return r.sofar === 0; });
+        var pQ = quiet.length >= 10 ? quiet.filter(function(r){ return r.later > 0; }).length / quiet.length : null;
+        var onsets = years.map(function(r){ return r.first; }).filter(Boolean).map(mdIdx);
+        var inSeason = today >= seasonStart && today <= seasonEnd;
+        results.push({ city: city, pAny: pAny, pLater: pLater, n: years.length, ci: wilson(pAny, years.length), pQuiet: pQ, quietN: quiet.length, onset: median(onsets), inSeason: inSeason });
+      }
+      results.sort(function(x,y){
+        var vy = y.inSeason ? (y.pQuiet !== null ? y.pQuiet : y.pLater) : y.pAny;
+        var vx = x.inSeason ? (x.pQuiet !== null ? x.pQuiet : x.pLater) : x.pAny;
+        return vy - vx;
+      });
+      var rows = results.map(function(r){
+        var onsetDate = r.onset ? (function(){
+          var d = new Date(Date.UTC(state.year, 0, 1)); d.setUTCDate(d.getUTCDate() + (r.onset - 1)); return isoOf(d);
+        })() : null;
+        return '<tr><th scope="row" style="font-weight:600">' + esc(r.city.name) + '</th><td>' + esc(ZONES[r.city.zone].label) + '</td>' +
+          '<td class="num">' + pct(r.pAny*100) + '</td><td class="num">' + pct(r.ci.lo*100) + '–' + pct(r.ci.hi*100) + '</td>' +
+          '<td class="num">' + (r.inSeason ? pct(r.pLater*100) : '—') + '</td>' +
+          '<td class="num">' + (!r.inSeason ? '—' : (r.pQuiet === null ? '—' : pct(r.pQuiet*100))) + '</td>' +
+          '<td class="num">' + (onsetDate ? fmtDateShort(onsetDate) : '—') + '</td><td class="num">' + r.n + '</td></tr>';
+      }).join('');
+      $('#ranking').innerHTML = '<div class="tablewrap" style="max-height:520px"><table><caption>Climatological likelihood by city for ' + esc(state.season.name) + ' ' + state.year + ', using temperature-only archive data (' + NORMAL_START + '–' + BASELINE_END + '). This is a ranked likelihood, not an alert map, and not an official warning. "Given quiet so far" applies only when the season is in progress.</caption>' +
+        '<thead><tr><th scope="col">City</th><th scope="col">Region</th><th scope="col">P(any heatwave in season)</th><th scope="col">95% interval</th><th scope="col">P(later this season)</th><th scope="col">Given quiet so far</th><th scope="col">Median onset</th><th scope="col">Years</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="ranknote">Cities are ordered by the most relevant figure for the current date. High percentages mean such seasons are common, not that a heatwave is certain. Temperature-only data is used here, so night-time and humidity indicators are not part of this ranking.</p>';
+    } catch(err){
+      $('#ranking').innerHTML = '<div class="err">The city ranking could not be built: ' + esc(err.message || 'unknown error') + '</div>';
+    } finally {
+      state.rankingBusy = false;
+      btn.disabled = false;
+      btn.textContent = 'Rebuild ranking';
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Wiring
+  ------------------------------------------------------------------ */
+  function setPlace(place){
+    state.place = place;
+    state.zone = place.zone || state.zone;
+    $('#zone').value = state.zone;
+    $('#city').value = place.id || '';
+    $('#placeSearch').value = place.id ? '' : place.name;
+    if(place.id){ $('#searchNote').hidden = true; }
+  }
+
+  async function searchPlace(q){
+    var query = (q || '').trim();
+    if(!query){ return; }
+    var lower = query.toLowerCase();
+    var hit = CITIES.filter(function(c){ return c.name.toLowerCase().indexOf(lower) === 0; })[0] ||
+              CITIES.filter(function(c){ return c.name.toLowerCase().indexOf(lower) > -1; })[0];
+    if(hit){ setPlace(hit); analyse(); return; }
+    setStatus('Searching for “' + query + '” in India…', 'loading');
+    try {
+      var json = await getJSON('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(query) + '&count=1&language=en&format=json&countryCode=IN', 12000);
+      var h = json.results && json.results[0];
+      if(!h){ setStatus('No Indian place matching “' + query + '” was found. Check the spelling or pick a listed city.', 'nodata'); return; }
+      var name = [h.name, h.admin1, h.country].filter(Boolean).join(', ');
+      var place = { name:name, lat:h.latitude, lon:h.longitude, id:null, zone:state.zone, autoZone:true };
+      setPlace(place);
+      var note = $('#searchNote');
+      note.hidden = false;
+      note.textContent = 'Using the coordinates for ' + name + ' (' + h.latitude.toFixed(2) + ', ' + h.longitude.toFixed(2) + '). The region type is set from elevation; change it if the place is coastal or hilly and the automatic choice is wrong.';
+      analyse();
+    } catch(err){
+      setStatus('Place search failed: ' + (err.message || 'unknown error') + '.', 'error');
+    }
+  }
+
+  function bind(){
+    $('#city').addEventListener('change', function(e){
+      var city = CITIES.filter(function(c){ return c.id === e.target.value; })[0];
+      if(!city) return;
+      setPlace(city);
+      analyse();
+    });
+    $('#zone').addEventListener('change', function(e){
+      state.zone = e.target.value;
+      analyse();
+    });
+    $('#season').addEventListener('change', function(e){
+      state.season = SEASONS.filter(function(s){ return s.key === e.target.value; })[0];
+      analyse();
+    });
+    $('#year').addEventListener('change', function(e){
+      state.year = +e.target.value;
+      analyse();
+    });
+    $('#run').addEventListener('click', function(){ analyse(); });
+    $('#placeSearch').addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); searchPlace(e.target.value); }
+    });
+    $('#placeSearch').addEventListener('change', function(e){ searchPlace(e.target.value); });
+    $('#rankBtn').addEventListener('click', buildRanking);
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest ? e.target.closest('.yearbtn') : null;
+      if(!btn) return;
+      var y = +btn.dataset.year;
+      if(!y || y === state.year) return;
+      state.year = y;
+      $('#year').value = String(y);
+      analyse();
+    });
+  }
+
+  function init(){
+    var citySel = $('#city');
+    CITIES.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = c.name;
+      citySel.appendChild(opt);
+    });
+    var dl = $('#cityList');
+    CITIES.forEach(function(c){
+      var o = document.createElement('option');
+      o.value = c.name;
+      dl.appendChild(o);
+    });
+    var seasonSel = $('#season');
+    SEASONS.forEach(function(s){
+      var o = document.createElement('option');
+      o.value = s.key; o.textContent = s.name + ' (' + s.short + ')';
+      seasonSel.appendChild(o);
+    });
+    var yearSel = $('#year');
+    for(var y = new Date().getFullYear(); y >= NORMAL_START; y--){
+      var o = document.createElement('option');
+      o.value = String(y); o.textContent = String(y);
+      yearSel.appendChild(o);
+    }
+    citySel.value = 'delhi';
+    yearSel.value = String(state.year);
+    seasonSel.value = state.season.key;
+    state.zone = 'plains';
+    setPlace(CITIES[0]);
+    bind();
+    analyse();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
