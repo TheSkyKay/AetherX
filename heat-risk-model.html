@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f7f5f0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b4552f'/%3E%3Ctext x='16' y='24' font-size='20' text-anchor='middle' fill='white'%3E%E2%98%BC%3C/text%3E%3C/svg%3E">
-<title>Heatwise India — heatwave early warning and decision support (prototype)</title>
+<title>Heatwise — heatwave early warning and decision support (prototype)</title>
 <style>
 :root{
   --ink:#1c2421; --muted:#5b655f; --paper:#f7f5f0; --card:#fffefb; --line:#e3ded3;
@@ -81,6 +81,11 @@ select:hover,input[type=date]:hover{border-color:#bdb5a4}
 .searchrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .searchrow .field{flex:1 1 220px}
 .searchrow .btn{align-self:end}
+.searchresults{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.searchresults[hidden]{display:none}
+.searchresults .btn-quiet{display:flex;flex-wrap:wrap;gap:5px;align-items:baseline;width:100%;text-align:left;justify-content:flex-start}
+.searchresults .btn-quiet strong{font-size:13.5px}
+.searchresults .btn-quiet span{font-size:11.5px;font-weight:500;color:#6a736c}
 .quickrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
 .quickrow .muted{font-size:11.5px}
 
@@ -221,7 +226,7 @@ footer p{margin:0 0 4px}
 
 <header class="top">
   <div class="wrap topbar">
-    <div class="brand"><span class="mark" aria-hidden="true">☼</span>heatwise <small>India · prototype</small></div>
+    <div class="brand"><span class="mark" aria-hidden="true">☼</span>heatwise <small>India focus · worldwide search</small></div>
     <div class="topmeta">
       <span class="chip chip-quiet">Decision support</span>
       <span class="chip chip-quiet">Not an official warning</span>
@@ -232,7 +237,7 @@ footer p{margin:0 0 4px}
 <div class="wrap">
   <div class="notice" role="note">
     <span class="icon" aria-hidden="true">⚠</span>
-    <span><strong>This is a planning prototype, not an official heatwave alert.</strong> Risk scores here are model estimates built from weather data plus illustrative exposure and vulnerability inputs. Always check the <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a> and your district authority for official warnings, and seek medical help for anyone who is unwell.</span>
+    <span><strong>This is a planning prototype, not an official heatwave alert.</strong> Risk scores here are model estimates built from weather data plus illustrative exposure and vulnerability inputs. Always check your national meteorological service — the <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a> in India — and your local disaster authority for official warnings, and seek medical help for anyone who is unwell.</span>
   </div>
 </div>
 
@@ -250,7 +255,7 @@ footer p{margin:0 0 4px}
 
     <div class="controlrow">
       <div class="field">
-        <label for="city">City <span class="help">Indian cities with a placeholder local profile</span></label>
+        <label for="city">City <span class="help">Listed cities use a placeholder local profile; search below covers the world</span></label>
         <select id="city"></select>
       </div>
       <div class="field">
@@ -264,11 +269,13 @@ footer p{margin:0 0 4px}
 
     <div class="searchrow">
       <div class="field">
-        <label for="placeSearch">Or search any place in India</label>
-        <input type="search" id="placeSearch" placeholder="e.g. Barmer, Cuttack, Coimbatore" autocomplete="off">
+        <label for="placeSearch">Or search any city or town worldwide</label>
+        <input type="search" id="placeSearch" placeholder="e.g. Nairobi, Lima, Osaka, Barmer" autocomplete="off">
       </div>
       <button type="button" class="btn btn-quiet" id="searchBtn">Search place</button>
     </div>
+
+    <div class="searchresults" id="searchResults" role="listbox" aria-label="Matching places" hidden></div>
 
     <div class="quickrow">
       <span class="muted">Quick picks:</span>
@@ -436,7 +443,7 @@ footer p{margin:0 0 4px}
     <ul class="actions" id="actionsList">
       <li><span class="tick" aria-hidden="true">•</span><span>Loading actions…</span></li>
     </ul>
-    <p class="muted" style="margin-top:12px">If someone is confused, faint, has hot dry skin or is very unwell, treat it as an emergency: move them to a cool place, cool them with water and seek urgent medical help (call 108 in India).</p>
+    <p class="muted" style="margin-top:12px">If someone is confused, faint, has hot dry skin or is very unwell, treat it as an emergency: move them to a cool place, cool them with water and seek urgent medical help (call 108 in India, or your local emergency number).</p>
   </section>
 
   <!-- HISTORY -->
@@ -558,9 +565,9 @@ footer p{margin:0 0 4px}
       <div>
         <h3>Data sources</h3>
         <ul>
-          <li><strong>Forecast weather:</strong> Open-Meteo forecast API — air temperature, relative humidity, apparent temperature, wet-bulb temperature, UV index. Global gridded model output, not a local station.</li>
+          <li><strong>Forecast weather:</strong> Open-Meteo forecast API — air temperature, relative humidity, apparent temperature, wet-bulb temperature, UV index. Global gridded model output, not a local station. Dates and hours are local to the selected place.</li>
           <li><strong>Observed/past weather:</strong> Open-Meteo archive API (ERA5 reanalysis), roughly 9–25 km grid, available with a delay of several days.</li>
-          <li><strong>Place search:</strong> Open-Meteo geocoding API, limited to India.</li>
+          <li><strong>Place search:</strong> Open-Meteo geocoding API, worldwide. Any city or town can be selected, and the results list shows region and country so same-named places stay distinguishable.</li>
           <li><strong>Exposure and vulnerability:</strong> bundled illustrative placeholders. The named sources below are what a real deployment would use; no values here are taken from them.</li>
         </ul>
 
@@ -596,8 +603,8 @@ footer p{margin:0 0 4px}
 </main>
 
 <footer class="wrap">
-  <p><strong>Heatwise India · prototype for demonstration and planning.</strong> Weather and geocoding data from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0). Exposure and vulnerability values are illustrative placeholders, not official statistics.</p>
-  <p>Model output is kept separate from official information: for warnings and instructions, follow the India Meteorological Department and your district disaster authority. Nothing here is medical advice.</p>
+  <p><strong>Heatwise · prototype for demonstration and planning (India-focused model, worldwide weather lookup).</strong> Weather and geocoding data from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0). Exposure and vulnerability values are illustrative placeholders, not official statistics.</p>
+  <p>Model output is kept separate from official information: for warnings and instructions, follow your national meteorological service (the India Meteorological Department in India) and your local disaster authority. Nothing here is medical advice.</p>
 </footer>
 
 <script>
@@ -672,12 +679,12 @@ footer p{margin:0 0 4px}
       'Keep water and food safety plans ready, and watch for power cuts that stop fans.'
     ],
     ext: [
-      'Follow instructions from the India Meteorological Department and district authorities.',
+      'Follow instructions from your national meteorological service (IMD in India) and local authorities.',
       'Suspend non-essential outdoor activity, outdoor events and outdoor labour during the day.',
       'Activate cooling centres and water points, and arrange transport to reach them.',
       'Hospitals: keep emergency capacity and heat-illness supplies ready for a surge.',
       'Check on vulnerable people at least twice a day; never leave a child or older adult in a parked vehicle.',
-      'Treat confusion, fainting, hot dry skin or collapse as a medical emergency: cool the person and call 108.'
+      'Treat confusion, fainting, hot dry skin or collapse as a medical emergency: cool the person and call your local emergency number (108 in India).'
     ]
   };
 
@@ -688,7 +695,8 @@ footer p{margin:0 0 4px}
     inputs: {},
     cache: new Map(),
     ctx: null,
-    requestId: 0
+    requestId: 0,
+    searchHits: []
   };
 
   /* ------------------------------ helpers ------------------------------ */
@@ -796,7 +804,7 @@ footer p{margin:0 0 4px}
     var key = 'f:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3);
     if(cache.has(key)) return cache.get(key);
     var base = 'https://api.open-meteo.com/v1/forecast?latitude=' + place.lat +
-      '&longitude=' + place.lon + '&timezone=Asia%2FKolkata&forecast_days=7' +
+      '&longitude=' + place.lon + '&timezone=auto&forecast_days=7&past_days=1' +
       '&current=temperature_2m,relative_humidity_2m,apparent_temperature';
     var daily = '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,uv_index_max';
     var withWb = base + '&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,wet_bulb_temperature_2m' + daily;
@@ -824,7 +832,7 @@ footer p{margin:0 0 4px}
     var key = 'a:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3) + ',' + start + ',' + end;
     if(cache.has(key)) return cache.get(key);
     var base = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + place.lat +
-      '&longitude=' + place.lon + '&start_date=' + start + '&end_date=' + end + '&timezone=Asia%2FKolkata';
+      '&longitude=' + place.lon + '&start_date=' + start + '&end_date=' + end + '&timezone=auto';
     var json, wetBulb = true;
     try {
       json = await getJSON(base + '&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,wet_bulb_temperature_2m', 20000);
@@ -1161,10 +1169,15 @@ footer p{margin:0 0 4px}
   }
 
   /* -------------------------------- data --------------------------------- */
+  function coordLabel(lat, lon){
+    return Math.abs(lat).toFixed(2) + '°' + (lat >= 0 ? 'N' : 'S') + ', ' +
+      Math.abs(lon).toFixed(2) + '°' + (lon >= 0 ? 'E' : 'W');
+  }
+
   function setPlace(place){
     state.place = place;
     state.inputs = Object.assign({}, place.profile || GENERIC_PROFILE);
-    $('#placeChip').textContent = place.name + ' · ' + place.lat.toFixed(2) + '°N, ' + place.lon.toFixed(2) + '°E';
+    $('#placeChip').textContent = place.name + ' · ' + coordLabel(place.lat, place.lon);
     syncInputs();
   }
 
@@ -1202,7 +1215,7 @@ footer p{margin:0 0 4px}
       var stats = statsFor(dayRows);
       if(!stats){
         renderNoData('No weather values were returned for ' + fmtDate(date) + ' at ' + place.name +
-          '. Try a nearby date, or check that the place is inside India.');
+          '. Try a nearby date; archived reanalysis can lag a few days, and gridded data can be missing for some locations.');
         return;
       }
 
@@ -1271,7 +1284,7 @@ footer p{margin:0 0 4px}
       try {
         var url = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + place.lat +
           '&longitude=' + place.lon + '&start_date=' + d + '&end_date=' + d +
-          '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max&timezone=Asia%2FKolkata';
+          '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max&timezone=auto';
         var json = await getJSON(url, 20000);
         var daily = json.daily;
         if(!daily || !daily.time || daily.time[0] !== d){
@@ -1301,6 +1314,7 @@ footer p{margin:0 0 4px}
     if(!state.ctx || !state.ctx.byDate) return null;
     var best = null;
     Object.keys(state.ctx.byDate).forEach(function(d){
+      if(d < todayISO()) return;
       var s = statsFor(state.ctx.byDate[d]);
       if(s && s.appMax !== null && (!best || s.appMax > best.appMax)) best = { date: d, appMax: s.appMax };
     });
@@ -1309,26 +1323,48 @@ footer p{margin:0 0 4px}
 
   async function searchPlace(query){
     var q = query.trim();
-    if(!q){ setStatus('Type a place name first, for example Barmer or Cuttack.', 'nodata'); return; }
-    setStatus('Searching for “' + q + '” in India…', 'loading');
+    if(!q){ setStatus('Type a city or town name first, for example Nairobi, Lima or Barmer.', 'nodata'); return; }
+    setStatus('Searching for “' + q + '” worldwide…', 'loading');
     try {
       var url = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) +
-        '&count=1&language=en&format=json&countryCode=IN';
+        '&count=6&language=en&format=json';
       var json = await getJSON(url, 12000);
-      var hit = json.results && json.results[0];
-      if(!hit){
-        setStatus('No place matching “' + q + '” was found in India. Check the spelling or pick a city from the list.', 'nodata');
+      var hits = (json.results || []).slice(0, 6);
+      if(!hits.length){
+        setStatus('No place matching “' + q + '” was found. Check the spelling, or add a region or country name.', 'nodata');
         return;
       }
-      var label = [hit.name, hit.admin1, hit.country].filter(Boolean).join(', ');
-      setPlace({ name: label, lat: hit.latitude, lon: hit.longitude, profile: GENERIC_PROFILE });
-      $('#city').value = '';
-      $('#placeSearch').value = label;
-      await refresh();
+      if(hits.length === 1){ chooseSearchHit(hits[0]); return; }
+      renderSearchHits(hits, q);
     } catch(err){
       setStatus('Place search failed: ' + (err.message || 'unknown error') + '. You can still use the city list.', 'error');
       $('#reload').disabled = false;
     }
+  }
+
+  function renderSearchHits(hits, q){
+    state.searchHits = hits;
+    var box = $('#searchResults');
+    box.innerHTML = hits.map(function(h, i){
+      var where = [h.admin1, h.country].filter(Boolean).join(', ');
+      return '<button type="button" class="btn-quiet" role="option" data-hit="' + i + '">' +
+        '<strong>' + escapeHtml(h.name) + '</strong>' +
+        (where ? '<span>' + escapeHtml(where) + '</span>' : '') +
+        '</button>';
+    }).join('');
+    box.hidden = false;
+    setStatus(hits.length + ' places match “' + q + '”. Choose the one you meant.', 'ready');
+  }
+
+  async function chooseSearchHit(hit){
+    var label = [hit.name, hit.admin1, hit.country].filter(Boolean).join(', ');
+    state.searchHits = [];
+    $('#searchResults').hidden = true;
+    $('#searchResults').innerHTML = '';
+    setPlace({ name: label, lat: hit.latitude, lon: hit.longitude, profile: GENERIC_PROFILE });
+    $('#city').value = '';
+    $('#placeSearch').value = label;
+    await refresh();
   }
 
   function bind(){
@@ -1346,6 +1382,16 @@ footer p{margin:0 0 4px}
     });
 
     $('#reload').addEventListener('click', function(){ refresh(); });
+
+    $('#searchResults').addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-hit]');
+      if(!btn) return;
+      var hit = state.searchHits && state.searchHits[Number(btn.dataset.hit)];
+      if(hit) chooseSearchHit(hit);
+    });
+    $('#placeSearch').addEventListener('input', function(){
+      $('#searchResults').hidden = true;
+    });
 
     $('#searchBtn').addEventListener('click', function(){
       searchPlace($('#placeSearch').value);
@@ -1392,6 +1438,10 @@ footer p{margin:0 0 4px}
 
   function init(){
     var citySel = $('#city');
+    var ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '— other place (use search) —';
+    citySel.appendChild(ph);
     CITIES.forEach(function(c){
       var opt = document.createElement('option');
       opt.value = c.id;
