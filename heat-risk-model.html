@@ -1,0 +1,1419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f5f0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b4552f'/%3E%3Ctext x='16' y='24' font-size='20' text-anchor='middle' fill='white'%3E%E2%98%BC%3C/text%3E%3C/svg%3E">
+<title>Heatwise India — heatwave early warning and decision support (prototype)</title>
+<style>
+:root{
+  --ink:#1c2421; --muted:#5b655f; --paper:#f7f5f0; --card:#fffefb; --line:#e3ded3;
+  --accent:#b4552f; --accent-ink:#8a3d1f;
+  --low:#1f6040; --lowbg:#e4f2e8;
+  --mod:#7a5200; --modbg:#fdf0d2;
+  --high:#98301f; --highbg:#fbe5dd;
+  --ext:#5b161d; --extbg:#f3dcdd;
+  --focus:#1f4f7a;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+h1,h2,h3{line-height:1.25;margin:0}
+p{margin:0 0 10px}
+a{color:#1f4f7a}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;padding:10px 14px;z-index:100}
+.skip:focus{left:10px;top:10px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+
+/* header */
+.top{background:#fffefb;border-bottom:1px solid var(--line)}
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.4px}
+.brand .mark{width:32px;height:32px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:18px}
+.brand small{font-weight:600;font-size:12px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
+.topmeta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+
+/* notice */
+.notice{margin-top:16px;border:1px solid #e8d7bd;background:#fdf6e8;border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.55;color:#5a4325;display:flex;gap:10px}
+.notice strong{color:#7b4a12}
+.notice .icon{flex:none;font-size:16px;line-height:1.4}
+
+/* layout */
+main{padding:18px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px}
+.card + .card,section + section{margin-top:16px}
+.cols{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start}
+@media (max-width:880px){.cols{grid-template-columns:1fr}}
+h2{font-size:17px;letter-spacing:-.2px}
+h3{font-size:14px}
+.muted{color:var(--muted);font-size:13px}
+.eyebrow{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--accent-ink)}
+.cardhead{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.sectionlead{color:var(--muted);font-size:13.5px;max-width:62ch;margin-top:4px}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;letter-spacing:.2px;border:1px solid transparent;white-space:nowrap}
+.chip-quiet{background:#f1eee6;color:#4d554f;border-color:#e2ddd0}
+.chip-warn{background:#fdf0d6;color:#7a4b06;border-color:#efdcb1}
+.chip-live{background:#e7f1e8;color:#20573b;border-color:#cfe3d4}
+.chip-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* controls */
+.controls{position:relative;z-index:5}
+.controlrow{display:grid;grid-template-columns:1.25fr 1.25fr auto;gap:12px;align-items:end}
+@media (max-width:820px){.controlrow{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:12px;font-weight:700;color:#404a44}
+.field .help{font-size:11.5px;color:var(--muted);font-weight:400}
+select,input[type=date],input[type=search]{width:100%;border:1px solid #d8d2c5;background:#fff;border-radius:9px;padding:10px 11px;color:var(--ink)}
+select:hover,input[type=date]:hover{border-color:#bdb5a4}
+.btn{border:1px solid #2f4336;background:#35543f;color:#fff;border-radius:9px;padding:10px 16px;font-weight:600;font-size:14px}
+.btn:hover{background:#294535}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn-quiet{border:1px solid #d8d2c5;background:#fff;color:#2f3a34;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:600}
+.btn-quiet:hover{background:#f5f2ea}
+.searchrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.searchrow .field{flex:1 1 220px}
+.searchrow .btn{align-self:end}
+.quickrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.quickrow .muted{font-size:11.5px}
+
+/* status */
+.statusline{margin-top:12px;font-size:12.5px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-height:20px}
+.status[data-kind="error"]{color:#8f2418;font-weight:600}
+.status[data-kind="nodata"]{color:#7a5200;font-weight:600}
+.spinner{width:13px;height:13px;border:2px solid #cfc8b9;border-top-color:#6a5a40;border-radius:50%;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+
+/* risk card */
+.risk .scoreline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:6px 0 2px}
+.risk .score{font-size:60px;font-weight:800;letter-spacing:-3px;line-height:1;color:#5b655f}
+.risk[data-cat="low"] .score{color:var(--low)}
+.risk[data-cat="mod"] .score{color:var(--mod)}
+.risk[data-cat="high"] .score{color:var(--high)}
+.risk[data-cat="ext"] .score{color:var(--ext)}
+.risk .den{font-size:15px;color:var(--muted);font-weight:600}
+.badge{margin-left:auto;border-radius:10px;padding:8px 14px;font-weight:800;font-size:14px;letter-spacing:.2px;border:1px solid transparent}
+.risk[data-cat="low"] .badge{background:var(--lowbg);color:var(--low);border-color:#c7e0cf}
+.risk[data-cat="mod"] .badge{background:var(--modbg);color:var(--mod);border-color:#eed8a7}
+.risk[data-cat="high"] .badge{background:var(--highbg);color:var(--high);border-color:#f0c4b7}
+.risk[data-cat="ext"] .badge{background:var(--extbg);color:var(--ext);border-color:#dfb6ba}
+.risk[data-cat="na"] .badge{background:#f1eee6;color:#5b655f}
+.gauge{margin:14px 0 4px}
+.gaugetrack{position:relative;height:12px;border-radius:8px;overflow:hidden;display:flex;border:1px solid #e8e2d4}
+.gaugetrack span{flex:1}
+.gaugetrack .z1{background:#bfe0c9}.gaugetrack .z2{background:#f2deac}.gaugetrack .z3{background:#f0bcaa}.gaugetrack .z4{background:#dca9ad}
+.marker{position:absolute;top:-4px;bottom:-4px;width:4px;background:#1c2421;border-radius:2px;left:0;transition:left .25s ease}
+.gauge-scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:4px}
+.riskcopy{font-size:13.5px;color:#39423c;margin-top:10px}
+.mathline{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:#f6f3ea;border:1px solid #e6e0d2;border-radius:8px;padding:8px 10px;color:#3b463f;overflow-x:auto;white-space:nowrap}
+.components{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.comp{background:#faf8f2;border:1px solid #e8e2d4;border-radius:10px;padding:10px}
+.comp span{display:block;font-size:11px;color:var(--muted)}
+.comp strong{display:block;font-size:20px;font-weight:800;margin:2px 0 4px}
+.minibar{height:6px;border-radius:4px;background:#e7e1d4;overflow:hidden}
+.minibar i{display:block;height:100%;background:#7a6a4e;border-radius:4px;width:0}
+.comp.h .minibar i{background:#c4703f}
+.comp.e .minibar i{background:#4a7a63}
+.comp.v .minibar i{background:#6a6a9a}
+
+/* conditions */
+.measuregrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.measuregrid{grid-template-columns:repeat(2,1fr)}}
+.measure{border:1px solid #e8e2d4;border-radius:10px;padding:10px 11px;background:#fff}
+.measure dt{font-size:11.5px;color:var(--muted);margin-bottom:3px}
+.measure dd{margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px}
+.measure dd small{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0}
+.measure span{display:block;font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+
+/* diagram */
+.diagram{margin:4px 0 0;padding:16px;background:#fbf9f3;border:1px dashed #dcd4c2;border-radius:12px;overflow-x:auto}
+.flow{display:flex;align-items:center;gap:10px;min-width:660px;justify-content:center}
+.node{border:1px solid #d9d1bf;background:#fff;border-radius:11px;padding:10px 12px;min-width:112px;text-align:center;box-shadow:0 1px 0 #e9e2d3}
+.node .nlabel{display:block;font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.node .nval{display:block;font-size:22px;font-weight:800;letter-spacing:-.5px;margin:2px 0}
+.node .nw{display:block;font-size:10.5px;color:#6b5a3f}
+.node.risk{background:#f3efe3;border-color:#cfc4ab}
+.node.cat{min-width:126px;background:#ecf3ec;border-color:#c6dccd}
+.op,.arrow{font-size:20px;color:#8a7d63;flex:none}
+figcaption{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.55}
+
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid #e8e2d4;border-radius:11px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:13px}
+caption{caption-side:top;text-align:left;padding:10px 12px;color:var(--muted);font-size:12px}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid #efe9dc;vertical-align:top}
+thead th{background:#f6f2e8;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#4c554e}
+tbody tr:last-child td{border-bottom:0}
+tr.comp th{background:#f0eadb;font-size:12px;letter-spacing:.2px;color:#3a423b}
+tr.comp .muted{font-weight:500;text-transform:none;letter-spacing:0}
+tr.total th,tr.total td{background:#f6f2e8;font-weight:800;font-size:13px}
+.termname{display:block;font-weight:700;color:#2c352f}
+.termrule{display:block;font-size:11px;color:#6a736c;margin-top:2px}
+.termsrc{display:block;font-size:10.5px;color:#8a8375;margin-top:3px}
+.num{font-variant-numeric:tabular-nums}
+
+/* inputs */
+.inputgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px 22px;margin-top:6px}
+@media (max-width:780px){.inputgrid{grid-template-columns:1fr}}
+.input{display:block}
+.input .lab{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:13px;font-weight:700}
+.input .lab output{font-weight:800;font-variant-numeric:tabular-nums;color:#2c352f}
+.input .unit{font-size:11px;color:var(--muted);font-weight:500}
+.input input[type=range]{width:100%;margin:8px 0 4px;accent-color:#3f6a52}
+.input .hint{font-size:11.5px;color:var(--muted);line-height:1.45}
+.inputsgroup{margin-top:14px}
+.inputsgroup h3{margin-bottom:2px}
+.groupnote{font-size:11.5px;color:var(--muted);margin:2px 0 10px}
+
+/* actions */
+.actions{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.actions li{display:flex;gap:10px;border:1px solid #e8e2d4;border-radius:10px;padding:10px 12px;font-size:13.5px;background:#fff;line-height:1.5}
+.actions li .tick{flex:none;width:20px;height:20px;border-radius:50%;background:#eaf2ea;color:#2f5c42;display:grid;place-items:center;font-size:11px;font-weight:800;margin-top:1px}
+.actions li.urgent{background:#fdf1ec;border-color:#efcbbd}
+.actions li.urgent .tick{background:#f7ddd2;color:#8f2418}
+.actionhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+
+/* history */
+.historical{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
+@media (max-width:760px){.historical{grid-template-columns:repeat(2,1fr)}}
+.hist{border:1px solid #e8e2d4;border-radius:10px;padding:10px 11px;background:#fff}
+.hist b{display:block;font-size:12px;color:#4c554e}
+.hist strong{display:block;font-size:18px;font-weight:800;margin-top:4px}
+.hist span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+
+/* benefits */
+.benefits{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width:760px){.benefits{grid-template-columns:1fr}}
+.benefit{border:1px solid #e8e2d4;border-radius:12px;padding:13px 14px;background:#fdfbf6}
+.benefit h3{display:flex;gap:8px;align-items:center;font-size:13.5px;margin-bottom:6px}
+.benefit ul{margin:0;padding-left:18px;font-size:13px;color:#3d4640;line-height:1.5}
+.benefit li{margin-bottom:3px}
+.audience{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.audience span{background:#f1eee4;border:1px solid #e2dccd;border-radius:999px;padding:5px 11px;font-size:12px;color:#414b44}
+.impact{margin-top:16px;border-left:4px solid var(--accent);background:#fdf6ef;border-radius:0 10px 10px 0;padding:12px 14px;font-size:15px;font-weight:700;color:#6c3a21}
+
+/* how it works */
+.how{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:820px){.how{grid-template-columns:1fr}}
+.how h3{margin-bottom:6px}
+.how ul,.how ol{margin:0 0 12px;padding-left:18px;font-size:13px;line-height:1.55;color:#3d4640}
+.how li{margin-bottom:5px}
+.how p{font-size:13px;color:#3d4640}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;background:#f6f3ea;border:1px solid #e6e0d2;border-radius:8px;padding:9px 11px;margin:8px 0 12px;overflow-x:auto;white-space:nowrap;color:#3b463f}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+.pillrow span{font-size:10.5px;font-weight:700;background:#f1eee4;border:1px solid #e2dccd;border-radius:6px;padding:4px 8px;color:#4c554e}
+
+/* footer */
+footer{padding:22px 0 34px;font-size:11.5px;color:#7c857e;line-height:1.6}
+footer p{margin:0 0 4px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="top">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true">☼</span>heatwise <small>India · prototype</small></div>
+    <div class="topmeta">
+      <span class="chip chip-quiet">Decision support</span>
+      <span class="chip chip-quiet">Not an official warning</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="notice" role="note">
+    <span class="icon" aria-hidden="true">⚠</span>
+    <span><strong>This is a planning prototype, not an official heatwave alert.</strong> Risk scores here are model estimates built from weather data plus illustrative exposure and vulnerability inputs. Always check the <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a> and your district authority for official warnings, and seek medical help for anyone who is unwell.</span>
+  </div>
+</div>
+
+<main id="main" class="wrap">
+
+  <!-- CONTROLS -->
+  <section class="card controls" aria-labelledby="controlsTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="controlsTitle">Choose a place and a date</h2>
+        <p class="sectionlead">Forecast dates run from today to 6 days ahead. Earlier dates show observed reanalysis weather instead of a forecast.</p>
+      </div>
+      <span class="chip chip-quiet" id="placeChip">—</span>
+    </div>
+
+    <div class="controlrow">
+      <div class="field">
+        <label for="city">City <span class="help">Indian cities with a placeholder local profile</span></label>
+        <select id="city"></select>
+      </div>
+      <div class="field">
+        <label for="date">Date <span class="help">Forecast or past date</span></label>
+        <input type="date" id="date">
+      </div>
+      <div class="field">
+        <button type="button" class="btn" id="reload">Load risk</button>
+      </div>
+    </div>
+
+    <div class="searchrow">
+      <div class="field">
+        <label for="placeSearch">Or search any place in India</label>
+        <input type="search" id="placeSearch" placeholder="e.g. Barmer, Cuttack, Coimbatore" autocomplete="off">
+      </div>
+      <button type="button" class="btn btn-quiet" id="searchBtn">Search place</button>
+    </div>
+
+    <div class="quickrow">
+      <span class="muted">Quick picks:</span>
+      <button type="button" class="btn-quiet" id="todayBtn">Today</button>
+      <button type="button" class="btn-quiet" id="hottestBtn">Hottest day this week</button>
+      <button type="button" class="btn-quiet" id="heatSampleBtn">Sample observed heat day</button>
+    </div>
+
+    <p class="statusline" id="statusLine" role="status" aria-live="polite">
+      <span class="status" id="status" data-kind="idle">Loading local weather…</span>
+    </p>
+  </section>
+
+  <!-- RISK + CONDITIONS -->
+  <div class="cols">
+    <section class="card risk" id="risk" data-cat="na" aria-labelledby="riskTitle">
+      <div class="cardhead">
+        <div>
+          <h2 id="riskTitle">Risk score</h2>
+          <p class="muted" id="riskPlace">—</p>
+        </div>
+        <span class="chip chip-quiet" id="modeChip">—</span>
+      </div>
+
+      <div class="scoreline">
+        <strong class="score" id="score">—</strong><span class="den">/ 100</span>
+        <span class="badge" id="catBadge">—</span>
+      </div>
+      <p class="sr-only" id="riskAria" aria-live="polite"></p>
+
+      <div class="gauge" aria-hidden="true">
+        <div class="gaugetrack">
+          <span class="z1"></span><span class="z2"></span><span class="z3"></span><span class="z4"></span>
+          <i class="marker" id="marker"></i>
+        </div>
+        <div class="gauge-scale"><span>0 Low</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+      </div>
+
+      <p class="riskcopy" id="riskSentence">Loading the selected date…</p>
+
+      <div class="mathline" id="mathline" aria-label="Risk arithmetic">R = 0.5 × H + 0.3 × E + 0.2 × V</div>
+
+      <div class="components">
+        <div class="comp h"><span>Hazard (H) · weight 0.5</span><strong id="hVal">—</strong><div class="minibar"><i id="hBar"></i></div></div>
+        <div class="comp e"><span>Exposure (E) · weight 0.3</span><strong id="eVal">—</strong><div class="minibar"><i id="eBar"></i></div></div>
+        <div class="comp v"><span>Vulnerability (V) · weight 0.2</span><strong id="vVal">—</strong><div class="minibar"><i id="vBar"></i></div></div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="condTitle">
+      <div class="cardhead">
+        <div>
+          <h2 id="condTitle">Conditions on the selected date</h2>
+          <p class="muted" id="condSub">Waiting for data</p>
+        </div>
+      </div>
+      <dl class="measuregrid" id="measures">
+        <div class="measure"><dt>Air temperature, max</dt><dd>—</dd></div>
+        <div class="measure"><dt>Air temperature, min</dt><dd>—</dd></div>
+        <div class="measure"><dt>Apparent temperature, max</dt><dd>—</dd></div>
+        <div class="measure"><dt>Apparent temperature, min</dt><dd>—</dd></div>
+        <div class="measure"><dt>Relative humidity at hottest hour</dt><dd>—</dd></div>
+        <div class="measure"><dt>Wet-bulb temperature, max</dt><dd>—</dd></div>
+      </dl>
+      <p class="muted" id="timestamp" style="margin-top:12px">Data timestamp will appear here.</p>
+    </section>
+  </div>
+
+  <!-- DIAGRAM -->
+  <section class="card" aria-labelledby="diagramTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="diagramTitle">How the three components combine</h2>
+        <p class="sectionlead">Each component is scored 0–100, then weighted. The result is a 0–100 risk score that maps to a category.</p>
+      </div>
+      <span class="chip chip-warn">Proposed weights — need local validation</span>
+    </div>
+
+    <figure class="diagram">
+      <div class="flow" aria-hidden="true">
+        <div class="node"><span class="nlabel">Hazard</span><span class="nval" id="dH">—</span><span class="nw">H × 0.5</span></div>
+        <span class="op">+</span>
+        <div class="node"><span class="nlabel">Exposure</span><span class="nval" id="dE">—</span><span class="nw">E × 0.3</span></div>
+        <span class="op">+</span>
+        <div class="node"><span class="nlabel">Vulnerability</span><span class="nval" id="dV">—</span><span class="nw">V × 0.2</span></div>
+        <span class="arrow">→</span>
+        <div class="node risk"><span class="nlabel">Risk score</span><span class="nval" id="dR">—</span><span class="nw">R / 100</span></div>
+        <span class="arrow">→</span>
+        <div class="node cat"><span class="nlabel">Category</span><span class="nval" id="dCat">—</span><span class="nw">Low → Extreme</span></div>
+      </div>
+      <figcaption>
+        <strong>Block diagram.</strong> Hazard (forecast heat) + Exposure (people, places and activities affected) + Vulnerability (factors that increase harm) produce a risk score with
+        R = 0.5H + 0.3E + 0.2V, which is then placed in a category: Low 0–24, Moderate 25–49, High 50–74, Extreme 75–100.
+        Weights (0.5 / 0.3 / 0.2) and category cut-offs are <strong>proposed values for this prototype</strong> and have not been validated against local health or mortality data.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- BREAKDOWN -->
+  <section class="card" aria-labelledby="calcTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="calcTitle">How this score was calculated</h2>
+        <p class="sectionlead">Every term, its input value, the 0–100 normalisation, its weight and its points toward the final score. Weather terms are measured; exposure and vulnerability terms are placeholder local inputs you can edit below.</p>
+      </div>
+      <span class="chip chip-warn">Normalisation bands are proposed</span>
+    </div>
+
+    <div class="tablewrap">
+      <table id="calcTable">
+        <caption id="calcCaption">Calculation for the selected date and place.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Term and what it uses</th>
+            <th scope="col">Input value</th>
+            <th scope="col">Normalised 0–100</th>
+            <th scope="col">Weight</th>
+            <th scope="col">Points toward R</th>
+          </tr>
+        </thead>
+        <tbody id="calcBody">
+          <tr><td colspan="5">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="margin-top:10px">Points are the term's normalised score × its weight inside the component × the component's weight in R. Totals are rounded, so columns may differ by 0.1.</p>
+    <p class="muted" id="wbNote" hidden></p>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="card" aria-labelledby="inputsTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="inputsTitle">Exposure and vulnerability inputs</h2>
+        <p class="sectionlead">Live local exposure and vulnerability data is not available to this prototype, so each city starts with <strong>illustrative placeholder values</strong>. They are not measured statistics. Move a slider to see how the score responds.</p>
+      </div>
+      <button type="button" class="btn-quiet" id="resetInputs">Reset to city placeholder</button>
+    </div>
+
+    <p><span class="chip chip-warn">Illustrative values — not local data</span></p>
+
+    <div class="inputsgroup">
+      <h3>Exposure (E) — who and what is in the heat</h3>
+      <p class="groupnote">Weights inside E: density 0.40 · outdoor workforce 0.35 · institutions 0.25</p>
+      <div class="inputgrid" id="exposureInputs"></div>
+    </div>
+
+    <div class="inputsgroup">
+      <h3>Vulnerability (V) — who is more likely to be harmed</h3>
+      <p class="groupnote">Weights inside V: age 0.25 · chronic illness 0.20 · housing 0.20 · water access 0.15 · cooling access 0.20</p>
+      <div class="inputgrid" id="vulnerabilityInputs"></div>
+    </div>
+  </section>
+
+  <!-- ACTIONS -->
+  <section class="card" aria-labelledby="actionsTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="actionsTitle">Recommended preparedness actions</h2>
+        <p class="sectionlead" id="actionsSub">Actions will appear after the risk score is calculated.</p>
+      </div>
+      <span class="chip chip-quiet" id="actionsCat">—</span>
+    </div>
+    <div class="actionhead"><span class="chip chip-quiet">Suggestions for planning · not official orders</span></div>
+    <ul class="actions" id="actionsList">
+      <li><span class="tick" aria-hidden="true">•</span><span>Loading actions…</span></li>
+    </ul>
+    <p class="muted" style="margin-top:12px">If someone is confused, faint, has hot dry skin or is very unwell, treat it as an emergency: move them to a cool place, cool them with water and seek urgent medical help (call 108 in India).</p>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="card" aria-labelledby="historyTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="historyTitle">This date in previous years</h2>
+        <p class="sectionlead">Observed daily weather for the same calendar date in the five previous years, from the Open-Meteo archive (ERA5 reanalysis). Reanalysis is a modelled reconstruction, not a station reading.</p>
+      </div>
+      <span class="chip chip-quiet" id="historyMode">—</span>
+    </div>
+    <div class="historical" id="historyGrid">
+      <div class="hist"><b>—</b><strong>—</strong><span>Loading…</span></div>
+    </div>
+    <p class="statusline"><span class="status" id="historyStatus" data-kind="idle" role="status" aria-live="polite">Historical weather will load with the forecast.</span></p>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="card" aria-labelledby="benefitsTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="benefitsTitle">Benefits, impact and who this is for</h2>
+        <p class="sectionlead">What an early-warning and decision-support layer is meant to change, and who uses it.</p>
+      </div>
+    </div>
+
+    <div class="benefits">
+      <div class="benefit">
+        <h3><span aria-hidden="true">🧑‍🤝‍🧑</span> People</h3>
+        <ul>
+          <li>Provide early warnings before dangerous heat arrives.</li>
+          <li>Help reduce heatstroke and dehydration risk.</li>
+          <li>Protect workers, children and older adults.</li>
+          <li>Help hospitals prepare staff, supplies and triage.</li>
+        </ul>
+      </div>
+      <div class="benefit">
+        <h3><span aria-hidden="true">🌳</span> Environment</h3>
+        <ul>
+          <li>Identify hot areas that need attention.</li>
+          <li>Encourage trees, shade and green spaces.</li>
+          <li>Support climate awareness and urban planning.</li>
+        </ul>
+      </div>
+      <div class="benefit">
+        <h3><span aria-hidden="true">💼</span> Socio-economic</h3>
+        <ul>
+          <li>Help reduce medical costs and income loss.</li>
+          <li>Reduce workplace heat risk and heatwave losses.</li>
+          <li>Help authorities plan water, power and health resources.</li>
+        </ul>
+      </div>
+      <div class="benefit">
+        <h3><span aria-hidden="true">🏛</span> Audience</h3>
+        <div class="audience" style="margin-top:0">
+          <span>Public</span><span>Farmers</span><span>Outdoor workers</span><span>Hospitals</span>
+          <span>Municipal bodies</span><span>Disaster authorities</span><span>Industries</span><span>Businesses</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="impact">Save lives, protect the environment, reduce losses, and support a climate-resilient society.</p>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="card" aria-labelledby="howTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="howTitle">How this works</h2>
+        <p class="sectionlead">Assumptions, limitations, and what would be needed before any of these numbers could be used for a real local decision.</p>
+      </div>
+      <span class="chip chip-warn">Prototype · unvalidated</span>
+    </div>
+
+    <div class="how">
+      <div>
+        <h3>The score</h3>
+        <p>Three components are each scored 0–100 and combined with fixed weights:</p>
+        <div class="formula">R = 0.5 × H + 0.3 × E + 0.2 × V</div>
+        <div class="pillrow">
+          <span>Low 0–24</span><span>Moderate 25–49</span><span>High 50–74</span><span>Extreme 75–100</span>
+        </div>
+        <p>Weights and cut-offs are <strong>proposed values</strong>. They are a transparent starting point for discussion with local health and disaster officials, not a validated index.</p>
+
+        <h3 style="margin-top:14px">Hazard (H) terms</h3>
+        <ul>
+          <li>Daytime heat: daily maximum apparent temperature (°C), 32 → 0 and 47 → 100. Weight 0.45.</li>
+          <li>Night heat: daily minimum apparent temperature (°C), 24 → 0 and 34 → 100. Weight 0.25.</li>
+          <li>Humidity heat stress: daily maximum wet-bulb temperature (°C), 24 → 0 and 32 → 100. Weight 0.15.</li>
+          <li>Persistence: number of days with feels-like maximum ≥ 40 °C in the 3-day window, 0 → 0 and 3 → 100. Weight 0.15.</li>
+        </ul>
+        <p class="muted">If wet-bulb data is unavailable, that term is dropped and the remaining weights are renormalised; the table notes this.</p>
+
+        <h3 style="margin-top:14px">Exposure (E) terms</h3>
+        <ul>
+          <li>Population density (people/km²), 500 → 0 and 30,000 → 100, log scale. Weight 0.40.</li>
+          <li>Outdoor or heat-exposed workforce (% of workers), 0 → 0 and 60 → 100. Weight 0.35.</li>
+          <li>Schools and hospitals per 100,000 people, 0 → 0 and 400 → 100. Weight 0.25.</li>
+        </ul>
+
+        <h3 style="margin-top:14px">Vulnerability (V) terms</h3>
+        <ul>
+          <li>Children under 5 plus adults 60+ (% of population), 10 → 0 and 30 → 100. Weight 0.25.</li>
+          <li>Adults with a chronic illness proxy (% of adults), 10 → 0 and 40 → 100. Weight 0.20.</li>
+          <li>Households in non-permanent or heat-prone housing (%), 0 → 0 and 50 → 100. Weight 0.20.</li>
+          <li>Households without piped water at home (%), 0 → 0 and 60 → 100. Weight 0.15.</li>
+          <li>Households without a fan or air conditioning (%), 0 → 0 and 60 → 100. Weight 0.20.</li>
+        </ul>
+
+        <h3 style="margin-top:14px">Weather measures — what is and is not shown</h3>
+        <ul>
+          <li><strong>Air temperature (2 m):</strong> the standard forecast temperature in °C.</li>
+          <li><strong>Apparent temperature:</strong> a feels-like measure combining temperature, humidity, wind and solar radiation. It is not WBGT.</li>
+          <li><strong>Wet-bulb temperature:</strong> supplied by Open-Meteo, derived from temperature, humidity and pressure. It reflects how well sweat can cool the body, and is one heat-stress indicator — not a personal risk measure.</li>
+          <li><strong>WBGT is not shown.</strong> A valid WBGT needs dry-bulb, natural wet-bulb and globe temperature (solar radiation and air movement). A 2 m air-temperature forecast does not provide those inputs, so any WBGT derived from temperature alone would be misleading.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3>Data sources</h3>
+        <ul>
+          <li><strong>Forecast weather:</strong> Open-Meteo forecast API — air temperature, relative humidity, apparent temperature, wet-bulb temperature, UV index. Global gridded model output, not a local station.</li>
+          <li><strong>Observed/past weather:</strong> Open-Meteo archive API (ERA5 reanalysis), roughly 9–25 km grid, available with a delay of several days.</li>
+          <li><strong>Place search:</strong> Open-Meteo geocoding API, limited to India.</li>
+          <li><strong>Exposure and vulnerability:</strong> bundled illustrative placeholders. The named sources below are what a real deployment would use; no values here are taken from them.</li>
+        </ul>
+
+        <h3 style="margin-top:14px">Assumptions</h3>
+        <ul>
+          <li>One weather grid cell represents the whole city or district; elevation, land use and the urban heat island are not resolved.</li>
+          <li>The score describes conditions on a single day plus a short persistence window. It has no lag, acclimatisation or multi-day mortality effect.</li>
+          <li>Exposure and vulnerability inputs are static across the day and apply to the whole area.</li>
+          <li>People can act on guidance: water, shade, rest, rescheduling and access to cooling.</li>
+        </ul>
+
+        <h3 style="margin-top:14px">Limitations</h3>
+        <ul>
+          <li>It does not predict illness, hospital admissions, deaths or economic loss.</li>
+          <li>It is not an official heatwave declaration and does not reproduce IMD criteria or alerts.</li>
+          <li>Gridded data smooths local extremes; a station or a top-floor room can be much hotter.</li>
+          <li>Indoor heat, housing quality and power cuts are only partly captured by the proxies.</li>
+          <li>No local calibration or validation has been performed on the weights, bands or thresholds.</li>
+        </ul>
+
+        <h3 style="margin-top:14px">What local validation would need</h3>
+        <ul>
+          <li>Ward-level station and automatic weather station data, including humidity and globe temperature.</li>
+          <li>IMD heatwave criteria and a historical archive of official alerts for the district.</li>
+          <li>Daily heat-illness counts from hospitals and 108 ambulance dispatch, plus mortality registry data by date and place.</li>
+          <li>Census and NFHS ward-level population, age structure, housing, water and cooling access.</li>
+          <li>Workforce and school calendars, cooling-centre locations, and electricity outage records.</li>
+          <li>Retrospective testing against past heat events (ROC/AUC, calibration curves), then tuning weights and thresholds with district health officers, followed by a prospective pilot.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><strong>Heatwise India · prototype for demonstration and planning.</strong> Weather and geocoding data from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0). Exposure and vulnerability values are illustrative placeholders, not official statistics.</p>
+  <p>Model output is kept separate from official information: for warnings and instructions, follow the India Meteorological Department and your district disaster authority. Nothing here is medical advice.</p>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     Model constants — all proposed values, not validated thresholds.
+  ------------------------------------------------------------------ */
+  var MODEL_W = { H: 0.5, E: 0.3, V: 0.2 };
+  var CATEGORIES = [
+    { key:'low',  name:'Low',      max:24.999 },
+    { key:'mod',  name:'Moderate', max:49.999 },
+    { key:'high', name:'High',     max:74.999 },
+    { key:'ext',  name:'Extreme',  max:100.001 }
+  ];
+
+  var INPUT_DEFS = [
+    { group:'E', key:'density', label:'Population density', unit:'people per km²', min:200, max:35000, step:100,
+      hint:'More people in one area means more people exposed to the same heat.' },
+    { group:'E', key:'outdoor', label:'Outdoor or heat-exposed workforce', unit:'% of workers', min:0, max:70, step:1,
+      hint:'Construction, agriculture, delivery, street vending, traffic duty, workshops without cooling.' },
+    { group:'E', key:'institutions', label:'Schools and hospitals', unit:'per 100,000 people', min:0, max:400, step:5,
+      hint:'Places that must keep operating, shelter people, or prepare for heat illness.' },
+    { group:'V', key:'youngOld', label:'Children under 5 plus adults 60+', unit:'% of population', min:5, max:45, step:1,
+      hint:'Age groups with less ability to regulate body heat or act on warnings.' },
+    { group:'V', key:'chronic', label:'Adults with chronic illness (proxy)', unit:'% of adults', min:5, max:45, step:1,
+      hint:'Hypertension, diabetes, heart and kidney disease raise heat risk. Placeholder proxy.' },
+    { group:'V', key:'housing', label:'Non-permanent or heat-prone housing', unit:'% of households', min:0, max:70, step:1,
+      hint:'Metal roofs, single rooms and poor ventilation trap heat overnight.' },
+    { group:'V', key:'water', label:'Households without piped water at home', unit:'% of households', min:0, max:80, step:1,
+      hint:'Water access affects hydration and the ability to cool down.' },
+    { group:'V', key:'cooling', label:'Households without a fan or AC', unit:'% of households', min:0, max:80, step:1,
+      hint:'Also reflects reliable electricity, which decides whether cooling works during a heatwave.' }
+  ];
+
+  var CITIES = [
+    { id:'delhi',       name:'Delhi',        lat:28.6139, lon:77.2090, profile:{density:13400,outdoor:30,institutions:210,youngOld:30,chronic:30,housing:20,water:25,cooling:38} },
+    { id:'mumbai',      name:'Mumbai',       lat:19.0760, lon:72.8777, profile:{density:21000,outdoor:26,institutions:180,youngOld:27,chronic:28,housing:45,water:30,cooling:45} },
+    { id:'chennai',     name:'Chennai',      lat:13.0827, lon:80.2707, profile:{density:17000,outdoor:28,institutions:160,youngOld:26,chronic:32,housing:30,water:25,cooling:40} },
+    { id:'kolkata',     name:'Kolkata',      lat:22.5726, lon:88.3639, profile:{density:24000,outdoor:30,institutions:150,youngOld:26,chronic:30,housing:35,water:32,cooling:42} },
+    { id:'ahmedabad',   name:'Ahmedabad',    lat:23.0225, lon:72.5714, profile:{density:12000,outdoor:34,institutions:170,youngOld:28,chronic:29,housing:22,water:28,cooling:36} },
+    { id:'jaipur',      name:'Jaipur',       lat:26.9124, lon:75.7873, profile:{density:6500,outdoor:36,institutions:150,youngOld:29,chronic:27,housing:26,water:34,cooling:30} },
+    { id:'nagpur',      name:'Nagpur',       lat:21.1458, lon:79.0882, profile:{density:5200,outdoor:35,institutions:140,youngOld:28,chronic:31,housing:28,water:36,cooling:33} },
+    { id:'bhubaneswar', name:'Bhubaneswar',  lat:20.2961, lon:85.8245, profile:{density:4900,outdoor:33,institutions:130,youngOld:27,chronic:30,housing:30,water:40,cooling:34} },
+    { id:'lucknow',     name:'Lucknow',      lat:26.8467, lon:80.9462, profile:{density:7800,outdoor:33,institutions:150,youngOld:29,chronic:29,housing:33,water:42,cooling:38} },
+    { id:'hyderabad',   name:'Hyderabad',    lat:17.3850, lon:78.4867, profile:{density:18500,outdoor:27,institutions:160,youngOld:27,chronic:31,housing:25,water:27,cooling:32} },
+    { id:'patna',       name:'Patna',        lat:25.5941, lon:85.1376, profile:{density:9000,outdoor:34,institutions:120,youngOld:31,chronic:28,housing:38,water:48,cooling:44} },
+    { id:'guwahati',    name:'Guwahati',     lat:26.1445, lon:91.7362, profile:{density:4400,outdoor:30,institutions:120,youngOld:26,chronic:26,housing:30,water:38,cooling:40} }
+  ];
+
+  var GENERIC_PROFILE = { density:9000, outdoor:32, institutions:150, youngOld:28, chronic:29, housing:32, water:38, cooling:40 };
+
+  var ACTIONS = {
+    low: [
+      'Keep water available and take breaks in shade during the afternoon.',
+      'Check this screen daily; treat it as a model estimate and confirm with IMD bulletins.',
+      'Keep health and civic helpline numbers handy for the season.'
+    ],
+    mod: [
+      'Move strenuous outdoor work and sport to early morning or after sunset where possible.',
+      'Share a water and shade plan with outdoor teams, and add rest rotations.',
+      'Check on older neighbours, infants and anyone living without a fan or cooling.',
+      'Schools: review assembly, sports and midday outdoor activity plans.',
+      'Clinics: check oral rehydration supplies and heat-illness triage steps.'
+    ],
+    high: [
+      'Reduce or reschedule outdoor work between 11:00 and 16:00 where the job allows.',
+      'Open or extend shaded and cooled public spaces, with drinking-water points.',
+      'Hospitals and clinics: prepare heat-illness triage, staffing and hydration supplies.',
+      'Community workers: check on older adults, isolated people and people without shelter.',
+      'Keep water and food safety plans ready, and watch for power cuts that stop fans.'
+    ],
+    ext: [
+      'Follow instructions from the India Meteorological Department and district authorities.',
+      'Suspend non-essential outdoor activity, outdoor events and outdoor labour during the day.',
+      'Activate cooling centres and water points, and arrange transport to reach them.',
+      'Hospitals: keep emergency capacity and heat-illness supplies ready for a surge.',
+      'Check on vulnerable people at least twice a day; never leave a child or older adult in a parked vehicle.',
+      'Treat confusion, fainting, hot dry skin or collapse as a medical emergency: cool the person and call 108.'
+    ]
+  };
+
+  var $ = function(sel){ return document.querySelector(sel); };
+  var state = {
+    place: null,
+    date: '',
+    inputs: {},
+    cache: new Map(),
+    ctx: null,
+    requestId: 0
+  };
+
+  /* ------------------------------ helpers ------------------------------ */
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function istNow(){ return new Date(Date.now() + 330 * 60000); }
+  function isoOf(d){ return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()); }
+  function todayISO(){ return isoOf(istNow()); }
+  function shiftISO(iso, days){
+    var d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + days);
+    return isoOf(d);
+  }
+  function fmtDate(iso, opts){
+    if(!iso) return '—';
+    var o = opts || { weekday:'short', day:'numeric', month:'short', year:'numeric' };
+    o.timeZone = 'UTC';
+    return new Intl.DateTimeFormat('en-IN', o).format(new Date(iso + 'T12:00:00Z'));
+  }
+  function num(v){ return (typeof v === 'number' && isFinite(v)) ? v : null; }
+  function clamp(v, a, b){ return Math.min(b === undefined ? 100 : b, Math.max(a === undefined ? 0 : a, v)); }
+  function lin(v, lo, hi){ return v === null || v === undefined ? null : clamp(((v - lo) / (hi - lo)) * 100); }
+  function logScale(v, lo, hi){
+    if(v === null || v === undefined || v <= 0) return null;
+    return clamp(((Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))) * 100);
+  }
+  function round1(v){ return Math.round(v * 10) / 10; }
+  function fmtNum(v, digits){
+    if(v === null || v === undefined) return '—';
+    if(Math.abs(v) >= 10000) return v.toLocaleString('en-IN');
+    var d = digits === undefined ? 0 : digits;
+    return (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toString();
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  async function getJSON(url, timeoutMs){
+    var ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, timeoutMs || 15000);
+    try {
+      var res = await fetch(url, { signal: ctl.signal });
+      if(!res.ok) throw new Error('Weather service returned status ' + res.status);
+      var json = await res.json();
+      if(json && json.error) throw new Error(json.reason || 'Weather service error');
+      return json;
+    } catch(err){
+      if(err && err.name === 'AbortError') throw new Error('The weather service did not respond in time');
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /* --------------------------- weather loading --------------------------- */
+  function rowsFromHourly(hourly){
+    var byDate = {};
+    if(!hourly || !hourly.time) return byDate;
+    for(var i = 0; i < hourly.time.length; i++){
+      var key = String(hourly.time[i]).slice(0, 10);
+      if(!byDate[key]) byDate[key] = [];
+      byDate[key].push({
+        time: String(hourly.time[i]).slice(11, 16),
+        temp: num(hourly.temperature_2m ? hourly.temperature_2m[i] : null),
+        rh: num(hourly.relative_humidity_2m ? hourly.relative_humidity_2m[i] : null),
+        app: num(hourly.apparent_temperature ? hourly.apparent_temperature[i] : null),
+        wb: num(hourly.wet_bulb_temperature_2m ? hourly.wet_bulb_temperature_2m[i] : null)
+      });
+    }
+    return byDate;
+  }
+
+  function statsFor(rows){
+    if(!rows || !rows.length) return null;
+    var list = rows.filter(function(r){ return r.app !== null || r.temp !== null; });
+    if(!list.length) return null;
+    var maxOf = function(k){
+      var a = list.map(function(r){ return r[k]; }).filter(function(v){ return v !== null; });
+      return a.length ? Math.max.apply(null, a) : null;
+    };
+    var minOf = function(k){
+      var a = list.map(function(r){ return r[k]; }).filter(function(v){ return v !== null; });
+      return a.length ? Math.min.apply(null, a) : null;
+    };
+    var meanOf = function(k){
+      var a = list.map(function(r){ return r[k]; }).filter(function(v){ return v !== null; });
+      return a.length ? a.reduce(function(s, v){ return s + v; }, 0) / a.length : null;
+    };
+    var hottest = null;
+    list.forEach(function(r){
+      if(r.app !== null && (!hottest || r.app > hottest.app)) hottest = r;
+    });
+    return {
+      hours: list.length,
+      appMax: maxOf('app'), appMin: minOf('app'),
+      tempMax: maxOf('temp'), tempMin: minOf('temp'),
+      wbMax: maxOf('wb'),
+      rhMean: meanOf('rh'),
+      rhHot: hottest ? hottest.rh : meanOf('rh')
+    };
+  }
+
+  async function loadForecastSeries(place, cache){
+    var key = 'f:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3);
+    if(cache.has(key)) return cache.get(key);
+    var base = 'https://api.open-meteo.com/v1/forecast?latitude=' + place.lat +
+      '&longitude=' + place.lon + '&timezone=Asia%2FKolkata&forecast_days=7' +
+      '&current=temperature_2m,relative_humidity_2m,apparent_temperature';
+    var daily = '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,uv_index_max';
+    var withWb = base + '&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,wet_bulb_temperature_2m' + daily;
+    var noWb = base + '&hourly=temperature_2m,relative_humidity_2m,apparent_temperature' + daily;
+    var json, wetBulb = true;
+    try {
+      json = await getJSON(withWb);
+    } catch(err){
+      json = await getJSON(noWb);
+      wetBulb = false;
+    }
+    var out = {
+      mode: 'forecast',
+      byDate: rowsFromHourly(json.hourly),
+      daily: json.daily || null,
+      wetBulb: wetBulb,
+      elevation: json.elevation,
+      fetchedAt: new Date()
+    };
+    cache.set(key, out);
+    return out;
+  }
+
+  async function loadArchiveSeries(place, start, end, cache){
+    var key = 'a:' + place.lat.toFixed(3) + ',' + place.lon.toFixed(3) + ',' + start + ',' + end;
+    if(cache.has(key)) return cache.get(key);
+    var base = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + place.lat +
+      '&longitude=' + place.lon + '&start_date=' + start + '&end_date=' + end + '&timezone=Asia%2FKolkata';
+    var json, wetBulb = true;
+    try {
+      json = await getJSON(base + '&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,wet_bulb_temperature_2m', 20000);
+    } catch(err){
+      json = await getJSON(base + '&hourly=temperature_2m,relative_humidity_2m,apparent_temperature', 20000);
+      wetBulb = false;
+    }
+    var out = {
+      mode: 'observed',
+      byDate: rowsFromHourly(json.hourly),
+      wetBulb: wetBulb,
+      elevation: json.elevation,
+      fetchedAt: new Date()
+    };
+    cache.set(key, out);
+    return out;
+  }
+
+  /* ------------------------------- models ------------------------------- */
+  function combine(key, terms){
+    var available = terms.filter(function(t){ return t.idx !== null && t.idx !== undefined; });
+    var sumW = available.reduce(function(s, t){ return s + t.weight; }, 0);
+    available.forEach(function(t){
+      t.share = sumW ? t.weight / sumW : 0;
+      t.points = t.idx * t.share;
+    });
+    var value = available.reduce(function(s, t){ return s + t.points; }, 0);
+    return {
+      key: key,
+      terms: terms,
+      availableWeight: round1(sumW * 100) / 100,
+      dropped: terms.length - available.length,
+      value: available.length ? Math.round(value) : null
+    };
+  }
+
+  function hazardModel(dayStats, persistDays, windowDays, wetBulb, mode){
+    var src = mode === 'observed' ? 'ERA5 reanalysis (Open-Meteo archive)' : 'Open-Meteo forecast';
+    var terms = [
+      { label:'Daytime heat', detail:'Daily maximum apparent temperature', raw: dayStats.appMax, unit:'°C',
+        idx: lin(dayStats.appMax, 32, 47), weight:0.45,
+        rule:'32 °C → 0 · 47 °C → 100',
+        source: src + ' · apparent temperature (heat + humidity + wind + solar)' },
+      { label:'Night heat', detail:'Daily minimum apparent temperature', raw: dayStats.appMin, unit:'°C',
+        idx: lin(dayStats.appMin, 24, 34), weight:0.25,
+        rule:'24 °C → 0 · 34 °C → 100',
+        source: src + ' · apparent temperature (heat + humidity + wind + solar)' },
+      { label:'Humidity heat stress', detail:'Daily maximum wet-bulb temperature', raw: wetBulb ? dayStats.wbMax : null, unit:'°C',
+        idx: wetBulb ? lin(dayStats.wbMax, 24, 32) : null, weight:0.15,
+        rule:'24 °C → 0 · 32 °C → 100',
+        source: wetBulb ? 'Open-Meteo wet-bulb temperature (temperature + humidity + pressure)' : 'Wet-bulb data not returned — term excluded, weights renormalised' },
+      { label:'Persistence', detail:'Days with feels-like max ≥ 40 °C in the ' + windowDays + '-day window', raw: persistDays, unit:'days',
+        idx: lin(persistDays, 0, 3), weight:0.15,
+        rule:'0 days → 0 · 3 days → 100',
+        source: 'Derived from the same daily series' }
+    ];
+    return combine('H', terms);
+  }
+
+  function exposureModel(inputs){
+    return combine('E', [
+      { label:'Population density', detail:'People per square kilometre', raw: inputs.density, unit:'people/km²',
+        idx: logScale(inputs.density, 500, 30000), weight:0.40,
+        rule:'500 → 0 · 30,000 → 100 (log scale)',
+        source:'Illustrative placeholder — Census / ward population data needed' },
+      { label:'Outdoor / heat-exposed workforce', detail:'Share of workers exposed for most of the day', raw: inputs.outdoor, unit:'% of workers',
+        idx: lin(inputs.outdoor, 0, 60), weight:0.35,
+        rule:'0 % → 0 · 60 % → 100',
+        source:'Illustrative placeholder — PLFS / municipal labour data needed' },
+      { label:'Schools and hospitals', detail:'Facilities per 100,000 people', raw: inputs.institutions, unit:'per 100k',
+        idx: lin(inputs.institutions, 0, 400), weight:0.25,
+        rule:'0 → 0 · 400 → 100',
+        source:'Illustrative placeholder — UDISE+ / health facility registry needed' }
+    ]);
+  }
+
+  function vulnerabilityModel(inputs){
+    return combine('V', [
+      { label:'Age', detail:'Children under 5 plus adults 60+', raw: inputs.youngOld, unit:'% of population',
+        idx: lin(inputs.youngOld, 10, 30), weight:0.25, rule:'10 % → 0 · 30 % → 100',
+        source:'Illustrative placeholder — Census age structure needed' },
+      { label:'Chronic illness', detail:'Adults with hypertension, diabetes or similar (proxy)', raw: inputs.chronic, unit:'% of adults',
+        idx: lin(inputs.chronic, 10, 40), weight:0.20, rule:'10 % → 0 · 40 % → 100',
+        source:'Illustrative placeholder — NFHS / district health survey needed' },
+      { label:'Housing', detail:'Households in non-permanent or heat-prone housing', raw: inputs.housing, unit:'% of households',
+        idx: lin(inputs.housing, 0, 50), weight:0.20, rule:'0 % → 0 · 50 % → 100',
+        source:'Illustrative placeholder — Census housing tables needed' },
+      { label:'Water access', detail:'Households without piped water at home', raw: inputs.water, unit:'% of households',
+        idx: lin(inputs.water, 0, 60), weight:0.15, rule:'0 % → 0 · 60 % → 100',
+        source:'Illustrative placeholder — Jal Jeevan / municipal data needed' },
+      { label:'Cooling access', detail:'Households without a fan or air conditioning', raw: inputs.cooling, unit:'% of households',
+        idx: lin(inputs.cooling, 0, 60), weight:0.20, rule:'0 % → 0 · 60 % → 100',
+        source:'Illustrative placeholder — household survey / electricity data needed' }
+    ]);
+  }
+
+  function categoryOf(score){
+    for(var i = 0; i < CATEGORIES.length; i++){
+      if(score <= CATEGORIES[i].max) return CATEGORIES[i];
+    }
+    return CATEGORIES[CATEGORIES.length - 1];
+  }
+
+  function buildModel(dayStats, persistDays, windowDays, wetBulb, mode){
+    var H = hazardModel(dayStats, persistDays, windowDays, wetBulb, mode);
+    var E = exposureModel(state.inputs);
+    var V = vulnerabilityModel(state.inputs);
+    if(H.value === null) return null;
+    var R = MODEL_W.H * H.value + MODEL_W.E * E.value + MODEL_W.V * V.value;
+    return { H:H, E:E, V:V, R:R, cat: categoryOf(R) };
+  }
+
+  /* ------------------------------ rendering ------------------------------ */
+  function setStatus(text, kind){
+    var el = $('#status');
+    el.textContent = text;
+    el.dataset.kind = kind || 'idle';
+  }
+
+  function renderLoading(){
+    $('#score').textContent = '—';
+    $('#catBadge').textContent = 'Loading';
+    $('#risk').dataset.cat = 'na';
+    $('#riskSentence').textContent = 'Fetching weather for the selected place and date…';
+    $('#modeChip').textContent = 'Loading';
+    $('#measures').innerHTML = '<div class="measure"><dt>Loading</dt><dd>—</dd><span>Fetching weather…</span></div>';
+    $('#timestamp').textContent = 'Waiting for data…';
+    $('#mathline').textContent = 'R = 0.5 × H + 0.3 × E + 0.2 × V';
+    $('#calcBody').innerHTML = '<tr><td colspan="5">Calculating…</td></tr>';
+    $('#wbNote').hidden = true;
+    setStatus('Loading weather and calculating the risk score…', 'loading');
+    $('#reload').disabled = true;
+  }
+
+  function renderError(message){
+    $('#score').textContent = '—';
+    $('#catBadge').textContent = 'Unavailable';
+    $('#risk').dataset.cat = 'na';
+    $('#riskSentence').textContent = 'The weather service could not be reached, so no risk score can be shown for this date. Nothing is estimated or filled in when data is missing.';
+    $('#modeChip').textContent = 'No data';
+    $('#measures').innerHTML = '<div class="measure"><dt>Weather</dt><dd>—</dd><span>Data unavailable</span></div>';
+    $('#timestamp').textContent = 'No data received.';
+    $('#calcBody').innerHTML = '<tr><td colspan="5">No calculation available because the weather request failed. ' + escapeHtml(message) + '</td></tr>';
+    $('#hVal').textContent = '—'; $('#eVal').textContent = '—'; $('#vVal').textContent = '—';
+    $('#hBar').style.width = '0%'; $('#eBar').style.width = '0%'; $('#vBar').style.width = '0%';
+    $('#dH').textContent = '—'; $('#dE').textContent = '—'; $('#dV').textContent = '—';
+    $('#dR').textContent = '—'; $('#dCat').textContent = '—';
+    $('#riskAria').textContent = 'Weather data unavailable. No risk score is shown.';
+    setStatus('Could not load weather: ' + message + ' Check your connection, then try again.', 'error');
+    $('#reload').disabled = false;
+  }
+
+  function renderNoData(reason){
+    $('#score').textContent = '—';
+    $('#catBadge').textContent = 'No data';
+    $('#risk').dataset.cat = 'na';
+    $('#riskSentence').textContent = reason;
+    $('#modeChip').textContent = 'No data';
+    $('#timestamp').textContent = 'No values returned for this date.';
+    $('#calcBody').innerHTML = '<tr><td colspan="5">' + escapeHtml(reason) + '</td></tr>';
+    $('#hVal').textContent = '—'; $('#eVal').textContent = '—'; $('#vVal').textContent = '—';
+    $('#dH').textContent = '—'; $('#dE').textContent = '—'; $('#dV').textContent = '—';
+    $('#dR').textContent = '—'; $('#dCat').textContent = '—';
+    setStatus(reason, 'nodata');
+    $('#reload').disabled = false;
+  }
+
+  function measureHTML(label, value, unit, note){
+    return '<div class="measure"><dt>' + label + '</dt><dd>' +
+      (value === null || value === undefined ? '—' : fmtNum(value, 1)) +
+      '<small> ' + unit + '</small></dd><span>' + note + '</span></div>';
+  }
+
+  function renderConditions(ctx){
+    var s = ctx.stats;
+    var modeNote = ctx.mode === 'observed' ? 'ERA5 reanalysis (observed estimate)' : 'Forecast model output';
+    $('#condSub').textContent = ctx.place.name + ' · ' + fmtDate(ctx.date) + ' · ' + (ctx.mode === 'observed' ? 'Observed' : 'Forecast');
+    $('#measures').innerHTML =
+      measureHTML('Air temperature, max', s.tempMax, '°C', modeNote) +
+      measureHTML('Air temperature, min', s.tempMin, '°C', modeNote) +
+      measureHTML('Apparent temperature, max', s.appMax, '°C', 'Feels-like: heat + humidity + wind + solar') +
+      measureHTML('Apparent temperature, min', s.appMin, '°C', 'Night-time feels-like conditions') +
+      measureHTML('Relative humidity at hottest hour', s.rhHot, '%', 'Humidity when it felt hottest') +
+      measureHTML('Wet-bulb temperature, max', ctx.wetBulb ? s.wbMax : null, '°C',
+        ctx.wetBulb ? 'Heat + humidity + pressure indicator' : 'Not returned by the service');
+
+    var when = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    }).format(ctx.fetchedAt);
+
+    var uvText = ctx.uv === null || ctx.uv === undefined ? '' : ' · UV index max ' + fmtNum(ctx.uv, 1);
+    $('#timestamp').textContent = 'Retrieved ' + when + ' IST · ' + modeNote + ' · ' +
+      (ctx.mode === 'observed' ? 'archive data' : 'Open-Meteo forecast') + uvText +
+      ' · grid cell elevation ' + (ctx.elevation === null || ctx.elevation === undefined ? 'unknown' : fmtNum(ctx.elevation) + ' m');
+  }
+
+  function buildSentence(model, ctx){
+    var parts = [];
+    if(ctx.stats.appMax !== null) parts.push('feels-like maximum ' + fmtNum(ctx.stats.appMax, 1) + ' °C');
+    if(ctx.stats.appMin !== null) parts.push('a night-time feels-like minimum of ' + fmtNum(ctx.stats.appMin, 1) + ' °C');
+    if(ctx.persistDays !== null) parts.push(ctx.persistDays + ' of ' + ctx.windowDays + ' days at or above 40 °C feels-like');
+    var weather = parts.length ? parts.join(', ') : 'limited weather values';
+    var noHazard = model.H.value === 0
+      ? ' No heat hazard signal was met on this date, so the score reflects exposure and vulnerability only.'
+      : '';
+    return 'On this date the ' + (ctx.mode === 'observed' ? 'observed' : 'forecast') + ' weather shows ' + weather +
+      '.' + noHazard + ' Combined with the exposure and vulnerability inputs, the model gives a ' + model.cat.name.toLowerCase() +
+      ' risk score of ' + Math.round(model.R) + ' out of 100. This is a planning estimate, not an official warning or a health forecast.';
+  }
+
+  function renderModel(model, ctx){
+    var risk = $('#risk');
+    risk.dataset.cat = model.cat.key;
+    $('#score').textContent = Math.round(model.R);
+    $('#catBadge').textContent = model.cat.name;
+    $('#marker').style.left = clamp(model.R) + '%';
+    $('#riskPlace').textContent = ctx.place.name + ' · ' + fmtDate(ctx.date);
+    $('#modeChip').textContent = ctx.mode === 'observed' ? 'Observed weather' : 'Forecast weather';
+    $('#mathline').textContent = 'R = 0.5 × ' + model.H.value + ' + 0.3 × ' + model.E.value + ' + 0.2 × ' + model.V.value + ' = ' + round1(model.R) + ' → ' + Math.round(model.R) + ' (' + model.cat.name + ')';
+
+    ['H','E','V'].forEach(function(k){
+      var val = model[k].value;
+      $('#' + k.toLowerCase() + 'Val').textContent = val === null ? '—' : val;
+      $('#' + k.toLowerCase() + 'Bar').style.width = (val === null ? 0 : clamp(val)) + '%';
+      $('#d' + k).textContent = val === null ? '—' : val;
+    });
+    $('#dR').textContent = Math.round(model.R);
+    $('#dCat').textContent = model.cat.name;
+
+    $('#riskSentence').textContent = buildSentence(model, ctx);
+    $('#riskAria').textContent = 'Risk score ' + Math.round(model.R) + ' out of 100. Category ' + model.cat.name +
+      '. Hazard ' + model.H.value + ', exposure ' + model.E.value + ', vulnerability ' + model.V.value + '.';
+
+    renderActions(model.cat);
+    renderBreakdown(model);
+
+    $('#modeChip').title = ctx.mode === 'observed'
+      ? 'Observed reanalysis weather for a past date'
+      : 'Forecast model output for a future or current date';
+  }
+
+  function renderBreakdown(model){
+    var comps = [
+      { m: model.H, name:'Hazard', letter:'H', w: MODEL_W.H },
+      { m: model.E, name:'Exposure', letter:'E', w: MODEL_W.E },
+      { m: model.V, name:'Vulnerability', letter:'V', w: MODEL_W.V }
+    ];
+    var html = '';
+    comps.forEach(function(c){
+      html += '<tr class="comp"><th scope="rowgroup" colspan="5">' + c.letter + ' · ' + c.name + ' — ' +
+        (c.m.value === null ? '—' : c.m.value) + '/100 <span class="muted">× ' + c.w + ' of R</span></th></tr>';
+      c.m.terms.forEach(function(t){
+        var idx = (t.idx === null || t.idx === undefined) ? '—' : Math.round(t.idx);
+        var raw = (t.raw === null || t.raw === undefined) ? '—' : fmtNum(t.raw, 1) + ' ' + (t.unit || '');
+        var pts = (t.idx === null || t.idx === undefined || t.share === undefined) ? '—' : round1(t.points * c.w);
+        html += '<tr>' +
+          '<td><span class="termname">' + t.label + ' — ' + t.detail + '</span>' +
+          '<span class="termrule">' + t.rule + '</span>' +
+          '<span class="termsrc">Source: ' + t.source + '</span></td>' +
+          '<td class="num">' + raw + '</td>' +
+          '<td class="num">' + idx + '</td>' +
+          '<td class="num">' + t.weight + '</td>' +
+          '<td class="num">' + pts + '</td>' +
+          '</tr>';
+      });
+    });
+    html += '<tr class="total"><th scope="row" colspan="4">R = 0.5 × ' + model.H.value + ' + 0.3 × ' + model.E.value +
+      ' + 0.2 × ' + model.V.value + ' = ' + round1(model.R) + '</th><td class="num">' + Math.round(model.R) + '</td></tr>';
+    $('#calcBody').innerHTML = html;
+    $('#calcCaption').textContent = 'Calculation for ' + state.place.name + ' on ' + fmtDate(state.date, { day:'numeric', month:'long', year:'numeric' }) +
+      '. Weather terms come from measured or modelled weather; exposure and vulnerability terms come from the editable placeholder inputs.';
+
+    var dropped = [model.H, model.E, model.V].some(function(m){ return m.dropped > 0; });
+    $('#wbNote').hidden = !dropped;
+    if(dropped){
+      $('#wbNote').textContent = 'One or more terms had no usable value (for example wet-bulb temperature was not returned). Those terms are excluded and the remaining weights inside that component are renormalised, so the component still spans 0–100.';
+    }
+  }
+
+  function renderActions(cat){
+    var list = ACTIONS[cat.key] || ACTIONS.low;
+    $('#actionsCat').textContent = cat.name + ' risk';
+    $('#actionsSub').textContent = 'Actions suggested for a ' + cat.name.toLowerCase() + ' risk score on this date, based on the model result above.';
+    $('#actionsList').innerHTML = list.map(function(text){
+      var urgent = cat.key === 'ext' && /108|emergency|Suspend/i.test(text);
+      return '<li' + (urgent ? ' class="urgent"' : '') + '><span class="tick" aria-hidden="true">' +
+        (urgent ? '!' : '✓') + '</span><span>' + text + '</span></li>';
+    }).join('');
+  }
+
+  /* ------------------------------- inputs -------------------------------- */
+  function buildInputs(){
+    var eBox = $('#exposureInputs');
+    var vBox = $('#vulnerabilityInputs');
+    eBox.innerHTML = '';
+    vBox.innerHTML = '';
+    INPUT_DEFS.forEach(function(def){
+      var wrap = document.createElement('div');
+      wrap.className = 'input';
+      var id = 'in-' + def.key;
+      wrap.innerHTML =
+        '<label class="lab" for="' + id + '"><span>' + def.label + ' <span class="unit">(' + def.unit + ')</span></span>' +
+        '<output id="out-' + def.key + '" for="' + id + '"></output></label>' +
+        '<input type="range" id="' + id + '" min="' + def.min + '" max="' + def.max + '" step="' + def.step + '" value="' + def.min + '">' +
+        '<span class="hint">' + def.hint + '</span>';
+      (def.group === 'E' ? eBox : vBox).appendChild(wrap);
+      var input = wrap.querySelector('input');
+      input.addEventListener('input', function(){
+        state.inputs[def.key] = Number(input.value);
+        document.getElementById('out-' + def.key).textContent = fmtNum(Number(input.value));
+        recomputeFromInputs();
+      });
+    });
+    syncInputs();
+  }
+
+  function syncInputs(){
+    INPUT_DEFS.forEach(function(def){
+      var input = document.getElementById('in-' + def.key);
+      var out = document.getElementById('out-' + def.key);
+      if(!input) return;
+      input.value = state.inputs[def.key];
+      out.textContent = fmtNum(state.inputs[def.key]);
+    });
+  }
+
+  function recomputeFromInputs(){
+    if(!state.ctx) return;
+    var m = buildModel(state.ctx.stats, state.ctx.persistDays, state.ctx.windowDays, state.ctx.wetBulb, state.ctx.mode);
+    if(!m) return;
+    state.model = m;
+    renderModel(m, state.ctx);
+  }
+
+  /* -------------------------------- data --------------------------------- */
+  function setPlace(place){
+    state.place = place;
+    state.inputs = Object.assign({}, place.profile || GENERIC_PROFILE);
+    $('#placeChip').textContent = place.name + ' · ' + place.lat.toFixed(2) + '°N, ' + place.lon.toFixed(2) + '°E';
+    syncInputs();
+  }
+
+  async function refresh(){
+    var token = ++state.requestId;
+    renderLoading();
+    var place = state.place;
+    var date = state.date;
+    var isPast = date < todayISO();
+
+    try {
+      if(!isPast && date > shiftISO(todayISO(), 6)){
+        if(token === state.requestId) renderNoData('This prototype shows forecasts up to 6 days ahead. Choose a date in that window, or a past date for observed weather.');
+        return;
+      }
+
+      var series, windowDates, uv = null;
+
+      if(isPast){
+        var start = shiftISO(date, -3);
+        series = await loadArchiveSeries(place, start, date, state.cache);
+        windowDates = [shiftISO(date, -2), shiftISO(date, -1), date];
+      } else {
+        series = await loadForecastSeries(place, state.cache);
+        windowDates = [date, shiftISO(date, 1), shiftISO(date, 2)];
+        if(series.daily && series.daily.time){
+          var idx = series.daily.time.indexOf(date);
+          if(idx >= 0) uv = num(series.daily.uv_index_max ? series.daily.uv_index_max[idx] : null);
+        }
+      }
+
+      if(token !== state.requestId) return;
+
+      var dayRows = series.byDate[date] || [];
+      var stats = statsFor(dayRows);
+      if(!stats){
+        renderNoData('No weather values were returned for ' + fmtDate(date) + ' at ' + place.name +
+          '. Try a nearby date, or check that the place is inside India.');
+        return;
+      }
+
+      var windowAvail = windowDates.filter(function(d){ return series.byDate[d] && series.byDate[d].length; });
+      var persistDays = windowAvail.reduce(function(count, d){
+        var s = statsFor(series.byDate[d]);
+        return count + (s && s.appMax !== null && s.appMax >= 40 ? 1 : 0);
+      }, 0);
+
+      state.ctx = {
+        place: place, date: date, mode: series.mode || (isPast ? 'observed' : 'forecast'),
+        stats: stats, uv: uv, wetBulb: series.wetBulb,
+        persistDays: persistDays, windowDays: windowAvail.length || 3,
+        fetchedAt: series.fetchedAt,
+        elevation: series.elevation,
+        byDate: series.byDate
+      };
+
+      var model = buildModel(stats, persistDays, state.ctx.windowDays, series.wetBulb, state.ctx.mode);
+      if(!model){
+        renderNoData('The hazard component could not be calculated for this date because no heat values were usable.');
+        return;
+      }
+      state.model = model;
+
+      renderConditions(state.ctx);
+      renderModel(model, state.ctx);
+      setStatus('Showing ' + (state.ctx.mode === 'observed' ? 'observed reanalysis' : 'forecast') + ' weather for ' +
+        place.name + ' on ' + fmtDate(date) + '. Data timestamp is shown with the conditions.', 'ready');
+      $('#reload').disabled = false;
+      loadHistory(place, date);
+    } catch(err){
+      if(token !== state.requestId) return;
+      renderError(err && err.message ? err.message : 'Unknown error');
+    }
+  }
+
+  function renderHistoryRows(rows, selectedDate, mode){
+    $('#historyGrid').innerHTML = rows.map(function(r){
+      if(r.none){
+        return '<div class="hist"><b>' + r.year + '</b><strong>—</strong><span>No archived value</span></div>';
+      }
+      if(r.error){
+        return '<div class="hist"><b>' + r.year + '</b><strong>—</strong><span>Request failed</span></div>';
+      }
+      return '<div class="hist"><b>' + r.year + '</b><strong>' +
+        (r.tmax === null ? '—' : fmtNum(r.tmax, 1) + ' °C') + '</strong>' +
+        '<span>Max air · min ' + (r.tmin === null ? '—' : fmtNum(r.tmin, 1) + ' °C') + '</span>' +
+        '<span>Feels-like max · ' + (r.appmax === null ? '—' : fmtNum(r.appmax, 1) + ' °C') + '</span></div>';
+    }).join('');
+    $('#historyMode').textContent = 'Same date, 5 previous years';
+    $('#historyStatus').textContent = 'Observed reanalysis for ' + selectedDate.slice(8, 10) + '/' +
+      selectedDate.slice(5, 7) + ' in previous years. Selected date is ' + (mode === 'observed' ? 'also observed' : 'a forecast') +
+      '; compare cautiously, since reanalysis smooths local extremes.';
+  }
+
+  async function loadHistory(place, date){
+    var token = state.requestId;
+    $('#historyStatus').textContent = 'Loading archive data for the same date in previous years…';
+    $('#historyMode').textContent = 'Loading';
+    var year = Number(date.slice(0, 4));
+    var years = [1, 2, 3, 4, 5].map(function(n){ return year - n; });
+
+    var rows = await Promise.all(years.map(async function(y){
+      var d = y + date.slice(4);
+      try {
+        var url = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + place.lat +
+          '&longitude=' + place.lon + '&start_date=' + d + '&end_date=' + d +
+          '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max&timezone=Asia%2FKolkata';
+        var json = await getJSON(url, 20000);
+        var daily = json.daily;
+        if(!daily || !daily.time || daily.time[0] !== d){
+          return { year: y, none: true };
+        }
+        return {
+          year: y,
+          tmax: num(daily.temperature_2m_max ? daily.temperature_2m_max[0] : null),
+          tmin: num(daily.temperature_2m_min ? daily.temperature_2m_min[0] : null),
+          appmax: num(daily.apparent_temperature_max ? daily.apparent_temperature_max[0] : null)
+        };
+      } catch(err){
+        return { year: y, error: true };
+      }
+    }));
+
+    if(token !== state.requestId) return;
+    var ok = rows.filter(function(r){ return !r.error && !r.none; });
+    renderHistoryRows(rows, date, state.ctx ? state.ctx.mode : 'forecast');
+    if(!ok.length){
+      $('#historyStatus').textContent = 'No archived observations were returned for these dates. Historical comparison is unavailable — no values are invented.';
+    }
+  }
+
+  /* -------------------------------- wiring -------------------------------- */
+  function findHottestForecastDate(){
+    if(!state.ctx || !state.ctx.byDate) return null;
+    var best = null;
+    Object.keys(state.ctx.byDate).forEach(function(d){
+      var s = statsFor(state.ctx.byDate[d]);
+      if(s && s.appMax !== null && (!best || s.appMax > best.appMax)) best = { date: d, appMax: s.appMax };
+    });
+    return best;
+  }
+
+  async function searchPlace(query){
+    var q = query.trim();
+    if(!q){ setStatus('Type a place name first, for example Barmer or Cuttack.', 'nodata'); return; }
+    setStatus('Searching for “' + q + '” in India…', 'loading');
+    try {
+      var url = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) +
+        '&count=1&language=en&format=json&countryCode=IN';
+      var json = await getJSON(url, 12000);
+      var hit = json.results && json.results[0];
+      if(!hit){
+        setStatus('No place matching “' + q + '” was found in India. Check the spelling or pick a city from the list.', 'nodata');
+        return;
+      }
+      var label = [hit.name, hit.admin1, hit.country].filter(Boolean).join(', ');
+      setPlace({ name: label, lat: hit.latitude, lon: hit.longitude, profile: GENERIC_PROFILE });
+      $('#city').value = '';
+      $('#placeSearch').value = label;
+      await refresh();
+    } catch(err){
+      setStatus('Place search failed: ' + (err.message || 'unknown error') + '. You can still use the city list.', 'error');
+      $('#reload').disabled = false;
+    }
+  }
+
+  function bind(){
+    $('#city').addEventListener('change', function(e){
+      var city = CITIES.filter(function(c){ return c.id === e.target.value; })[0];
+      if(!city) return;
+      setPlace(city);
+      $('#placeSearch').value = '';
+      refresh();
+    });
+
+    $('#date').addEventListener('change', function(e){
+      state.date = e.target.value || todayISO();
+      refresh();
+    });
+
+    $('#reload').addEventListener('click', function(){ refresh(); });
+
+    $('#searchBtn').addEventListener('click', function(){
+      searchPlace($('#placeSearch').value);
+    });
+    $('#placeSearch').addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); searchPlace($('#placeSearch').value); }
+    });
+
+    $('#todayBtn').addEventListener('click', function(){
+      state.date = todayISO();
+      $('#date').value = state.date;
+      refresh();
+    });
+
+    $('#hottestBtn').addEventListener('click', function(){
+      var hot = findHottestForecastDate();
+      if(!hot){
+        setStatus('Load the forecast first, then use the hottest-day shortcut.', 'nodata');
+        return;
+      }
+      if(hot.date > shiftISO(todayISO(), 6)){
+        setStatus('The hottest value found is outside the forecast window.', 'nodata');
+        return;
+      }
+      state.date = hot.date;
+      $('#date').value = hot.date;
+      refresh();
+    });
+
+    $('#heatSampleBtn').addEventListener('click', function(){
+      var year = Number(todayISO().slice(0, 4)) - 2;
+      state.date = year + '-05-30';
+      $('#date').value = state.date;
+      refresh();
+      setStatus('Showing a sample late-May observed heat day (' + state.date + ') from the archive, so you can see a higher score. It is history, not a warning.', 'ready');
+    });
+
+    $('#resetInputs').addEventListener('click', function(){
+      state.inputs = Object.assign({}, (state.place && state.place.profile) || GENERIC_PROFILE);
+      syncInputs();
+      recomputeFromInputs();
+    });
+  }
+
+  function init(){
+    var citySel = $('#city');
+    CITIES.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      citySel.appendChild(opt);
+    });
+    citySel.value = 'delhi';
+
+    var d = $('#date');
+    d.min = shiftISO(todayISO(), -1825);
+    d.max = shiftISO(todayISO(), 6);
+    state.date = todayISO();
+    d.value = state.date;
+
+    setPlace(CITIES[0]);
+    buildInputs();
+    bind();
+    refresh();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
