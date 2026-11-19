@@ -1,0 +1,1474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heatwise — Heat alert &amp; supply coordination (demo)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b4551f'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23fdf6ec'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box}
+:root{--ink:#2b332e;--muted:#6a736c;--line:#e6dfd0;--paper:#f7f3ea;--card:#fff;--accent:#b4551f;--green:#3f6a52;--red:#8f2418;--blue:#2c4a72;--violet:#4d3d6b}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 "DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3,h4{font-family:"Manrope",system-ui,sans-serif;line-height:1.25;margin:0}
+h2{font-size:19px}h3{font-size:14.5px}h4{font-size:13px}
+a{color:#8a3f17}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #b4551f;outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 18px}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;padding:10px 14px;z-index:30}
+.skip:focus{left:12px;top:12px}
+.top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Manrope",sans-serif;font-weight:800;font-size:18px;letter-spacing:-.2px}
+.brand .mark{width:24px;height:24px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:13px}
+.brand small{font-weight:600;font-size:11px;color:var(--muted)}
+.nav{display:flex;gap:6px;flex-wrap:wrap;font-size:12.5px}
+.nav a{text-decoration:none;color:#4b544d;border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff}
+.nav a:hover{background:#f6f2e8}
+.nav a[aria-current=page]{background:#f1eadb;border-color:#d9cfb8;color:#2f3a34;font-weight:700}
+.demo-banner{background:#2f3a34;color:#fdf8ef;font-size:12.5px;padding:8px 0}
+.demo-banner .wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.demo-banner .wrap span{flex:1 1 420px}
+.demo-banner .btn-quiet{flex:0 0 auto;padding:5px 9px;font-size:11.5px;background:#fdf8ef;border-color:#5b635a}
+.demo-banner b{background:#f0c86a;color:#3a2c10;border-radius:5px;padding:2px 7px;font-size:11px;letter-spacing:.6px}
+.roles{display:flex;gap:6px;flex-wrap:wrap;padding:12px 0 0}
+.roles button{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #d8d2c5;background:#fff;color:#3d4640;border-radius:999px;padding:7px 13px;cursor:pointer}
+.roles button[aria-pressed=true]{background:#2f3a34;color:#fff;border-color:#2f3a34}
+.roles .who{margin-left:auto;font-size:11.5px;color:var(--muted);align-self:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+.cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:12.5px;margin:2px 0 0}
+.chip{display:inline-block;border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:800;letter-spacing:.3px;border:1px solid #ddd6c6;background:#f7f3e9;color:#4c554e;white-space:nowrap}
+.chip.demo{background:#3f3a2a;border-color:#3f3a2a;color:#ffe6a3}
+.chip.live{background:#eef4ef;border-color:#cfe0d2;color:#2f5c42}
+.chip.warn{background:#fdeae4;border-color:#efc8ba;color:#8f2418}
+.chip.watch{background:#fbf3dc;border-color:#e9d9a8;color:#6f5411}
+.chip.alert{background:#fdeee2;border-color:#eccdb4;color:#8a3f17}
+.chip.severe{background:#fbe3dc;border-color:#e7b6a9;color:#7c1f13}
+.chip.obs{background:#eef4ef;border-color:#cfe0d2;color:#2f5c42}
+.chip.model{background:#fdf1e8;border-color:#eccdb8;color:#7c3a15}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.field label{font-size:12px;font-weight:700;color:#3d4640}
+.field .help{font-weight:500;color:var(--muted);font-size:11px}
+input,select,textarea{font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid #d8d2c5;border-radius:9px;background:#fff;color:var(--ink);width:100%}
+textarea{min-height:120px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5}
+input[type=checkbox],input[type=radio]{width:auto}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row .field{flex:1 1 160px;margin-bottom:0}
+.btn{font:inherit;font-size:13px;font-weight:700;border:1px solid #9d4412;background:var(--accent);color:#fff;border-radius:9px;padding:9px 14px;cursor:pointer}
+.btn:hover{background:#9d4412}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-quiet{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #d8d2c5;background:#fff;color:#2f3a34;border-radius:9px;padding:7px 11px;cursor:pointer}
+.btn-quiet:hover{background:#f5f2ea}
+.btn-danger{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #c98a7c;background:#fff;color:#8f2418;border-radius:9px;padding:7px 11px;cursor:pointer}
+.btn-danger:hover{background:#fdf0ec}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+caption{caption-side:top;text-align:left;padding-bottom:8px;color:var(--muted);font-size:11.5px;line-height:1.5}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid #efe9dc;vertical-align:top}
+thead th{background:#f6f2e8;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#4c554e}
+tbody tr:hover{background:#fdfbf6}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+.tablewrap table{min-width:620px}
+.tablewrap.wide table{min-width:1080px}
+.statusline{margin:8px 0 0;font-size:12.5px}
+.status{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:4px 10px;font-weight:700;font-size:11.5px;border:1px solid #ddd6c6;background:#f7f3e9;color:#4c554e}
+.status[data-kind=ok]{background:#eef4ef;border-color:#cfe0d2;color:#2f5c42}
+.status[data-kind=warn]{background:#fdf4e7;border-color:#ecd6b6;color:#7c4a12}
+.status[data-kind=error]{background:#fdeae4;border-color:#efc8ba;color:#8f2418}
+.status[data-kind=info]{background:#eef2fa;border-color:#cfd9ea;color:#2c4a72}
+.notice{display:flex;gap:10px;align-items:flex-start;background:#fff8ec;border:1px solid #ecdcc0;border-radius:12px;padding:11px 14px;margin:14px 0 0;font-size:12.5px;color:#4a463c}
+.notice .icon{color:var(--accent);font-size:16px;line-height:1.3}
+.err{border:1px solid #efc8ba;background:#fdf2ee;border-radius:11px;padding:11px 13px;font-size:12.5px;color:#7c2416}
+.callout{border:1px solid var(--line);border-radius:11px;padding:10px 13px;background:#f8f6ef;font-size:12.5px;color:#40483f}
+.hz{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fdfbf6;margin-bottom:9px}
+.hz h3{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.hz p{margin:4px 0 0;font-size:12.5px;color:#4a534c}
+.hz .facts{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px;font-size:11.5px;color:var(--muted)}
+.hz .facts b{color:#333d36;font-weight:700}
+.map{background:#eef1e8;border:1px solid #dfe3d6;border-radius:12px;position:relative;overflow:hidden}
+.map svg{display:block;width:100%;height:auto}
+.map .cap{position:absolute;left:10px;bottom:8px;background:#fffdf7e6;border:1px solid #e3e0d4;border-radius:7px;padding:5px 8px;font-size:10px;color:#59635b}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+.swatch{width:11px;height:11px;border-radius:50%;display:inline-block}
+ul.actions{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+ul.actions li{display:flex;gap:9px;border:1px solid #e8e2d4;border-radius:10px;padding:8px 11px;font-size:12.5px;background:#fff;line-height:1.5}
+ul.actions li .tick{flex:none;width:18px;height:18px;border-radius:50%;background:#eaf2ea;color:#2f5c42;display:grid;place-items:center;font-size:10px;font-weight:800;margin-top:1px}
+ul.actions li.urgent{background:#fdf1ec;border-color:#efcbbd}
+ul.actions li.urgent .tick{background:#f7ddd2;color:#8f2418}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:#fff}
+.kpi .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:800}
+.kpi .val{font-family:"Manrope",sans-serif;font-size:20px;font-weight:800;margin-top:3px}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:3px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;background:#f1ece0;color:#5b5347}
+.pill.ok{background:#eaf2ea;color:#2f5c42}
+.pill.no{background:#f7e6e0;color:#8f2418}
+.mini{font-size:11.5px;color:var(--muted)}
+.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.modal[hidden]{display:none}
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:#1d241f99;padding:16px}
+.modal .box{background:#fff;border-radius:14px;max-width:620px;width:100%;max-height:88vh;overflow:auto;padding:18px 20px;border:1px solid #ddd6c6;box-shadow:0 12px 40px #00000038}
+.modal h2{margin-bottom:6px}
+.modal .foot{display:flex;gap:9px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.brief{display:grid;gap:8px}
+.brief .item{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fdfbf6}
+.brief .item b{display:block;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.brief .item p{margin:0;font-size:12.5px;line-height:1.5}
+.msgpreview{border:1px solid #e4ded0;border-radius:10px;background:#fbf9f3;padding:10px 12px;font-size:12.5px;line-height:1.55;margin-top:6px}
+.msgpreview .lang{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+details{border:1px solid var(--line);border-radius:11px;padding:10px 13px;background:#fdfbf6;margin-top:9px}
+summary{cursor:pointer;font-weight:700;font-size:13px}
+details ul,details ol{margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.55;color:#3d4640}
+details li{margin-bottom:4px}
+.timeline{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.timeline li{position:relative;padding:0 0 12px 20px;border-left:2px solid #e8e0d0;margin-left:5px}
+.timeline li:last-child{border-color:transparent;padding-bottom:0}
+.timeline li::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:#c8b79a;border:2px solid #fff}
+.timeline li.demo::before{background:#c98a3a}
+.timeline .t{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timeline .d{font-size:12.5px}
+.timeline .a{font-weight:700}
+footer{padding:20px 0 34px;font-size:11.5px;color:#7c857e;line-height:1.6}
+footer p{margin:0 0 4px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="top">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true">☼</span>heatwise <small>alert &amp; response</small></div>
+    <nav class="nav" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="heat-risk-model.html">Risk model</a>
+      <a href="heatwave-outlook.html">Season outlook</a>
+      <a href="heat-response.html" aria-current="page">Alert &amp; response</a>
+    </nav>
+  </div>
+</header>
+
+<div class="demo-banner">
+  <div class="wrap">
+    <b>DEMO</b>
+    <span>Simulation only. Synthetic people, zones, stock and dispatches. No messages are sent, no supplies are ordered, and nothing here is an official IMD warning.</span>
+    <button class="btn-quiet" id="resetBtn" style="margin-left:auto">Reset demo data</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="roles" role="group" aria-label="Demo role">
+    <button type="button" data-role="public" aria-pressed="true">Public</button>
+    <button type="button" data-role="response" aria-pressed="false">Response team</button>
+    <button type="button" data-role="operator" aria-pressed="false">Storage operator</button>
+    <button type="button" data-role="admin" aria-pressed="false">Administrator</button>
+    <span class="who" id="whoami">Viewing as: resident (demo)</span>
+  </div>
+
+  <div class="notice" role="note">
+    <span class="icon" aria-hidden="true">⚠</span>
+    <span><strong>Not an emergency service.</strong> Alerts on this page are model estimates or DEMO simulations. Official warnings come only from the <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a> and your district authority. In an emergency call 112 / 108. Nothing here is medical advice.</span>
+  </div>
+</div>
+
+<main id="main" class="wrap">
+  <p class="statusline"><span class="status" id="status" data-kind="info" role="status" aria-live="polite">Demo data loaded.</span></p>
+
+  <!-- ============ PUBLIC ============ -->
+  <section class="roleview" data-view="public" aria-labelledby="pubTitle">
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2 id="pubTitle">Your area</h2>
+          <p class="muted">Pick a zone or use your device location. Location stays in this browser and is never shown on the map.</p>
+        </div>
+        <span class="chip demo">DEMO DATA</span>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:2 1 260px">
+          <label for="pubZone">Heat zone</label>
+          <select id="pubZone"></select>
+        </div>
+        <div class="field" style="flex:0 0 auto">
+          <label class="help" for="geoBtn">&nbsp;</label>
+          <button type="button" class="btn-quiet" id="geoBtn">Use my location</button>
+        </div>
+        <div class="field" style="flex:0 0 auto">
+          <label class="help" for="pubLang">&nbsp;</label>
+          <select id="pubLang" aria-label="Preferred language" style="width:auto">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+          </select>
+        </div>
+      </div>
+      <p class="statusline"><span class="status" id="geoStatus" data-kind="info">Geofencing is off until you allow location.</span></p>
+      <div id="pubZoneDetail" style="margin-top:10px"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="cardhead">
+          <div>
+            <h2>Alerts for this area</h2>
+            <p class="muted">In-app alerts are delivered in this browser only. SMS and email need server credentials and are simulated.</p>
+          </div>
+        </div>
+        <div id="pubAlerts"></div>
+      </div>
+      <div class="card">
+        <div class="cardhead">
+          <div>
+            <h2>Stay safe</h2>
+            <p class="muted">Guidance changes with the alert level. It does not replace medical advice.</p>
+          </div>
+        </div>
+        <div id="pubGuidance"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2>Subscribe or opt out</h2>
+          <p class="muted">Only the fields needed to send an alert are requested. Contacts are synthetic in this demo and stored only in this browser.</p>
+        </div>
+      </div>
+      <div id="subFormWrap"></div>
+      <div id="subListWrap"></div>
+    </div>
+  </section>
+
+  <!-- ============ RESPONSE ============ -->
+  <section class="roleview hidden" data-view="response" aria-labelledby="resTitle">
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2 id="resTitle">Heat zones</h2>
+          <p class="muted">Model-estimated zones from the weather data, kept separate from official IMD warnings. Select a zone to draft an alert and a supply plan.</p>
+        </div>
+        <span class="chip demo">DEMO</span>
+      </div>
+      <div id="zoneMap"></div>
+      <div class="legend">
+        <span><i class="swatch" style="background:#e6c76a"></i> watch</span>
+        <span><i class="swatch" style="background:#d08a52"></i> alert</span>
+        <span><i class="swatch" style="background:#a83a24"></i> severe</span>
+        <span><i class="swatch" style="background:#9aa79b"></i> no current data</span>
+        <span>Schematic positions, not a geographic map.</span>
+      </div>
+      <div id="zoneList" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2>Compose an alert</h2>
+          <p class="muted">Preview in two languages before sending. Sending is simulated and requires confirmation.</p>
+        </div>
+        <span class="chip" id="composerChip">—</span>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="row">
+            <div class="field" style="flex:1 1 220px">
+              <label for="alertZone">Zone</label>
+              <select id="alertZone"></select>
+            </div>
+            <div class="field" style="flex:1 1 200px">
+              <label for="alertAudience">Audience</label>
+              <select id="alertAudience">
+                <option value="all">Residents and workers</option>
+                <option value="resident">Residents</option>
+                <option value="worker">Outdoor and industrial workers</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Channels</label>
+            <div class="inline">
+              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chInapp" checked> In-app (available)</label>
+              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chSms" disabled> SMS — not configured</label>
+              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chEmail" disabled> Email — not configured</label>
+            </div>
+            <span class="help">SMS, email and messaging adapters are disabled until their credentials are set on a server. No secrets are stored in this page.</span>
+          </div>
+          <div class="field">
+            <label>Languages to send</label>
+            <div class="inline">
+              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="langEn" checked> English</label>
+              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="langHi" checked> हिन्दी</label>
+            </div>
+          </div>
+          <div class="callout" id="composerState">Select a zone with current data to continue.</div>
+          <div class="inline" style="margin-top:10px">
+            <button type="button" class="btn" id="sendAlertBtn">Review &amp; send alert</button>
+            <button type="button" class="btn-quiet" id="refreshWeatherBtn">Refresh weather</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:6px">Message preview</h3>
+          <div id="msgPreview"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2>Alert log and delivery</h2>
+          <p class="muted">Every send is simulated. Duplicates within 6 hours are suppressed, and sends are rate-limited per zone.</p>
+        </div>
+      </div>
+      <div id="alertLog"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2>Supply plan</h2>
+          <p class="muted">Quantities are planning estimates from population and alert level, not clinical standards. Dispatch and inventory changes are simulated.</p>
+        </div>
+        <span class="chip demo">SIMULATED</span>
+      </div>
+      <div id="supplyPlan"></div>
+    </div>
+  </section>
+
+  <!-- ============ OPERATOR ============ -->
+  <section class="roleview hidden" data-view="operator" aria-labelledby="opTitle">
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2 id="opTitle">Storage unit</h2>
+          <p class="muted">Update stock for your unit. Changes are simulated and logged with your role.</p>
+        </div>
+        <span class="chip demo">DEMO OPERATOR</span>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:2 1 260px">
+          <label for="opUnit">Unit</label>
+          <select id="opUnit"></select>
+        </div>
+      </div>
+      <div id="opUnitDetail"></div>
+    </div>
+    <div class="card">
+      <div class="cardhead"><div><h2>Requests for this unit</h2><p class="muted">Requests appear when a responder approves a plan that includes this unit.</p></div></div>
+      <div id="opRequests"></div>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN ============ -->
+  <section class="roleview hidden" data-view="admin" aria-labelledby="adminTitle">
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2 id="adminTitle">Thresholds and data</h2>
+          <p class="muted">Model thresholds are configurable and clearly not official IMD thresholds. Changes apply to the next weather refresh.</p>
+        </div>
+        <span class="chip demo">DEMO ADMIN</span>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="t1">Watch at feels-like (°C)</label><input type="number" id="t1" min="30" max="50" step="0.5"></div>
+        <div class="field"><label for="t2">Alert at (°C)</label><input type="number" id="t2" min="32" max="52" step="0.5"></div>
+        <div class="field"><label for="t3">Severe at (°C)</label><input type="number" id="t3" min="34" max="55" step="0.5"></div>
+        <div class="field"><label for="staleH">Weather stale after (hours)</label><input type="number" id="staleH" min="1" max="72" step="1"></div>
+        <div class="field"><label for="rlMax">Max alerts per zone in window</label><input type="number" id="rlMax" min="1" max="10" step="1"></div>
+        <div class="field"><label for="rlWin">Rate-limit window (minutes)</label><input type="number" id="rlWin" min="1" max="120" step="1"></div>
+      </div>
+      <div class="inline" style="margin:4px 0 10px">
+        <label class="inline" style="font-size:12.5px"><input type="checkbox" id="reviewLevel3"> Require a second reviewer for severe alerts</label>
+      </div>
+      <div class="inline">
+        <button type="button" class="btn" id="saveSettings">Save settings</button>
+        <button type="button" class="btn-quiet" id="liveToggle">Live weather: off (demo snapshot)</button>
+      </div>
+      <div id="settingsState" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><div><h2>Integrations and setup</h2><p class="muted">What is live, what is simulated, and what a real deployment needs.</p></div></div>
+      <div id="integrationTable"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><div><h2>Roles and permissions</h2><p class="muted">Demo roles only. In production these would come from the responder organisation's identity provider.</p></div></div>
+      <div id="roleTable"></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="auditTitle">
+    <div class="cardhead">
+      <div>
+        <h2 id="auditTitle">Audit log</h2>
+        <p class="muted">Every simulated alert, delivery attempt, inventory change and dispatch is appended here with the acting role.</p>
+      </div>
+      <button type="button" class="btn-quiet" id="exportAudit">Export audit JSON</button>
+    </div>
+    <div id="auditLog"></div>
+  </section>
+
+  <section class="card" aria-labelledby="methodTitle">
+    <div class="cardhead"><div><h2 id="methodTitle">How this demo works</h2><p class="muted">Data flow, safeguards and the limits of the simulation.</p></div></div>
+    <details open>
+      <summary>Heat zone and alert inputs</summary>
+      <ul>
+        <li>The model measure is daily maximum apparent temperature ("feels like"), which combines temperature, humidity, wind and solar radiation. It is not WBGT and not a personal risk score.</li>
+        <li>Zones are created when the maximum apparent temperature over the next three days crosses a configurable model threshold (default watch 38 °C, alert 41 °C, severe 44 °C). These defaults are not IMD thresholds.</li>
+        <li>Every alert records the zone and affected area, the measure and threshold, the forecast window, the data source, the update time, the confidence, and whether it is a model estimate or a DEMO simulation.</li>
+        <li>The page also shows whether the same grid cell meets the IMD maximum-temperature criterion (40 °C plains, 37 °C coastal, 30 °C hilly with a departure of 4.5 °C or more). That is a reference calculation, not an official warning.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Delivery, duplicates and safety holds</summary>
+      <ul>
+        <li>Sending requires a confirmation step that names the zone, level, channel and recipient count. Severe alerts can additionally require a second reviewer, set by the administrator.</li>
+        <li>Identical alerts to the same zone at the same level within six hours are blocked as duplicates; sends are rate-limited per zone.</li>
+        <li>An alert is held, with the reason shown, when weather data is missing or older than the stale limit, when no eligible recipient is subscribed, or when the level has no valid message template.</li>
+        <li>Sent alerts can be cancelled and corrected. Both actions are logged and the correction is linked to the original.</li>
+        <li>In-app delivery is real inside this browser. SMS, email and messaging are simulated adapters; they are disabled until a server holds the credentials.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Supply planning and privacy</summary>
+      <ul>
+        <li>Demand is estimated from zone population, alert level and a fixed affected share, then multiplied by planning norms for water, oral rehydration salts, food, medicine kits and cooling items. The formula is shown with every plan.</li>
+        <li>Priority order weighs distance and travel time against the projected coverage of drinking water. Dispatch deducts stock and writes a simulated record; nothing is ordered.</li>
+        <li>Contacts are synthetic and stored only in this browser's local storage. They are never shown on the map, never included in the audit detail and never sent anywhere.</li>
+        <li>Location is used only to check whether the device is inside a zone. It is not stored or transmitted.</li>
+        <li>Resetting the demo clears this browser's demo data. Clearing site data also removes it.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>What a production deployment needs</summary>
+      <ul>
+        <li>A server for delivery with provider credentials in environment variables, for example <code>HEATWISE_SMS_API_KEY</code>, <code>HEATWISE_SMS_SENDER</code>, <code>HEATWISE_EMAIL_API_KEY</code>, <code>HEATWISE_EMAIL_FROM</code>, <code>HEATWISE_MESSAGING_TOKEN</code>. None are present in this static demo.</li>
+        <li>A database with consent records, encrypted contact storage, retention rules and an append-only audit store, instead of browser local storage.</li>
+        <li>Authentication and role assignment from the responsible organisation, plus response playbooks that name who may approve alerts and dispatches.</li>
+        <li>Weather feeds with explicit update times, and an archive of official IMD warnings to compare model zones against. This prototype does not ingest official warnings.</li>
+        <li>Translation review by native speakers, accessibility testing with users, and legal review of consent and messaging rules.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><strong>Heatwise · heat alert and supply coordination (demo).</strong> Weather from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0), ERA5 reanalysis and forecast models by ECMWF/Copernicus. Demo zones, people, stock and dispatches are fictional.</p>
+  <p>Official warnings: <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">India Meteorological Department</a>. Emergency: 112. Ambulance: 108. This page does not replace official warnings, emergency services, medical advice or decisions by local authorities, and it makes no prediction of deaths or hospitalisations.</p>
+</footer>
+
+<div class="modal" id="modal" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">Confirm</h2>
+    <div id="modalBody"></div>
+    <div class="foot">
+      <button type="button" class="btn-quiet" id="modalCancel">Cancel</button>
+      <button type="button" class="btn" id="modalOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  var STORE = 'heatwise.response.v1';
+  var now = function(){ return new Date(); };
+  var iso = function(d){ return d.toISOString(); };
+  var HOUR = 3600000;
+
+  var LEVELS = {
+    0:{ key:'none', name:'No current heat zone', chip:'chip' },
+    1:{ key:'watch', name:'Watch', chip:'chip watch', share:0.25, color:'#e6c76a' },
+    2:{ key:'alert', name:'Alert', chip:'chip alert', share:0.5, color:'#d08a52' },
+    3:{ key:'severe', name:'Severe', chip:'chip severe', share:0.8, color:'#a83a24' }
+  };
+  var ROLE_LABEL = {
+    public:'Resident (demo)', response:'Priya N. · response lead', operator:'Arun K. · unit operator', admin:'Demo administrator'
+  };
+  var ROLE_PERM = {
+    public:['Read zone alerts','Subscribe or opt out'],
+    response:['Compose and send simulated alerts','Approve supply plans','Simulate dispatch','Cancel or correct alerts'],
+    operator:['View own unit','Update inventory','View requests for own unit'],
+    admin:['Configure thresholds and data source','Set review and rate limits','Reset demo data','View audit log']
+  };
+  var SUPPLY_ITEMS = [
+    { key:'water', label:'Drinking water', unit:'litres' },
+    { key:'ors', label:'Oral rehydration sachets', unit:'sachets' },
+    { key:'food', label:'Food rations', unit:'kg' },
+    { key:'meds', label:'Essential medicine kits', unit:'kits' },
+    { key:'cooling', label:'Cooling supplies', unit:'kits' },
+    { key:'other', label:'Other necessities', unit:'units' }
+  ];
+
+  var state = null;
+
+  /* ------------------------------------------------------------------
+     Seed data
+  ------------------------------------------------------------------ */
+  function seed(){
+    var t = now();
+    var ago = function(h){ return iso(new Date(t.getTime() - h*HOUR)); };
+    var zones = [
+      { id:'z-suryapur', name:'Suryapur east ward', fictional:true, note:'Fictional ward in Suryapur district, modelled on a northern plains city.',
+        district:'Suryapur', lat:26.85, lon:78.10, region:'plains', pop:42000, workers:9000,
+        weather:{ status:'demo', fetchedAt:ago(2), tmax:43.6, appMax:46.2, tmin:31.2, rh:34,
+          window:{ from:iso(new Date(t.getTime()+24*HOUR)).slice(0,10), to:iso(new Date(t.getTime()+72*HOUR)).slice(0,10) },
+          source:'DEMO snapshot (not live weather)', confidence:'Illustrative only' } },
+      { id:'z-northplain', name:'Northplain industrial ward', fictional:true, note:'Fictional industrial ward with a large outdoor workforce.',
+        district:'Northplain', lat:23.40, lon:75.60, region:'plains', pop:18000, workers:26000,
+        weather:{ status:'demo', fetchedAt:ago(2), tmax:41.1, appMax:43.8, tmin:29.4, rh:41,
+          window:{ from:iso(new Date(t.getTime()+24*HOUR)).slice(0,10), to:iso(new Date(t.getTime()+72*HOUR)).slice(0,10) },
+          source:'DEMO snapshot (not live weather)', confidence:'Illustrative only' } },
+      { id:'z-kovai', name:'Kovai coastal ward', fictional:true, note:'Fictional coastal ward; IMD coastal thresholds apply.',
+        district:'Kovai', lat:12.95, lon:80.20, region:'coastal', pop:26000, workers:4000,
+        weather:{ status:'demo', fetchedAt:ago(9), tmax:37.8, appMax:41.2, tmin:28.9, rh:68,
+          window:{ from:iso(new Date(t.getTime()+24*HOUR)).slice(0,10), to:iso(new Date(t.getTime()+72*HOUR)).slice(0,10) },
+          source:'DEMO snapshot (not live weather)', confidence:'Illustrative only' } }
+    ];
+    var recipients = [
+      { id:'p1', name:'Resident A', zoneId:'z-suryapur', audience:'resident', language:'en', channel:'inapp', contact:'+91 ••••• 4821', consent:true, subscribedAt:ago(200), note:'DEMO contact' },
+      { id:'p2', name:'Resident B', zoneId:'z-suryapur', audience:'resident', language:'hi', channel:'inapp', contact:'+91 ••••• 7310', consent:true, subscribedAt:ago(190), note:'DEMO contact' },
+      { id:'p3', name:'Resident C', zoneId:'z-suryapur', audience:'resident', language:'en', channel:'sms', contact:'+91 ••••• 1194', consent:true, subscribedAt:ago(180), note:'DEMO contact' },
+      { id:'p4', name:'Worker D', zoneId:'z-suryapur', audience:'worker', language:'hi', channel:'inapp', contact:'+91 ••••• 2247', consent:true, subscribedAt:ago(120), note:'DEMO contact' },
+      { id:'p5', name:'Worker E', zoneId:'z-suryapur', audience:'worker', language:'en', channel:'inapp', contact:'+91 ••••• 5580', consent:true, subscribedAt:ago(100), note:'DEMO contact' },
+      { id:'p6', name:'Resident F', zoneId:'z-northplain', audience:'resident', language:'hi', channel:'inapp', contact:'+91 ••••• 9032', consent:true, subscribedAt:ago(90), note:'DEMO contact' },
+      { id:'p7', name:'Worker G', zoneId:'z-northplain', audience:'worker', language:'en', channel:'inapp', contact:'+91 ••••• 6671', consent:true, subscribedAt:ago(80), note:'DEMO contact' },
+      { id:'p8', name:'Resident H', zoneId:'z-kovai', audience:'resident', language:'en', channel:'inapp', contact:'+91 ••••• 3308', consent:true, subscribedAt:ago(60), note:'DEMO contact' },
+      { id:'p9', name:'Worker I', zoneId:'z-kovai', audience:'worker', language:'hi', channel:'inapp', contact:'+91 ••••• 4477', consent:false, subscribedAt:ago(50), note:'DEMO contact, opted out' },
+      { id:'p10', name:'Resident J', zoneId:'z-northplain', audience:'resident', language:'en', channel:'sms', contact:'+91 ••••• 8852', consent:true, subscribedAt:ago(40), note:'DEMO contact' }
+    ];
+    var units = [
+      { id:'u1', name:'Suryapur central warehouse', operator:'District supply office', zoneId:'z-suryapur', lat:26.80, lon:78.05, distanceKm:6.4, travelMin:18,
+        stock:{ water:210000, ors:1400, food:32000, meds:5, cooling:90, other:120 }, capacity:95, updatedAt:ago(3), note:'DEMO inventory' },
+      { id:'u2', name:'Suryapur PHC store', operator:'Primary health centre', zoneId:'z-suryapur', lat:26.91, lon:78.18, distanceKm:9.1, travelMin:26,
+        stock:{ water:28000, ors:420, food:4200, meds:3, cooling:10, other:25 }, capacity:70, updatedAt:ago(30), note:'DEMO inventory, stale' },
+      { id:'u3', name:'Northplain cold room', operator:'Industrial estate', zoneId:'z-northplain', lat:23.44, lon:75.66, distanceKm:4.2, travelMin:12,
+        stock:{ water:96000, ors:700, food:14000, meds:4, cooling:40, other:90 }, capacity:88, updatedAt:ago(5), note:'DEMO inventory' },
+      { id:'u4', name:'Kovai community kitchen', operator:'Ward committee', zoneId:'z-kovai', lat:12.99, lon:80.25, distanceKm:5.7, travelMin:22,
+        stock:{ water:82000, ors:500, food:9000, meds:3, cooling:30, other:60 }, capacity:60, updatedAt:ago(12), note:'DEMO inventory' }
+    ];
+    return {
+      version:1, role:'public', demo:true,
+      settings:{ t1:38, t2:41, t3:44, staleHours:6, rateMax:2, rateWindowMin:5, reviewLevel3:true, live:false },
+      zones:zones, recipients:recipients, units:units,
+      alerts:[], deliveries:[], requests:[], dispatches:[], audit:[], activeZone:'z-suryapur'
+    };
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORE);
+      if(!raw) return null;
+      var s = JSON.parse(raw);
+      if(!s || s.version !== 1 || !s.zones) return null;
+      return s;
+    }catch(e){ return null; }
+  }
+  function save(){
+    try{ localStorage.setItem(STORE, JSON.stringify(state)); }
+    catch(e){ /* storage can fail in private mode; the session still works in memory */ }
+  }
+  function audit(action, detail, actorRole){
+    state.audit.unshift({
+      id:'a' + Date.now() + Math.random().toString(16).slice(2,6),
+      ts:iso(now()), actor:ROLE_LABEL[actorRole || state.role], role:actorRole || state.role,
+      action:action, detail:detail, simulated:true
+    });
+    if(state.audit.length > 400) state.audit.length = 400;
+    save();
+  }
+
+  /* ------------------------------------------------------------------
+     Domain helpers
+  ------------------------------------------------------------------ */
+  function zoneById(id){ return state.zones.filter(function(z){ return z.id === id; })[0] || null; }
+  function unitById(id){ return state.units.filter(function(u){ return u.id === id; })[0] || null; }
+  function levelOf(zone){
+    var w = zone.weather;
+    if(!w || typeof w.appMax !== 'number') return { level:0, reason:'No current weather for this zone.' };
+    var age = (now() - new Date(w.fetchedAt)) / HOUR;
+    if(age > state.settings.staleHours) return { level:0, stale:true, reason:'Weather is ' + Math.round(age) + ' h old, beyond the ' + state.settings.staleHours + ' h stale limit.' };
+    var s = state.settings;
+    var lvl = w.appMax >= s.t3 ? 3 : w.appMax >= s.t2 ? 2 : w.appMax >= s.t1 ? 1 : 0;
+    return { level:lvl, stale:false };
+  }
+  function thresholdFor(level){
+    var s = state.settings;
+    return level === 3 ? s.t3 : level === 2 ? s.t2 : level === 1 ? s.t1 : null;
+  }
+  function imdReference(zone){
+    var w = zone.weather;
+    if(!w) return null;
+    var entry = zone.region === 'coastal' ? 37 : zone.region === 'hilly' ? 30 : 40;
+    var entryMet = typeof w.tmax === 'number' && w.tmax >= entry;
+    var absolute = typeof w.tmax === 'number' && w.tmax >= 45;
+    return { entry:entry, tmax:w.tmax, met: !!(entryMet && (absolute || true)), note:'Grid-cell check of the maximum-temperature entry threshold only. A departure from the 1991–2020 normal is not computed on this page.' };
+  }
+  function haversine(a, b){
+    var R = 6371, toRad = Math.PI/180;
+    var dLat = (b.lat - a.lat)*toRad, dLon = (b.lon - a.lon)*toRad;
+    var s = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(a.lat*toRad)*Math.cos(b.lat*toRad)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return Math.round(2*R*Math.asin(Math.sqrt(s))*10)/10;
+  }
+  function maskContact(contact){
+    if(!contact) return '—';
+    return String(contact).replace(/\d(?=\d{3})/g, function(c, i){ return i > 6 ? '•' : c; });
+  }
+  function fmtTime(value){
+    var d = value instanceof Date ? value : new Date(value);
+    return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }).format(d);
+  }
+  function fmtDay(isoDate){
+    if(!isoDate) return '—';
+    return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'short' }).format(new Date(isoDate + 'T12:00:00Z'));
+  }
+  function hash(str){
+    var h = 2166136261;
+    for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return Math.abs(h);
+  }
+  function setStatus(text, kind){
+    var el = $('#status');
+    if(!el) return;
+    el.textContent = text;
+    el.dataset.kind = kind || 'info';
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Message templates
+  ------------------------------------------------------------------ */
+  function windowText(zone){
+    var w = zone.weather;
+    if(!w || !w.window) return 'the forecast window';
+    return fmtDay(w.window.from) + ' – ' + fmtDay(w.window.to);
+  }
+  function buildMessage(lang, zone, level){
+    var w = zone.weather, meta = LEVELS[level], s = state.settings;
+    var app = w && typeof w.appMax === 'number' ? Math.round(w.appMax) : '—';
+    var thr = thresholdFor(level);
+    var win = windowText(zone);
+    var lead = level === 3 ? 'Severe heat warning' : level === 2 ? 'Heat alert' : 'Heat watch';
+    if(lang === 'hi'){
+      var hiLead = level === 3 ? 'गंभीर गर्मी चेतावनी' : level === 2 ? 'गर्मी चेतावनी' : 'गर्मी निगरानी';
+      return '[डेमो] ' + hiLead + ' — ' + zone.name + ': अगले दिनों में महसूस होने वाला अधिकतम तापमान लगभग ' + app + '°C, ' + thr + '°C की सीमा से ऊपर। अवधि: ' + win + '। ' +
+        (level === 3
+          ? 'पानी पीते रहें, दिन में 12 से 4 बजे तक बाहर काम न करें, बुज़ुर्गों, बच्चों और बीमार लोगों को ठंडी जगह पर रखें। '
+          : level === 2
+            ? 'पानी पीते रहें, दोपहर में बाहर काम कम करें और बुज़ुर्गों तथा बच्चों का ध्यान रखें। '
+            : 'पानी पीते रहें और गर्मी बढ़ने पर बाहर की गतिविधि कम करें। ') +
+        'यह एक सिमुलेशन है, आधिकारिक IMD चेतावनी नहीं। स्रोत: ' + (w ? w.source : 'DEMO') + '।';
+    }
+    return '[DEMO] ' + lead + ' — ' + zone.name + ': feels-like temperature is forecast near ' + app + '°C over ' + win + ', above the model ' + thr + '°C threshold. ' +
+      (level === 3
+        ? 'Drink water often, avoid outdoor work between 12:00 and 16:00, and move older people, children and anyone unwell to a cool place. '
+        : level === 2
+          ? 'Drink water often, reduce outdoor work at midday, and check on older people and children. '
+          : 'Keep water handy and limit strenuous outdoor activity as the day heats up. ') +
+      'This is a simulation, not an official IMD warning. Source: ' + (w ? w.source : 'DEMO') + '.';
+  }
+  function guidance(level){
+    var base = [
+      'Drink water before you feel thirsty; avoid alcohol and very sweet drinks.',
+      'Move to the coolest room available and use a fan or damp cloth if there is no cooler.',
+      'Never leave a child or an older person in a parked vehicle.'
+    ];
+    if(level >= 2) base.unshift('Shift outdoor work to early morning or evening; take rest breaks in shade every 30–45 minutes.');
+    if(level >= 3) base.unshift('Avoid going outside between 12:00 and 16:00 unless it is essential.');
+    base.push('If someone is confused, fainting, has hot dry skin or stops sweating, cool them immediately and call 108.');
+    return base;
+  }
+
+  /* ------------------------------------------------------------------
+     Modal
+  ------------------------------------------------------------------ */
+  var modalAction = null;
+  function openModal(title, bodyHtml, okLabel, onOk){
+    $('#modalTitle').textContent = title;
+    $('#modalBody').innerHTML = bodyHtml;
+    $('#modalOk').textContent = okLabel || 'Confirm';
+    $('#modal').hidden = false;
+    modalAction = onOk;
+    setTimeout(function(){ $('#modalOk').focus(); }, 30);
+  }
+  function closeModal(){ $('#modal').hidden = true; modalAction = null; }
+
+  /* ------------------------------------------------------------------
+     Weather
+  ------------------------------------------------------------------ */
+  async function fetchWeather(zone){
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + zone.lat + '&longitude=' + zone.lon +
+      '&timezone=auto&forecast_days=4&daily=temperature_2m_max,apparent_temperature_max,temperature_2m_min,relative_humidity_2m_mean';
+    var ctl = new AbortController();
+    var timer = setTimeout(function(){ ctl.abort(); }, 15000);
+    try{
+      var res = await fetch(url, { signal: ctl.signal });
+      if(!res.ok) throw new Error('Weather service returned HTTP ' + res.status);
+      var json = await res.json();
+      var d = json.daily;
+      if(!d || !d.time || !d.time.length) throw new Error('Weather response had no daily data');
+      var appMax = Math.max.apply(null, d.apparent_temperature_max.map(function(v){ return typeof v === 'number' ? v : -Infinity; }));
+      var tmax = Math.max.apply(null, d.temperature_2m_max.map(function(v){ return typeof v === 'number' ? v : -Infinity; }));
+      var tmin = Math.min.apply(null, d.temperature_2m_min.map(function(v){ return typeof v === 'number' ? v : Infinity; }));
+      var rh = d.relative_humidity_2m_mean ? d.relative_humidity_2m_mean[0] : null;
+      if(!isFinite(appMax) || !isFinite(tmax)) throw new Error('Weather values were missing');
+      zone.weather = {
+        status:'live', fetchedAt:iso(now()), tmax:Math.round(tmax*10)/10, appMax:Math.round(appMax*10)/10,
+        tmin:isFinite(tmin) ? Math.round(tmin*10)/10 : null, rh:rh,
+        window:{ from:d.time[1], to:d.time[Math.min(d.time.length-1, 3)] },
+        source:'Open-Meteo forecast API (live)', confidence:'Deterministic model, 3-day horizon'
+      };
+      save();
+      audit('Weather refreshed', 'Live forecast for ' + zone.name + ' · feels-like max ' + zone.weather.appMax + ' °C');
+      setStatus('Live weather loaded for ' + zone.name + '.', 'ok');
+    } catch(err){
+      zone.weather = { status:'error', fetchedAt:iso(now()), source:'Unavailable', confidence:'None', error:err.message };
+      save();
+      audit('Weather refresh failed', zone.name + ': ' + err.message);
+      setStatus('Live weather is unavailable for ' + zone.name + '. Alerts are held until fresh data exists.', 'error');
+    }
+    renderAll();
+  }
+
+  /* ------------------------------------------------------------------
+     Alerts
+  ------------------------------------------------------------------ */
+  function eligibleRecipients(zoneId, audience, langs, channels){
+    return state.recipients.filter(function(r){
+      if(r.zoneId !== zoneId || !r.consent) return false;
+      if(audience !== 'all' && r.audience !== audience) return false;
+      if(langs.indexOf(r.language) < 0) return false;
+      if(channels.indexOf(r.channel) < 0) return false;
+      return true;
+    });
+  }
+  function recentAlerts(zoneId, minutes){
+    var cutoff = now().getTime() - minutes*60000;
+    return state.alerts.filter(function(a){
+      return a.zoneId === zoneId && a.status === 'sent' && new Date(a.sentAt).getTime() >= cutoff;
+    });
+  }
+  function duplicateAlert(zoneId, level){
+    var cutoff = now().getTime() - 6*HOUR;
+    return state.alerts.filter(function(a){
+      return a.zoneId === zoneId && a.level === level && a.status === 'sent' && !a.correctionOf && new Date(a.sentAt).getTime() >= cutoff;
+    })[0] || null;
+  }
+
+  function updateComposer(){
+    var zone = zoneById($('#alertZone').value);
+    var info = zone ? levelOf(zone) : { level:0 };
+    var chip = $('#composerChip');
+    if(!zone){ chip.className = 'chip'; chip.textContent = '—'; $('#composerState').textContent = 'Select a zone with current data to continue.'; return; }
+    chip.className = 'chip ' + LEVELS[info.level].key;
+    chip.textContent = LEVELS[info.level].name;
+    var reasons = [];
+    if(!zone.weather) reasons.push('no weather record');
+    else if(zone.weather.status === 'error') reasons.push('weather unavailable');
+    else if(info.stale) reasons.push(info.reason);
+    else if(info.level === 0) reasons.push('feels-like maximum stays below the watch threshold');
+    var dup = duplicateAlert(zone.id, info.level);
+    if(dup) reasons.push('an identical alert was already sent at ' + fmtTime(dup.sentAt));
+    var langs = [];
+    if($('#langEn').checked) langs.push('en');
+    if($('#langHi').checked) langs.push('hi');
+    var channels = ['inapp'];
+    var recipients = eligibleRecipients(zone.id, $('#alertAudience').value, langs, channels);
+    if(!langs.length) reasons.push('no language selected');
+    if(!recipients.length) reasons.push('no subscribed DEMO recipients match this zone, audience and language');
+    var held = reasons.length > 0;
+    $('#composerState').innerHTML = held
+      ? '<strong>Alert held.</strong> ' + esc(reasons.join('; ')) + ' Nothing will be sent until this is resolved. Official warnings should be checked separately.'
+      : '<strong>Ready to send (simulated).</strong> ' + recipients.length + ' DEMO recipient' + (recipients.length === 1 ? '' : 's') + ' in ' + esc(zone.name) + ' would receive this alert in ' + langs.join(' + ') + '. Level: ' + LEVELS[info.level].name + ' at ' + Math.round(zone.weather.appMax) + ' °C feels-like (threshold ' + thresholdFor(info.level) + ' °C).';
+    $('#sendAlertBtn').disabled = held;
+    $('#msgPreview').innerHTML = (langs.length ? langs : ['en']).map(function(l){
+      return '<div class="msgpreview"><div class="lang">' + (l === 'hi' ? 'हिन्दी' : 'English') + '</div>' + esc(buildMessage(l, zone, info.level || 1)) + '</div>';
+    }).join('');
+    if(zone.weather && zip(zone)){
+      $('#composerState').innerHTML += '<div class="mini" style="margin-top:6px">Data: ' + esc(zone.weather.source) + ' · updated ' + fmtTime(zone.weather.fetchedAt) + ' · confidence: ' + esc(zone.weather.confidence || '—') + ' · window ' + esc(windowText(zone)) + '</div>';
+    }
+  }
+  function zip(){ return true; }
+
+  function reviewSend(){
+    var zone = zoneById($('#alertZone').value);
+    if(!zone) return;
+    var info = levelOf(zone);
+    if(info.level === 0) return;
+    var langs = [];
+    if($('#langEn').checked) langs.push('en');
+    if($('#langHi').checked) langs.push('hi');
+    var recipients = eligibleRecipients(zone.id, $('#alertAudience').value, langs, ['inapp']);
+    var needSecond = state.settings.reviewLevel3 && info.level === 3;
+    var body = '<p><span class="chip demo">DEMO</span> This will simulate an in-app alert to <strong>' + recipients.length + '</strong> synthetic recipient(s) in <strong>' + esc(zone.name) + '</strong>.</p>' +
+      '<ul style="font-size:12.5px;line-height:1.6;padding-left:18px">' +
+        '<li><strong>Measure:</strong> daily maximum apparent temperature (feels-like) ' + Math.round(zone.weather.appMax) + ' °C</li>' +
+        '<li><strong>Threshold:</strong> model ' + thresholdFor(info.level) + ' °C (' + LEVELS[info.level].name + ')</li>' +
+        '<li><strong>Window:</strong> ' + esc(windowText(zone)) + '</li>' +
+        '<li><strong>Source:</strong> ' + esc(zone.weather.source) + ', updated ' + fmtTime(zone.weather.fetchedAt) + '</li>' +
+        '<li><strong>Channels:</strong> in-app (SMS and email are not configured and will not be used)</li>' +
+        '<li><strong>Languages:</strong> ' + langs.join(', ') + '</li>' +
+      '</ul>' +
+      '<p class="mini">No real phone, email or messaging service is contacted. This is not an official IMD warning.</p>' +
+      (needSecond ? '<label class="inline" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="secondReview"> I confirm a second reviewer checked this severe alert</label>' : '') +
+      '<label class="inline" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="sendAck"> I understand this is a simulation</label>';
+    openModal('Confirm simulated alert', body, 'Send simulated alert', function(){
+      if(!$('#sendAck') || !$('#sendAck').checked){ setStatus('Alert not sent: the simulation acknowledgement was not checked.', 'warn'); return; }
+      if(needSecond && (!$('#secondReview') || !$('#secondReview').checked)){ setStatus('Severe alert held: the second-reviewer confirmation is required.', 'warn'); return; }
+      closeModal();
+      sendAlert(zone, info.level, langs, recipients);
+    });
+  }
+
+  function sendAlert(zone, level, langs, recipients){
+    var rl = recentAlerts(zone.id, state.settings.rateWindowMin);
+    if(rl.length >= state.settings.rateMax){
+      setStatus('Rate limit reached: ' + rl.length + ' alert(s) already sent to this zone in the last ' + state.settings.rateWindowMin + ' minutes.', 'warn');
+      audit('Alert blocked by rate limit', zone.name + ' · ' + rl.length + ' sends in ' + state.settings.rateWindowMin + ' min');
+      return;
+    }
+    var alert = {
+      id:'al' + Date.now(), zoneId:zone.id, zoneName:zone.name, level:level, lang:langs,
+      audience:$('#alertAudience').value, channel:'inapp', status:'sent', sentAt:iso(now()),
+      window:zone.weather.window, measure:{ name:'Daily maximum apparent temperature', value:zone.weather.appMax, unit:'°C', threshold:thresholdFor(level) },
+      source:zone.weather.source, sourceUpdatedAt:zone.weather.fetchedAt, confidence:zone.weather.confidence,
+      simulated:true, correctionOf:null, recipients:[]
+    };
+    var delivered = 0, failed = 0;
+    recipients.forEach(function(r){
+      alert.recipients.push({ id:r.id, name:r.name, channel:'inapp', status:'queued' });
+      var ok = simulateDelivery(alert.id, r.id, 'inapp', 1);
+      var rec = alert.recipients[alert.recipients.length-1];
+      rec.status = ok ? 'delivered' : 'failed';
+      if(ok) delivered++; else failed++;
+      state.deliveries.push({ id:'d' + Date.now() + Math.random().toString(16).slice(2,5), alertId:alert.id, recipientId:r.id, channel:'inapp', status:rec.status, attempts:1, ts:iso(now()), simulated:true });
+    });
+    state.alerts.unshift(alert);
+    save();
+    audit('Alert sent (simulated)', zone.name + ' · level ' + LEVELS[level].name + ' · ' + delivered + ' delivered, ' + failed + ' failed · ' + langs.join('+'));
+    setStatus('Simulated alert recorded for ' + zone.name + ': ' + delivered + ' delivered, ' + failed + ' failed.', failed ? 'warn' : 'ok');
+    if(state.activeZone === zone.id) $('#alertZone').value = zone.id;
+    renderAll();
+  }
+
+  function simulateDelivery(alertId, recipientId, channel, attempt){
+    /* Deterministic-ish so the demo is reproducible: SMS fails more often. */
+    var h = hash(alertId + '|' + recipientId + '|' + channel + '|' + attempt) % 100;
+    var threshold = channel === 'sms' ? 80 : 90;
+    return h < threshold;
+  }
+
+  function retryDelivery(alertId, recipientId){
+    var d = state.deliveries.filter(function(x){ return x.alertId === alertId && x.recipientId === recipientId; })[0];
+    var a = state.alerts.filter(function(x){ return x.id === alertId; })[0];
+    if(!d || !a) return;
+    var ok = simulateDelivery(alertId, recipientId, d.channel, d.attempts + 1);
+    d.attempts += 1;
+    if(ok){
+      d.status = 'delivered';
+      var rec = a.recipients.filter(function(r){ return r.id === recipientId; })[0];
+      if(rec) rec.status = 'delivered';
+      audit('Delivery retried (simulated)', 'Alert ' + alertId.slice(-4) + ' · recipient ' + recipientId + ' · delivered on attempt ' + d.attempts);
+      setStatus('Retry simulated: delivery succeeded on attempt ' + d.attempts + '.', 'ok');
+    } else {
+      d.status = 'failed';
+      audit('Delivery retry failed (simulated)', 'Alert ' + alertId.slice(-4) + ' · recipient ' + recipientId + ' · attempt ' + d.attempts);
+      setStatus('Retry simulated: still failed. In a live system this would queue for another attempt.', 'warn');
+    }
+    save();
+    renderAll();
+  }
+
+  function cancelAlert(alertId){
+    var a = state.alerts.filter(function(x){ return x.id === alertId; })[0];
+    if(!a) return;
+    openModal('Cancel this alert?', '<p>Alert for <strong>' + esc(a.zoneName) + '</strong> will be marked cancelled. Recipients who already received it are not un-messaged in this demo; a correction can be sent instead.</p><label class="inline" style="font-size:12.5px"><input type="checkbox" id="cancelAck"> I understand a cancellation notice is not delivered automatically</label>', 'Cancel alert', function(){
+      if(!$('#cancelAck') || !$('#cancelAck').checked){ setStatus('Cancellation not confirmed.', 'warn'); return; }
+      a.status = 'cancelled';
+      a.cancelledAt = iso(now());
+      audit('Alert cancelled', a.zoneName + ' · alert ' + a.id.slice(-4));
+      save(); closeModal(); renderAll();
+      setStatus('Alert marked cancelled and logged.', 'warn');
+    });
+  }
+
+  function correctAlert(alertId){
+    var a = state.alerts.filter(function(x){ return x.id === alertId; })[0];
+    if(!a) return;
+    var zone = zoneById(a.zoneId);
+    openModal('Send a correction', '<p>This sends a new simulated alert referencing the original, marked as a correction. Recipients are the same audience and language.</p><label class="inline" style="font-size:12.5px"><input type="checkbox" id="corrAck"> I understand this is a simulation</label>', 'Send correction', function(){
+      if(!$('#corrAck') || !$('#corrAck').checked){ setStatus('Correction not sent: acknowledgement missing.', 'warn'); return; }
+      var recipients = eligibleRecipients(a.zoneId, a.audience, a.lang, ['inapp']);
+      var alert = {
+        id:'al' + Date.now(), zoneId:a.zoneId, zoneName:a.zoneName, level:a.level, lang:a.lang,
+        audience:a.audience, channel:'inapp', status:'sent', sentAt:iso(now()), window:zone ? zone.weather.window : null,
+        measure:a.measure, source:zone ? zone.weather.source : a.source, sourceUpdatedAt:zone ? zone.weather.fetchedAt : a.sourceUpdatedAt,
+        confidence:zone ? zone.weather.confidence : a.confidence, simulated:true, correctionOf:a.id, recipients:[]
+      };
+      var delivered = 0;
+      recipients.forEach(function(r){
+        var ok = simulateDelivery(alert.id, r.id, 'inapp', 1);
+        alert.recipients.push({ id:r.id, name:r.name, channel:'inapp', status:ok ? 'delivered' : 'failed' });
+        state.deliveries.push({ id:'d' + Date.now() + Math.random().toString(16).slice(2,5), alertId:alert.id, recipientId:r.id, channel:'inapp', status:ok ? 'delivered' : 'failed', attempts:1, ts:iso(now()), simulated:true });
+        if(ok) delivered++;
+      });
+      state.alerts.unshift(alert);
+      audit('Correction sent (simulated)', 'Original ' + a.id.slice(-4) + ' · correction ' + alert.id.slice(-4) + ' · ' + delivered + ' delivered');
+      save(); closeModal(); renderAll();
+      setStatus('Correction recorded for ' + a.zoneName + '.', 'ok');
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Supply planning
+  ------------------------------------------------------------------ */
+  function demandFor(zone, level){
+    var share = LEVELS[level].share || 0.25;
+    var people = Math.round(zone.pop + zone.workers * 0.6);
+    var affected = Math.round(people * share);
+    return {
+      people:people, affected:affected, share:share, days:3,
+      water: affected * 3 * 3,                 /* 3 L per person per day, 3 days */
+      ors: Math.ceil(affected / 50),
+      food: Math.round(affected * 0.5 * 3),    /* 0.5 kg per person per day */
+      meds: Math.ceil(affected / 5000),
+      cooling: Math.ceil(affected / 250),
+      other: Math.ceil(affected / 400)
+    };
+  }
+  function supplyPlan(zone, level){
+    var demand = demandFor(zone, level);
+    var units = state.units.filter(function(u){ return u.zoneId === zone.id; }).map(function(u){
+      var stale = (now() - new Date(u.updatedAt)) / HOUR > 24;
+      var dist = haversine(zone, u);
+      return { unit:u, stale:stale, distance:dist, travel:Math.max(8, Math.round(dist * 2.6)), stock:u.stock };
+    });
+    units.sort(function(a,b){
+      if(a.stale !== b.stale) return a.stale ? 1 : -1;
+      return (a.travel + a.distance*1.5) - (b.travel + b.distance*1.5);
+    });
+    var remaining = { water:demand.water, ors:demand.ors, food:demand.food, meds:demand.meds, cooling:demand.cooling, other:demand.other };
+    units.forEach(function(u){
+      u.allocate = {};
+      SUPPLY_ITEMS.forEach(function(it){
+        var want = remaining[it.key];
+        var give = Math.max(0, Math.min(want, u.stock[it.key] || 0));
+        /* Keep a reserve when the unit is the only supply point. */
+        if(units.length > 1) give = Math.min(give, Math.floor(give * 0.8));
+        u.allocate[it.key] = give;
+        remaining[it.key] = Math.max(0, want - give);
+      });
+    });
+    return { demand:demand, units:units, remaining:remaining, level:level };
+  }
+  function coverage(plan, key){
+    var demand = plan.demand[key];
+    if(!demand) return 100;
+    var supplied = plan.units.reduce(function(s,u){ return s + u.allocate[key]; }, 0);
+    return Math.min(100, Math.round(supplied / demand * 100));
+  }
+
+  function approvePlan(zoneId){
+    var zone = zoneById(zoneId);
+    var info = levelOf(zone);
+    if(info.level === 0){ setStatus('No current heat level for this zone; supply requests are held.', 'warn'); return; }
+    var plan = supplyPlan(zone, info.level);
+    if(!plan.units.length){ setStatus('No registered storage units serve this zone, so no request can be prepared.', 'warn'); return; }
+    var body = '<p>Approve a <strong>simulated</strong> supply request for <strong>' + esc(zone.name) + '</strong> at ' + LEVELS[info.level].name + ' level?</p>' +
+      '<p class="mini">' + plan.demand.affected.toLocaleString('en-IN') + ' people assumed affected; ' + plan.demand.days + '-day supply. Estimates only.</p>' +
+      '<ul style="font-size:12.5px;line-height:1.6;padding-left:18px">' + plan.units.map(function(u){
+        return '<li>' + esc(u.unit.name) + ' — water ' + u.allocate.water.toLocaleString('en-IN') + ' L, ORS ' + u.allocate.ors + ', food ' + u.allocate.food + ' kg' + (u.stale ? ' <span class="chip warn">stale stock</span>' : '') + '</li>';
+      }).join('') + '</ul>' +
+      '<p class="mini">No real order is placed and no supplier is contacted. The action is logged with your role.</p>' +
+      '<label class="inline" style="font-size:12.5px"><input type="checkbox" id="approveAck"> I approve this simulated allocation</label>';
+    openModal('Approve supply plan (DEMO)', body, 'Approve and simulate dispatch', function(){
+      if(!$('#approveAck') || !$('#approveAck').checked){ setStatus('Plan not approved: confirmation not checked.', 'warn'); return; }
+      closeModal();
+      dispatchPlan(zone, info.level, plan);
+    });
+  }
+
+  function dispatchPlan(zone, level, plan){
+    var request = {
+      id:'rq' + Date.now(), zoneId:zone.id, zoneName:zone.name, level:level, createdAt:iso(now()),
+      status:'approved (simulated)', approvedBy:ROLE_LABEL[state.role], demand:plan.demand, allocations:[]
+    };
+    plan.units.forEach(function(u){
+      var alloc = { unitId:u.unit.id, unitName:u.unit.name, items:{}, stale:u.stale };
+      SUPPLY_ITEMS.forEach(function(it){
+        var qty = u.allocate[it.key] || 0;
+        if(qty > 0){
+          alloc.items[it.key] = qty;
+          u.unit.stock[it.key] = Math.max(0, (u.unit.stock[it.key] || 0) - qty);
+        }
+      });
+      request.allocations.push(alloc);
+      state.dispatches.push({
+        id:'dp' + Date.now() + Math.random().toString(16).slice(2,5), requestId:request.id, zoneName:zone.name,
+        unitId:u.unit.id, unitName:u.unit.name, items:alloc.items, status:'dispatched (simulated)', ts:iso(now()), simulated:true
+      });
+      u.unit.updatedAt = iso(now());
+    });
+    state.requests.unshift(request);
+    audit('Supply request approved (simulated)', zone.name + ' · ' + plan.units.length + ' unit(s) · ' + plan.demand.affected.toLocaleString('en-IN') + ' people assumed');
+    audit('Dispatch simulated', zone.name + ' · water ' + plan.units.reduce(function(s,u){ return s+u.allocate.water; }, 0).toLocaleString('en-IN') + ' L · inventory reduced in demo data');
+    save();
+    setStatus('Simulated dispatch recorded and inventory reduced for ' + zone.name + '.', 'ok');
+    renderAll();
+  }
+
+  /* ------------------------------------------------------------------
+     Rendering
+  ------------------------------------------------------------------ */
+  function renderAll(){
+    $('#whoami').textContent = 'Viewing as: ' + ROLE_LABEL[state.role];
+    $$('.roles button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.role === state.role)); });
+    $$('.roleview').forEach(function(v){ v.classList.toggle('hidden', v.dataset.view !== state.role); });
+    renderPublic();
+    renderResponse();
+    renderOperator();
+    renderAdmin();
+    renderAudit();
+    save();
+  }
+
+  function zoneOptions(select, selected){
+    select.innerHTML = state.zones.map(function(z){
+      return '<option value="' + z.id + '"' + (z.id === selected ? ' selected' : '') + '>' + esc(z.name) + ' (DEMO)</option>';
+    }).join('');
+  }
+
+  function renderPublic(){
+    var sel = $('#pubZone');
+    zoneOptions(sel, state.activeZone);
+    var zone = zoneById(sel.value) || state.zones[0];
+    var info = levelOf(zone);
+    var meta = LEVELS[info.level];
+    var w = zone.weather;
+    var imd = imdReference(zone);
+    $('#pubZoneDetail').innerHTML =
+      '<div class="hz"><h3><span>' + esc(zone.name) + ' <span class="chip demo">DEMO ZONE</span></span><span class="' + meta.chip + '">' + meta.name + '</span></h3>' +
+      '<p>' + esc(zone.note || '') + ' · Fictional area used for this demonstration.</p>' +
+      '<div class="facts">' +
+        '<span><b>Measure:</b> max apparent temperature</span>' +
+        '<span><b>Value:</b> ' + (w && typeof w.appMax === 'number' ? Math.round(w.appMax) + ' °C' : '—') + '</span>' +
+        '<span><b>Model threshold:</b> ' + (thresholdFor(info.level) || state.settings.t1) + ' °C</span>' +
+        '<span><b>Window:</b> ' + (w ? esc(windowText(zone)) : '—') + '</span>' +
+        '<span><b>Source:</b> ' + (w ? esc(w.source) : 'unavailable') + '</span>' +
+        '<span><b>Updated:</b> ' + (w ? fmtTime(w.fetchedAt) : '—') + '</span>' +
+        '<span><b>Confidence:</b> ' + (w ? esc(w.confidence || '—') : '—') + '</span>' +
+        '<span><b>Type:</b> model estimate' + (state.settings.live ? '' : ' · DEMO snapshot') + '</span>' +
+      '</div>' +
+      (info.stale ? '<p class="statusline"><span class="status" data-kind="warn">Weather is stale, so this zone is not being alerted.</span></p>' : '') +
+      (w && w.status === 'error' ? '<p class="statusline"><span class="status" data-kind="error">Weather unavailable: ' + esc(w.error || 'unknown') + '</span></p>' : '') +
+      '<p class="mini" style="margin-top:8px">IMD reference only: this grid cell\'s maximum air temperature ' + (imd && typeof imd.tmax === 'number' ? Math.round(imd.tmax) + ' °C' : '—') +
+        ' against the ' + (zone.region === 'coastal' ? '37 °C coastal' : zone.region === 'hilly' ? '30 °C hilly' : '40 °C plains') + ' entry threshold — ' + (imd && imd.met ? 'met' : 'not met') + '. This page does not compute the required departure from normal and does not issue warnings.</p>' +
+      '</div>';
+
+    var alerts = state.alerts.filter(function(a){ return a.zoneId === zone.id && a.status === 'sent'; });
+    $('#pubAlerts').innerHTML = alerts.length
+      ? alerts.map(function(a){
+          var msg = buildMessage($('#pubLang').value, zone, a.level);
+          return '<div class="msgpreview"><div class="lang">' + fmtTime(a.sentAt) + ' · ' + LEVELS[a.level].name + ' · <span class="chip demo">DEMO</span></div>' + esc(msg) + '</div>';
+        }).join('')
+      : '<p class="mini">No simulated alerts have been sent for this zone yet. In a live system, alerts would appear here and through your chosen channel.</p>';
+
+    $('#pubGuidance').innerHTML = '<ul class="actions">' + guidance(info.level).map(function(g, i){
+      return '<li' + (i === 0 && info.level >= 2 ? ' class="urgent"' : '') + '><span class="tick" aria-hidden="true">✓</span><span>' + esc(g) + '</span></li>';
+    }).join('') + '</ul>';
+
+    var mine = state.recipients.filter(function(r){ return r.channel === 'inapp'; });
+    $('#subListWrap').innerHTML = '<h3 style="margin-top:14px">Subscriptions in this demo</h3>' +
+      '<div class="tablewrap"><table><caption>DEMO contacts, stored only in this browser. Contact details are masked and never shown on the map.</caption>' +
+      '<thead><tr><th scope="col">Person</th><th scope="col">Zone</th><th scope="col">Language</th><th scope="col">Channel</th><th scope="col">Contact</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>' +
+      mine.map(function(r){
+        return '<tr><td>' + esc(r.name) + '</td><td>' + esc((zoneById(r.zoneId) || {}).name || '—') + '</td><td>' + (r.language === 'hi' ? 'हिन्दी' : 'English') + '</td><td>' + esc(r.channel) + '</td><td>' + esc(r.contact) + '</td>' +
+          '<td>' + (r.consent ? '<span class="chip ok">subscribed</span>' : '<span class="chip">opted out</span>') + '</td>' +
+          '<td>' + (r.consent ? '<button type="button" class="btn-danger" data-optout="' + r.id + '">Opt out</button>' : '<button type="button" class="btn-quiet" data-optin="' + r.id + '">Opt back in</button>') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+
+    $('#subFormWrap').innerHTML = '<div class="row">' +
+      '<div class="field"><label for="subName">Name (optional)</label><input type="text" id="subName" placeholder="Resident K"></div>' +
+      '<div class="field"><label for="subContact">Contact</label><input type="text" id="subContact" placeholder="+91 90000 00000"></div>' +
+      '<div class="field"><label for="subZone">Zone</label><select id="subZone">' + state.zones.map(function(z){ return '<option value="' + z.id + '">' + esc(z.name) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field"><label for="subLang">Language</label><select id="subLang"><option value="en">English</option><option value="hi">हिन्दी</option></select></div>' +
+      '<div class="field"><label for="subChannel">Channel</label><select id="subChannel"><option value="inapp">In-app (available)</option><option value="sms" disabled>SMS (not configured)</option></select></div>' +
+      '</div>' +
+      '<label class="inline" style="font-size:12.5px;margin:4px 0 8px"><input type="checkbox" id="subConsent"> I agree to receive DEMO heat alerts and understand nothing is sent externally.</label>' +
+      '<div><button type="button" class="btn" id="subBtn">Add demo subscription</button></div>' +
+      '<p class="mini" style="margin-top:6px">Only zone, language and one contact are requested. In production this form would be served over HTTPS, contacts encrypted at rest, and consent recorded with a timestamp.</p>';
+  }
+
+  function renderResponse(){
+    zoneOptions($('#alertZone'), state.activeZone);
+    var zones = state.zones.map(function(z){
+      var info = levelOf(z);
+      return { zone:z, info:info };
+    });
+    var levels = zones.map(function(x){ return x.info.level; });
+    var maxLevel = Math.max.apply(null, levels);
+    var staleCount = zones.filter(function(x){ return x.info.stale || !x.zone.weather || x.zone.weather.status === 'error'; }).length;
+
+    $('#zoneMap').innerHTML = mapSVG();
+    $('#zoneList').innerHTML =
+      '<div class="kpis">' +
+        '<div class="kpi"><div class="lab">Highest model level</div><div class="val">' + LEVELS[maxLevel].name + '</div><div class="sub">Model estimate, not an official warning.</div></div>' +
+        '<div class="kpi"><div class="lab">Zones monitored</div><div class="val">' + zones.length + '</div><div class="sub">Demo zones with synthetic populations.</div></div>' +
+        '<div class="kpi"><div class="lab">Zones without fresh data</div><div class="val">' + staleCount + '</div><div class="sub">Alerts are held for these zones.</div></div>' +
+        '<div class="kpi"><div class="lab">Alerts sent (demo)</div><div class="val">' + state.alerts.filter(function(a){ return a.status === 'sent'; }).length + '</div><div class="sub">Simulated in-app messages only.</div></div>' +
+      '</div>' +
+      zones.map(function(x){
+        var meta = LEVELS[x.info.level];
+        return '<div class="hz"><h3><span>' + esc(x.zone.name) + ' <span class="chip demo">DEMO</span></span><span class="' + meta.chip + '">' + meta.name + '</span></h3>' +
+          '<p>' + (x.zone.weather && typeof x.zone.weather.appMax === 'number' ? 'Feels-like max ' + Math.round(x.zone.weather.appMax) + ' °C against a ' + state.settings.t1 + ' °C watch threshold' : 'No current weather') +
+          ' · window ' + (x.zone.weather ? esc(windowText(x.zone)) : '—') + ' · ' + (x.info.stale ? '<strong>stale data, alerts held</strong>' : (x.zone.weather ? esc(x.zone.weather.source) : 'unavailable')) + '</p>' +
+          '<div class="facts"><span><b>Population:</b> ' + x.zone.pop.toLocaleString('en-IN') + '</span><span><b>Workers:</b> ' + x.zone.workers.toLocaleString('en-IN') + '</span><span><b>Region:</b> ' + esc(x.zone.region) + '</span><span><b>Updated:</b> ' + (x.zone.weather ? fmtTime(x.zone.weather.fetchedAt) : '—') + '</span></div>' +
+          '<div class="inline" style="margin-top:8px"><button type="button" class="btn-quiet" data-open-zone="' + x.zone.id + '">Use for alert</button>' +
+          '<button type="button" class="btn-quiet" data-plan-zone="' + x.zone.id + '">Supply plan</button></div></div>';
+      }).join('');
+
+    updateComposer();
+
+    $('#alertLog').innerHTML = state.alerts.length ? state.alerts.map(function(a){
+      var delivered = a.recipients.filter(function(r){ return r.status === 'delivered'; }).length;
+      var failed = a.recipients.filter(function(r){ return r.status === 'failed'; }).length;
+      return '<div class="hz"><h3><span>' + esc(a.zoneName) + ' · ' + LEVELS[a.level].name + ' <span class="chip demo">DEMO</span>' + (a.status === 'cancelled' ? ' <span class="chip warn">cancelled</span>' : '') + (a.correctionOf ? ' <span class="chip warn">correction</span>' : '') + '</span>' +
+        '<span class="mini">' + fmtTime(a.sentAt) + '</span></h3>' +
+        '<div class="facts"><span><b>Measure:</b> ' + a.measure.value + ' °C</span><span><b>Threshold:</b> ' + a.measure.threshold + ' °C</span><span><b>Window:</b> ' + (a.window ? fmtDay(a.window.from) + '–' + fmtDay(a.window.to) : '—') + '</span><span><b>Source:</b> ' + esc(a.source) + '</span><span><b>Delivered:</b> ' + delivered + '</span><span><b>Failed:</b> ' + failed + '</span></div>' +
+        '<details><summary>Recipients and retries</summary><div class="tablewrap" style="margin-top:8px"><table><thead><tr><th scope="col">Recipient</th><th scope="col">Channel</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>' +
+        a.recipients.map(function(r){
+          return '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.channel) + '</td><td>' + (r.status === 'delivered' ? '<span class="chip ok">delivered (simulated)</span>' : '<span class="chip warn">failed</span>') + '</td>' +
+            '<td>' + (r.status === 'failed' ? '<button type="button" class="btn-quiet" data-retry="' + a.id + '|' + r.id + '">Retry</button>' : '—') + '</td></tr>';
+        }).join('') + '</tbody></table></div></details>' +
+        '<div class="inline" style="margin-top:8px">' + (a.status === 'sent' ? '<button type="button" class="btn-danger" data-cancel="' + a.id + '">Cancel alert</button><button type="button" class="btn-quiet" data-correct="' + a.id + '">Send correction</button>' : '<span class="mini">No further action available.</span>') + '</div></div>';
+    }).join('') : '<p class="mini">No alerts yet. Compose one above; it will appear here with delivery results and an audit entry.</p>';
+
+    var zone = zoneById($('#alertZone').value);
+    var info = zone ? levelOf(zone) : { level:0 };
+    if(!zone || info.level === 0){
+      $('#supplyPlan').innerHTML = '<p class="mini">Select a zone with a current heat level to see supply units and an estimated plan.</p>';
+    } else {
+      var plan = supplyPlan(zone, info.level);
+      var d = plan.demand;
+      $('#supplyPlan').innerHTML =
+        '<div class="callout"><strong>Estimated demand — ' + esc(zone.name) + ', ' + LEVELS[info.level].name + '.</strong> ' +
+        (d.people).toLocaleString('en-IN') + ' people considered (population plus 60% of the worker count), ' + Math.round(d.share*100) + '% assumed affected → <strong>' + d.affected.toLocaleString('en-IN') + '</strong> people for ' + d.days + ' days. ' +
+        'Planning norms: 3 L water/person/day, 1 ORS sachet per 50 people, 0.5 kg food/person/day, 1 medicine kit per 5,000, 1 cooling kit per 250. These are estimates, not clinical or official standards.</div>' +
+        '<div class="tablewrap wide" style="margin-top:10px"><table><caption>Registered units, ordered by a suggested priority. Distance is straight-line from the zone centre; travel time is an estimate. Stock is DEMO data; a stale unit is flagged and placed last.</caption>' +
+        '<thead><tr><th scope="col">Priority</th><th scope="col">Unit</th><th scope="col">Distance / travel</th><th scope="col">Water</th><th scope="col">ORS</th><th scope="col">Food</th><th scope="col">Meds</th><th scope="col">Cooling</th><th scope="col">Last update</th><th scope="col">Suggested allocation</th></tr></thead><tbody>' +
+        plan.units.map(function(u, i){
+          return '<tr><td>' + (i+1) + '</td><td>' + esc(u.unit.name) + (u.stale ? ' <span class="chip warn">stale</span>' : '') + '</td>' +
+            '<td>' + u.distance + ' km · ~' + u.travel + ' min</td>' +
+            '<td class="num">' + u.stock.water.toLocaleString('en-IN') + ' L</td><td class="num">' + u.stock.ors + '</td><td class="num">' + u.stock.food + ' kg</td><td class="num">' + u.stock.meds + '</td><td class="num">' + u.stock.cooling + '</td>' +
+            '<td>' + fmtTime(u.unit.updatedAt) + (u.stale ? ' <span class="chip warn">older than 24 h</span>' : '') + '</td>' +
+            '<td class="mini">' + SUPPLY_ITEMS.filter(function(it){ return u.allocate[it.key] > 0; }).map(function(it){ return it.label.split(' ')[0] + ' ' + u.allocate[it.key].toLocaleString('en-IN'); }).join(' · ') + '</td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="kpis" style="margin-top:10px">' +
+          ['water','ors','food','meds','cooling'].map(function(k){
+            var item = SUPPLY_ITEMS.filter(function(x){ return x.key === k; })[0];
+            return '<div class="kpi"><div class="lab">' + esc(item.label) + ' coverage</div><div class="val">' + coverage(plan, k) + '%</div><div class="sub">Estimated from available DEMO stock.</div></div>';
+          }).join('') +
+        '</div>' +
+        '<p class="mini">Coverage below 100% means the estimated need exceeds stock in the listed units. Nothing is ordered by this page.</p>' +
+        '<div class="inline" style="margin-top:10px"><button type="button" class="btn" data-approve="' + zone.id + '">Review and approve plan (simulated)</button>' +
+        '<span class="mini">Requires confirmation and is logged with your role.</span></div>' +
+        (state.requests.length ? '<h3 style="margin-top:14px">Recent requests</h3>' + state.requests.slice(0,3).map(function(rq){
+          return '<div class="hz"><h3><span>' + esc(rq.zoneName) + ' · ' + LEVELS[rq.level].name + '</span><span class="chip demo">SIMULATED</span></h3>' +
+            '<div class="facts"><span><b>Approved by:</b> ' + esc(rq.approvedBy) + '</span><span><b>When:</b> ' + fmtTime(rq.createdAt) + '</span><span><b>Status:</b> ' + esc(rq.status) + '</span><span><b>Units:</b> ' + rq.allocations.length + '</span></div></div>';
+        }).join('') : '');
+    }
+  }
+
+  function mapSVG(){
+    var W = 660, H = 330;
+    function px(lon){ return ((lon - 67.5) / (98 - 67.5)) * (W - 60) + 30; }
+    function py(lat){ return H - 20 - ((lat - 7.5) / (36.5 - 7.5)) * (H - 50); }
+    var marks = state.zones.map(function(z){
+      var info = levelOf(z);
+      var col = (!z.weather || z.weather.status === 'error' || info.stale) ? '#9aa79b' : LEVELS[info.level].color;
+      var r = 16 + (info.level * 6);
+      return '<g role="button" tabindex="0" data-map-zone="' + z.id + '" aria-label="' + esc(z.name) + ', ' + LEVELS[info.level].name + '">' +
+        '<circle cx="' + px(z.lon).toFixed(1) + '" cy="' + py(z.lat).toFixed(1) + '" r="' + r + '" fill="' + col + '" fill-opacity=".5" stroke="' + col + '" stroke-width="2"></circle>' +
+        '<circle cx="' + px(z.lon).toFixed(1) + '" cy="' + py(z.lat).toFixed(1) + '" r="3" fill="#4a3a20"></circle>' +
+        '<text x="' + (px(z.lon) + r + 6).toFixed(1) + '" y="' + (py(z.lat) + 4).toFixed(1) + '" font-size="10" fill="#3f463f" font-family="sans-serif">' + esc(z.name.split(' ')[0]) + '</text></g>';
+    }).join('');
+    var grid = '';
+    for(var lon = 70; lon <= 95; lon += 5){
+      grid += '<line x1="' + px(lon) + '" y1="16" x2="' + px(lon) + '" y2="' + (H-18) + '" stroke="#dfe3d6" stroke-width="1"/>' +
+              '<text x="' + px(lon) + '" y="' + (H-5) + '" font-size="9" fill="#8a9189" text-anchor="middle" font-family="sans-serif">' + lon + '°E</text>';
+    }
+    for(var lat = 10; lat <= 35; lat += 5){
+      grid += '<line x1="24" y1="' + py(lat) + '" x2="' + (W-18) + '" y2="' + py(lat) + '" stroke="#dfe3d6" stroke-width="1"/>' +
+              '<text x="8" y="' + (py(lat)+3) + '" font-size="9" fill="#8a9189" font-family="sans-serif">' + lat + '°N</text>';
+    }
+    return '<div class="map"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Schematic map of demo heat zones positioned by coordinate">' +
+      '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#eef1e8"/>' + grid + marks +
+      '<text x="' + (W-14) + '" y="18" font-size="9" fill="#8a9189" text-anchor="end" font-family="sans-serif">schematic · not geographic</text>' +
+      '</svg><div class="cap">DEMO zones · no personal data shown</div></div>';
+  }
+
+  function renderOperator(){
+    var sel = $('#opUnit');
+    if(!sel.options.length){
+      sel.innerHTML = state.units.map(function(u){ return '<option value="' + u.id + '">' + esc(u.name) + '</option>'; }).join('');
+    }
+    var u = unitById(sel.value) || state.units[0];
+    if(!u) return;
+    var stale = (now() - new Date(u.updatedAt)) / HOUR > 24;
+    $('#opUnitDetail').innerHTML =
+      '<div class="hz"><h3><span>' + esc(u.name) + ' <span class="chip demo">DEMO</span></span>' + (stale ? '<span class="chip warn">inventory stale</span>' : '<span class="chip ok">inventory current</span>') + '</h3>' +
+      '<div class="facts"><span><b>Operator:</b> ' + esc(u.operator) + '</span><span><b>Zone:</b> ' + esc((zoneById(u.zoneId) || {}).name || '—') + '</span><span><b>Last update:</b> ' + fmtTime(u.updatedAt) + '</span><span><b>Capacity used:</b> ' + u.capacity + '%</span></div></div>' +
+      '<div class="grid3" style="margin-top:8px">' + SUPPLY_ITEMS.map(function(it){
+        return '<div class="field"><label for="inv-' + it.key + '">' + esc(it.label) + ' <span class="help">(' + esc(it.unit) + ')</span></label>' +
+          '<input type="number" min="0" step="1" id="inv-' + it.key + '" value="' + (u.stock[it.key] || 0) + '"></div>';
+      }).join('') + '</div>' +
+      '<div class="inline"><button type="button" class="btn" id="saveInv">Save inventory (simulated)</button><span class="mini">Saving updates the demo record and writes an audit entry.</span></div>';
+
+    var reqs = state.requests.filter(function(r){ return r.allocations.some(function(a){ return a.unitId === u.id; }); });
+    $('#opRequests').innerHTML = reqs.length ? reqs.map(function(r){
+      var alloc = r.allocations.filter(function(a){ return a.unitId === u.id; })[0];
+      return '<div class="hz"><h3><span>' + esc(r.zoneName) + ' · ' + LEVELS[r.level].name + '</span><span class="chip demo">SIMULATED REQUEST</span></h3>' +
+        '<div class="facts">' + Object.keys(alloc.items).map(function(k){
+          var it = SUPPLY_ITEMS.filter(function(x){ return x.key === k; })[0];
+          return '<span><b>' + esc(it ? it.label : k) + ':</b> ' + alloc.items[k].toLocaleString('en-IN') + ' ' + esc(it ? it.unit : '') + '</span>';
+        }).join('') + '<span><b>Approved by:</b> ' + esc(r.approvedBy) + '</span><span><b>When:</b> ' + fmtTime(r.createdAt) + '</span></div></div>';
+    }).join('') : '<p class="mini">No requests for this unit yet. Approve a supply plan in the Response team view to generate a simulated request.</p>';
+  }
+
+  function renderAdmin(){
+    var s = state.settings;
+    $('#t1').value = s.t1; $('#t2').value = s.t2; $('#t3').value = s.t3;
+    $('#staleH').value = s.staleHours; $('#rlMax').value = s.rateMax; $('#rlWin').value = s.rateWindowMin;
+    $('#reviewLevel3').checked = !!s.reviewLevel3;
+    $('#liveToggle').textContent = s.live ? 'Live weather: on (fetching Open-Meteo)' : 'Live weather: off (demo snapshot)';
+    $('#integrationTable').innerHTML =
+      '<div class="tablewrap"><table><caption>Integrations are only live when server-side credentials exist. Nothing is hard-coded in this page.</caption>' +
+      '<thead><tr><th scope="col">Channel</th><th scope="col">Status in this demo</th><th scope="col">What a live deployment needs</th></tr></thead><tbody>' +
+      '<tr><td>In-app (this browser)</td><td><span class="chip ok">works, DEMO data</span></td><td>Nothing external; a real app would use push or a signed-in session.</td></tr>' +
+      '<tr><td>SMS</td><td><span class="chip warn">not configured</span></td><td>Server-side provider credentials in environment variables such as <code>HEATWISE_SMS_API_KEY</code> and <code>HEATWISE_SMS_SENDER</code>, plus opt-in records and a delivery webhook.</td></tr>' +
+      '<tr><td>Email</td><td><span class="chip warn">not configured</span></td><td><code>HEATWISE_EMAIL_API_KEY</code> and <code>HEATWISE_EMAIL_FROM</code> on the server, with bounce handling.</td></tr>' +
+      '<tr><td>Messaging app</td><td><span class="chip warn">not configured</span></td><td>A bot or business account token in <code>HEATWISE_MESSAGING_TOKEN</code>, message templates approved by the provider, and user opt-in.</td></tr>' +
+      '<tr><td>Weather</td><td><span class="chip ok">live when enabled</span></td><td>Open-Meteo forecast API with no key; a deployment should add its own key and a monitored contract.</td></tr>' +
+      '</tbody></table></div>' +
+      '<p class="mini" style="margin-top:8px">Toggle “Live weather” to fetch a real 3-day forecast for a zone. The demo snapshot stays clearly labelled DEMO; live values are labelled as model estimates and still never as official warnings.</p>';
+
+    $('#roleTable').innerHTML = '<div class="tablewrap"><table><caption>Demo role switch. In production, roles come from authentication, not from a dropdown.</caption>' +
+      '<thead><tr><th scope="col">Role</th><th scope="col">Can do</th></tr></thead><tbody>' +
+      Object.keys(ROLE_PERM).map(function(r){
+        return '<tr><td>' + esc(ROLE_LABEL[r]) + '</td><td><ul style="margin:0;padding-left:16px">' + ROLE_PERM[r].map(function(p){ return '<li>' + esc(p) + '</li>'; }).join('') + '</ul></td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  function renderAudit(){
+    $('#auditLog').innerHTML = state.audit.length
+      ? '<ul class="timeline">' + state.audit.slice(0, 30).map(function(a){
+          return '<li class="demo"><div class="t">' + fmtTime(a.ts) + ' · DEMO</div><div class="d"><span class="a">' + esc(a.action) + '</span> — ' + esc(a.detail) + ' <span class="mini">(' + esc(a.actor) + ')</span></div></li>';
+        }).join('') + '</ul>' +
+        '<p class="mini">Showing the latest 30 of ' + state.audit.length + ' entries. Export includes all retained entries.</p>'
+      : '<p class="mini">No actions yet.</p>';
+  }
+
+  /* ------------------------------------------------------------------
+     Events
+  ------------------------------------------------------------------ */
+  function bind(){
+    $$('.roles button').forEach(function(b){
+      b.addEventListener('click', function(){
+        state.role = b.dataset.role;
+        renderAll();
+        setStatus('Viewing as ' + ROLE_LABEL[state.role] + '. Role switching is part of the demo.', 'info');
+      });
+    });
+
+    $('#pubZone').addEventListener('change', function(e){
+      state.activeZone = e.target.value;
+      save(); renderAll();
+    });
+    $('#pubLang').addEventListener('change', function(){ renderPublic(); });
+    $('#alertZone').addEventListener('change', function(e){
+      state.activeZone = e.target.value;
+      save(); renderResponse();
+    });
+    ['alertAudience','langEn','langHi','chInapp'].forEach(function(id){
+      var el = $('#' + id);
+      if(el) el.addEventListener('change', updateComposer);
+    });
+    $('#sendAlertBtn').addEventListener('click', reviewSend);
+    $('#refreshWeatherBtn').addEventListener('click', function(){
+      var zone = zoneById($('#alertZone').value);
+      if(zone) fetchWeather(zone);
+    });
+
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      var btn = t.closest ? t.closest('button') : null;
+      if(btn){
+        if(btn.dataset.openZone){ state.activeZone = btn.dataset.openZone; $('#alertZone').value = state.activeZone; save(); renderResponse(); }
+        if(btn.dataset.planZone){ state.activeZone = btn.dataset.planZone; $('#alertZone').value = state.activeZone; save(); renderResponse(); renderAll(); setStatus('Supply plan loaded for ' + (zoneById(state.activeZone) || {}).name + '.', 'info'); }
+        if(btn.dataset.retry){ var parts = btn.dataset.retry.split('|'); retryDelivery(parts[0], parts[1]); }
+        if(btn.dataset.cancel){ cancelAlert(btn.dataset.cancel); }
+        if(btn.dataset.correct){ correctAlert(btn.dataset.correct); }
+        if(btn.dataset.approve){ approvePlan(btn.dataset.approve); }
+        if(btn.dataset.optout){ var r = state.recipients.filter(function(x){ return x.id === btn.dataset.optout; })[0]; if(r){ r.consent = false; audit('Subscription opted out', r.name + ' · ' + r.channel); save(); renderAll(); setStatus('Opt-out recorded for ' + r.name + '.', 'warn'); } }
+        if(btn.dataset.optin){ var r2 = state.recipients.filter(function(x){ return x.id === btn.dataset.optin; })[0]; if(r2){ r2.consent = true; audit('Subscription opted in', r2.name + ' · ' + r2.channel); save(); renderAll(); setStatus('Opt-in recorded for ' + r2.name + '.', 'ok'); } }
+        if(btn.id === 'subBtn'){ addSubscription(); }
+        if(btn.id === 'saveInv'){ saveInventory(); }
+        if(btn.id === 'saveSettings'){ saveSettings(); }
+        if(btn.id === 'liveToggle'){ state.settings.live = !state.settings.live; audit('Data mode changed', state.settings.live ? 'Live weather enabled' : 'Demo snapshot enabled'); save(); renderAll(); setStatus(state.settings.live ? 'Live weather enabled. Refresh a zone to fetch it.' : 'Demo snapshot restored.', 'info'); }
+        if(btn.id === 'exportAudit'){ exportAudit(); }
+        if(btn.id === 'resetBtn'){ confirmReset(); }
+        if(btn.id === 'geoBtn'){ useLocation(); }
+      }
+      var mapNode = t.closest ? t.closest('[data-map-zone]') : null;
+      if(mapNode){
+        state.activeZone = mapNode.dataset.mapZone;
+        $('#alertZone').value = state.activeZone;
+        save(); renderAll();
+        setStatus('Selected ' + (zoneById(state.activeZone) || {}).name + ' from the schematic map.', 'info');
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && !$('#modal').hidden) closeModal();
+      var node = e.target.closest ? e.target.closest('[data-map-zone]') : null;
+      if(node && (e.key === 'Enter' || e.key === ' ')){
+        e.preventDefault();
+        state.activeZone = node.dataset.mapZone;
+        $('#alertZone').value = state.activeZone;
+        save(); renderAll();
+      }
+    });
+
+    $('#opUnit').addEventListener('change', renderOperator);
+    $('#modalCancel').addEventListener('click', closeModal);
+    $('#modalOk').addEventListener('click', function(){ if(modalAction) modalAction(); else closeModal(); });
+    $('#modal').addEventListener('click', function(e){ if(e.target.id === 'modal') closeModal(); });
+
+    var search = $('#placeSearch');
+    if(search) search.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); } });
+  }
+
+  function addSubscription(){
+    var consent = $('#subConsent').checked;
+    if(!consent){ setStatus('Subscription not added: consent is required.', 'warn'); return; }
+    var contact = $('#subContact').value.trim();
+    if(!contact){ setStatus('Subscription not added: a contact is needed for the chosen channel.', 'warn'); return; }
+    var r = {
+      id:'p' + Date.now(), name:($('#subName').value.trim() || 'New DEMO resident'),
+      zoneId:$('#subZone').value, audience:'resident', language:$('#subLang').value,
+      channel:$('#subChannel').value, contact:maskContact(contact), consent:true, subscribedAt:iso(now()), note:'DEMO contact added in this browser'
+    };
+    state.recipients.push(r);
+    audit('Subscription added', r.name + ' · ' + r.channel + ' · ' + (zoneById(r.zoneId) || {}).name);
+    save(); renderAll();
+    setStatus('Demo subscription added (contact masked in the table).', 'ok');
+  }
+
+  function saveInventory(){
+    var u = unitById($('#opUnit').value);
+    if(!u) return;
+    var before = JSON.stringify(u.stock);
+    SUPPLY_ITEMS.forEach(function(it){
+      var el = $('#inv-' + it.key);
+      var v = parseInt(el.value, 10);
+      u.stock[it.key] = isFinite(v) && v >= 0 ? v : 0;
+    });
+    u.updatedAt = iso(now());
+    audit('Inventory updated', u.name + ' · ' + (before === JSON.stringify(u.stock) ? 'no quantity change' : 'quantities changed') + ' (DEMO)');
+    save(); renderAll();
+    setStatus('Inventory saved for ' + u.name + ' and logged as a simulated change.', 'ok');
+  }
+
+  function saveSettings(){
+    var t1 = parseFloat($('#t1').value), t2 = parseFloat($('#t2').value), t3 = parseFloat($('#t3').value);
+    if(!(t3 > t2 && t2 > t1)){ setStatus('Thresholds must increase: watch < alert < severe.', 'warn'); return; }
+    state.settings.t1 = t1; state.settings.t2 = t2; state.settings.t3 = t3;
+    state.settings.staleHours = Math.max(1, parseInt($('#staleH').value, 10) || 6);
+    state.settings.rateMax = Math.max(1, parseInt($('#rlMax').value, 10) || 2);
+    state.settings.rateWindowMin = Math.max(1, parseInt($('#rlWin').value, 10) || 5);
+    state.settings.reviewLevel3 = $('#reviewLevel3').checked;
+    audit('Settings updated', 'Thresholds ' + t1 + '/' + t2 + '/' + t3 + ' °C · stale ' + state.settings.staleHours + ' h · rate ' + state.settings.rateMax + ' per ' + state.settings.rateWindowMin + ' min');
+    save(); renderAll();
+    setStatus('Settings saved. Refresh a zone to reclassify it.', 'ok');
+  }
+
+  function exportAudit(){
+    var blob = new Blob([JSON.stringify({ exportedAt:iso(now()), demo:true, audit:state.audit, alerts:state.alerts, deliveries:state.deliveries, requests:state.requests, dispatches:state.dispatches }, null, 2)], { type:'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'heatwise-demo-audit.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    audit('Audit exported', state.audit.length + ' entries exported as JSON (DEMO)');
+    save(); renderAudit();
+    setStatus('Demo audit exported as JSON.', 'ok');
+  }
+
+  function confirmReset(){
+    openModal('Reset demo data?', '<p>This clears alerts, deliveries, requests, dispatches, inventory edits and the audit log in this browser, then reloads the sample scenario.</p><label class="inline" style="font-size:12.5px"><input type="checkbox" id="resetAck"> I understand this removes the local demo history</label>', 'Reset', function(){
+      if(!$('#resetAck') || !$('#resetAck').checked){ setStatus('Reset cancelled.', 'info'); return; }
+      try{ localStorage.removeItem(STORE); }catch(e){}
+      state = seed();
+      audit('Demo data reset', 'Sample scenario restored: ' + state.zones.length + ' zones, ' + state.recipients.length + ' synthetic contacts, ' + state.units.length + ' units');
+      save(); closeModal(); renderAll();
+      setStatus('Demo data reset to the sample scenario.', 'ok');
+    });
+  }
+
+  function useLocation(){
+    var statusEl = $('#geoStatus');
+    if(!navigator.geolocation){
+      statusEl.dataset.kind = 'error';
+      statusEl.textContent = 'This browser does not expose location. Alerts remain limited to the zone you select.';
+      return;
+    }
+    statusEl.dataset.kind = 'info';
+    statusEl.textContent = 'Requesting location once. It is used only to check the zone and is not stored.';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var here = { lat:pos.coords.latitude, lon:pos.coords.longitude };
+      var near = state.zones.map(function(z){ return { zone:z, km:haversine(here, z) }; }).sort(function(a,b){ return a.km - b.km; })[0];
+      if(near && near.km <= 60){
+        state.activeZone = near.zone.id;
+        $('#pubZone').value = near.zone.id;
+        statusEl.dataset.kind = 'ok';
+        statusEl.textContent = 'Inside ' + near.zone.name + ' (' + near.km + ' km from the zone centre). Alerts will use this zone. Precise coordinates are not stored.';
+        save(); renderAll();
+      } else {
+        statusEl.dataset.kind = 'warn';
+        statusEl.textContent = 'You are not inside a demo zone (nearest is ' + (near ? near.zone.name + ', ' + near.km + ' km' : 'unknown') + '). Geofenced alerts are off; pick a zone above.';
+      }
+    }, function(err){
+      statusEl.dataset.kind = 'warn';
+      statusEl.textContent = err && err.code === 1
+        ? 'Location permission denied. Alerts stay limited to the zone you select, and no location is stored.'
+        : 'Location could not be determined. Alerts stay limited to the selected zone.';
+    }, { enableHighAccuracy:false, timeout:8000, maximumAge:600000 });
+  }
+
+  /* ------------------------------------------------------------------
+     Init
+  ------------------------------------------------------------------ */
+  function init(){
+    state = load() || seed();
+    if(!state.audit.length) audit('Demo session started', 'Sample scenario loaded: ' + state.zones.length + ' fictional zones, ' + state.recipients.length + ' synthetic contacts, ' + state.units.length + ' storage units');
+    bind();
+    renderAll();
+    setStatus(state.settings.live ? 'Demo loaded. Live weather can be refreshed per zone.' : 'Demo loaded with a synthetic heat event. Open Response team to run the scenario.', 'info');
+  }
+  init();
+})();
+</script>
+</body>
+</html>
