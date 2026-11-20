@@ -142,6 +142,12 @@ footer p{margin:0 0 4px}
 .simtag{display:inline-block;background:#3f3a2a;color:#ffe6a3;border-radius:4px;padding:1px 6px;font-size:9.5px;font-weight:800;letter-spacing:.6px}
 .costrow{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:8px;color:#40483f}
 .costrow b{color:#2b332e}
+.emailwrap{margin-top:10px}
+.emailframe{border:1px solid #dfd7c6;border-radius:12px;background:#fff;overflow:hidden;max-width:640px}
+.emailhead{background:#f7f3ea;border-bottom:1px solid #e8e1d2;padding:9px 12px;font-size:11.5px;color:#4c554e;line-height:1.55}
+.emailhead b{display:block;font-size:12.5px;color:#2b332e}
+.emailbody{padding:0}
+.emailbody a{color:#8a3f17}
 ol.steps{margin:0;padding-left:20px;font-size:12.5px;line-height:1.6;color:#3d4640}
 ol.steps li{margin-bottom:3px}
 </style>
@@ -165,7 +171,7 @@ ol.steps li{margin-bottom:3px}
 <div class="demo-banner">
   <div class="wrap">
     <b>DEMO</b>
-    <span>Simulation only. Synthetic people, zones, stock and dispatches. No real SMS is sent, no supplies are ordered, and nothing here is an official IMD warning.</span>
+    <span>Simulation only. Synthetic people, zones, stock and dispatches. No real SMS or email is sent, no supplies are ordered, and nothing here is an official IMD warning.</span>
     <button class="btn-quiet" id="resetBtn" style="margin-left:auto">Reset demo data</button>
   </div>
 </div>
@@ -302,9 +308,9 @@ ol.steps li{margin-bottom:3px}
             <div class="inline">
               <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chInapp" checked> In-app (available)</label>
               <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chSms"> SMS <span class="simtag" id="smsModeChip">SIMULATED</span></label>
-              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chEmail" disabled> Email — not configured</label>
+              <label class="inline" style="font-weight:500;font-size:12.5px"><input type="checkbox" id="chEmail"> Email <span class="simtag" id="emailModeChip">DEMO</span></label>
             </div>
-            <span class="help">SMS goes only to synthetic numbers in this demo. Live SMS needs the server adapter and its environment variables; no credentials are stored in this page.</span>
+            <span class="help">SMS goes only to synthetic numbers and email only to synthetic .invalid addresses in this demo. Live delivery needs the server adapter and its environment variables; no credentials are stored in this page.</span>
           </div>
           <div class="field">
             <label>Languages to send</label>
@@ -326,6 +332,7 @@ ol.steps li{margin-bottom:3px}
         </div>
       </div>
       <div id="smsPanel"></div>
+      <div id="emailPanel"></div>
     </div>
 
     <div class="card">
@@ -347,6 +354,27 @@ ol.steps li{margin-bottom:3px}
         <span class="mini">No real number is contacted. Contacts whose registered area does not overlap the zone are excluded.</span>
       </div>
       <div id="smsScenarioOut"></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <div>
+          <h2>Sample email test scenario</h2>
+          <p class="muted">One path through the email feature using the demo registered contacts: affected area and data freshness, eligible opted-in recipients, email preview, confirmation, DEMO delivery, then the audit trail.</p>
+        </div>
+        <span class="chip demo">DEMO</span>
+      </div>
+      <ol class="steps">
+        <li>Selects the Suryapur east ward demo zone and both languages.</li>
+        <li>Filters the synthetic contacts to those who opted in to email and whose registered area overlaps the zone.</li>
+        <li>Shows the subject and email text per language, then requires a responder confirmation.</li>
+        <li>Simulates delivery, then lists per-recipient status, failures and the audit entries. No address is shown in full.</li>
+      </ol>
+      <div class="inline" style="margin-top:10px">
+        <button type="button" class="btn" id="emailScenarioBtn">Preview the sample email</button>
+        <span class="mini">No real email is sent. Demo addresses use the reserved .invalid domain.</span>
+      </div>
+      <div id="emailScenarioOut"></div>
     </div>
 
     <div class="card">
@@ -483,6 +511,17 @@ ol.steps li{margin-bottom:3px}
       </ul>
     </details>
     <details>
+      <summary>Email alerts, consent and unsubscribe</summary>
+      <ul>
+        <li>Email is its own channel with its own opt-in. A contact receives heatwave email only if they gave general consent, opted in to email separately, have an address on record, and are registered in an area that overlaps the affected zone. Opting in or out is done in the public view, and every email carries an unsubscribe link that works without signing in.</li>
+        <li>Each email names the alert level, the affected area and district, the valid time window, the last update time and the data source. It states plainly that a model estimate is not an official IMD warning, lists practical heat-safety steps, explains when to seek urgent medical help, and links to the full alert and to the public heat-safety guidance.</li>
+        <li>The language comes from the contact's saved preference, falling back to the site default (English). Each recipient gets one email in one language; no recipient ever sees another recipient's address, and addresses are masked everywhere they appear in this page.</li>
+        <li>Before sending, the responder sees the affected area, level, source, forecast window and data age, the number of eligible opted-in recipients, and the subject and body exactly as they will go out.</li>
+        <li>Duplicates are blocked per zone, level and channel within six hours; email has its own per-zone rate limit. An idempotency key stops a retried request from delivering the same alert twice. The approval records who approved, the alert version, the recipient count, the timestamp and the delivery results.</li>
+        <li>No provider is contacted in DEMO mode: delivery is simulated against synthetic <code>.invalid</code> addresses. Live email needs <code>server/email-adapter.mjs</code> running with provider credentials in its environment. The adapter defaults to a dry run, replaces the unsubscribe placeholder with a signed per-recipient link, and reports a status only after the provider answers.</li>
+      </ul>
+    </details>
+    <details>
       <summary>Supply planning and privacy</summary>
       <ul>
         <li>Demand is estimated from zone population, alert level and a fixed affected share, then multiplied by planning norms for water, oral rehydration salts, food, medicine kits and cooling items. The formula is shown with every plan.</li>
@@ -527,7 +566,7 @@ ol.steps li{margin-bottom:3px}
 
   var $ = function(s){ return document.querySelector(s); };
   var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
-  var STORE = 'heatwise.response.v2';
+  var STORE = 'heatwise.response.v3';
   var now = function(){ return new Date(); };
   var iso = function(d){ return d.toISOString(); };
   var HOUR = 3600000;
@@ -587,18 +626,18 @@ ol.steps li{margin-bottom:3px}
           source:'DEMO snapshot (not live weather)', confidence:'Illustrative only' } }
     ];
     var recipients = [
-      { id:'p1', name:'Resident A', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 04821', areas:['Suryapur east ward'], district:'Suryapur', consent:true, smsOptIn:true, subscribedAt:ago(200), note:'DEMO contact, SMS opted in' },
-      { id:'p2', name:'Resident B', zoneId:'z-suryapur', audience:'resident', language:'hi', phone:'+91 90000 07310', areas:['East colony'], district:'Suryapur', consent:true, smsOptIn:true, subscribedAt:ago(190), note:'DEMO contact, SMS opted in' },
-      { id:'p3', name:'Resident C', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 01194', areas:['Bus stand area'], district:'Suryapur', consent:true, smsOptIn:false, subscribedAt:ago(180), note:'DEMO contact, SMS opted out' },
-      { id:'p4', name:'Worker D', zoneId:'z-suryapur', audience:'worker', language:'hi', phone:'+91 90000 02247', areas:['Suryapur east ward'], district:'Suryapur', consent:true, smsOptIn:true, subscribedAt:ago(120), note:'DEMO contact, SMS opted in' },
-      { id:'p5', name:'Worker E', zoneId:'z-suryapur', audience:'worker', language:'en', phone:'+91 90000 05580', areas:['East colony'], district:'Suryapur', consent:true, smsOptIn:true, subscribedAt:ago(100), note:'DEMO contact, SMS opted in' },
-      { id:'p6', name:'Resident F', zoneId:'z-northplain', audience:'resident', language:'hi', phone:'+91 90000 09032', areas:['Northplain industrial ward'], district:'Northplain', consent:true, smsOptIn:true, subscribedAt:ago(90), note:'DEMO contact, SMS opted in' },
-      { id:'p7', name:'Worker G', zoneId:'z-northplain', audience:'worker', language:'en', phone:'+91 90000 06671', areas:['Sector 4'], district:'Northplain', consent:true, smsOptIn:true, subscribedAt:ago(80), note:'DEMO contact, SMS opted in' },
-      { id:'p8', name:'Resident H', zoneId:'z-kovai', audience:'resident', language:'en', phone:'+91 90000 03308', areas:['Kovai coastal ward'], district:'Kovai', consent:true, smsOptIn:true, subscribedAt:ago(60), note:'DEMO contact, SMS opted in' },
-      { id:'p9', name:'Worker I', zoneId:'z-kovai', audience:'worker', language:'hi', phone:'+91 90000 04477', areas:['Harbour colony'], district:'Kovai', consent:false, smsOptIn:false, subscribedAt:ago(50), note:'DEMO contact, opted out of everything' },
-      { id:'p10', name:'Resident J', zoneId:'z-northplain', audience:'resident', language:'en', phone:'+91 90000 08852', areas:['Sector 4'], district:'Northplain', consent:true, smsOptIn:true, subscribedAt:ago(40), note:'DEMO contact, SMS opted in' },
-      { id:'p11', name:'Resident K', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 02176', areas:['East colony'], district:'Suryapur', consent:true, smsOptIn:true, subscribedAt:ago(30), note:'DEMO contact, SMS opted in' },
-      { id:'p12', name:'Resident L', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 06399', areas:['Old town'], district:'Suryapur', consent:true, smsOptIn:true, subscribedAt:ago(20), note:'DEMO contact registered outside every demo zone boundary' }
+      { id:'p1', name:'Resident A', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 04821', email:'resident.a@example.invalid', areas:['Suryapur east ward'], district:'Suryapur', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(200), note:'DEMO contact, SMS and email opted in' },
+      { id:'p2', name:'Resident B', zoneId:'z-suryapur', audience:'resident', language:'hi', phone:'+91 90000 07310', email:'resident.b@example.invalid', areas:['East colony'], district:'Suryapur', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(190), note:'DEMO contact, SMS and email opted in' },
+      { id:'p3', name:'Resident C', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 01194', email:'resident.c@example.invalid', areas:['Bus stand area'], district:'Suryapur', consent:true, smsOptIn:false, emailOptIn:false, emailOptOutAt:ago(70), subscribedAt:ago(180), note:'DEMO contact, SMS and email opted out' },
+      { id:'p4', name:'Worker D', zoneId:'z-suryapur', audience:'worker', language:'hi', phone:'+91 90000 02247', email:'worker.d@example.invalid', areas:['Suryapur east ward'], district:'Suryapur', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(120), note:'DEMO contact, SMS and email opted in' },
+      { id:'p5', name:'Worker E', zoneId:'z-suryapur', audience:'worker', language:'en', phone:'+91 90000 05580', email:null, areas:['East colony'], district:'Suryapur', consent:true, smsOptIn:true, emailOptIn:false, subscribedAt:ago(100), note:'DEMO contact with no email address on record' },
+      { id:'p6', name:'Resident F', zoneId:'z-northplain', audience:'resident', language:'hi', phone:'+91 90000 09032', email:'resident.f@example.invalid', areas:['Northplain industrial ward'], district:'Northplain', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(90), note:'DEMO contact, SMS and email opted in' },
+      { id:'p7', name:'Worker G', zoneId:'z-northplain', audience:'worker', language:'en', phone:'+91 90000 06671', email:'worker.g@example.invalid', areas:['Sector 4'], district:'Northplain', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(80), note:'DEMO contact, SMS and email opted in' },
+      { id:'p8', name:'Resident H', zoneId:'z-kovai', audience:'resident', language:'en', phone:'+91 90000 03308', email:'resident.h@example.invalid', areas:['Kovai coastal ward'], district:'Kovai', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(60), note:'DEMO contact, SMS and email opted in' },
+      { id:'p9', name:'Worker I', zoneId:'z-kovai', audience:'worker', language:'hi', phone:'+91 90000 04477', email:'worker.i@example.invalid', areas:['Harbour colony'], district:'Kovai', consent:false, smsOptIn:false, emailOptIn:false, subscribedAt:ago(50), note:'DEMO contact, opted out of everything' },
+      { id:'p10', name:'Resident J', zoneId:'z-northplain', audience:'resident', language:'en', phone:'+91 90000 08852', email:'resident.j@example.invalid', areas:['Sector 4'], district:'Northplain', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(40), note:'DEMO contact, SMS and email opted in' },
+      { id:'p11', name:'Resident K', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 02176', email:'resident.k@example.invalid', areas:['East colony'], district:'Suryapur', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(30), note:'DEMO contact, SMS and email opted in' },
+      { id:'p12', name:'Resident L', zoneId:'z-suryapur', audience:'resident', language:'en', phone:'+91 90000 06399', email:'resident.l@example.invalid', areas:['Old town'], district:'Suryapur', consent:true, smsOptIn:true, emailOptIn:true, subscribedAt:ago(20), note:'DEMO contact registered outside every demo zone boundary' }
     ];
     var units = [
       { id:'u1', name:'Suryapur central warehouse', operator:'District supply office', zoneId:'z-suryapur', lat:26.80, lon:78.05, distanceKm:6.4, travelMin:18,
@@ -611,11 +650,13 @@ ol.steps li{margin-bottom:3px}
         stock:{ water:82000, ors:500, food:9000, meds:3, cooling:30, other:60 }, capacity:60, updatedAt:ago(12), note:'DEMO inventory' }
     ];
     return {
-      version:2, role:'public', demo:true,
+      version:3, role:'public', demo:true,
       settings:{ t1:38, t2:41, t3:44, staleHours:6, rateMax:2, rateWindowMin:5, reviewLevel3:true, live:false },
       sms:{ mode:'simulate', provider:'simulated', sender:'HEATWISE', liveConfigured:false, dryRun:true,
         costPerSegment:0.18, currency:'INR', optOutKeyword:'STOP', maxSendsPerZone:3, rateWindowMin:30,
         maxSegments:5, lastCheck:null, checkResult:null },
+      email:{ mode:'simulate', provider:'simulated', sender:'alerts@heatwise.example', liveConfigured:false, dryRun:true,
+        maxSendsPerZone:3, rateWindowMin:30, lastCheck:null, checkResult:null },
       zones:zones, recipients:recipients, units:units,
       alerts:[], deliveries:[], requests:[], dispatches:[], audit:[], activeZone:'z-suryapur'
     };
@@ -626,7 +667,7 @@ ol.steps li{margin-bottom:3px}
       var raw = localStorage.getItem(STORE);
       if(!raw) return null;
       var s = JSON.parse(raw);
-      if(!s || s.version !== 2 || !s.zones || !s.sms) return null;
+      if(!s || s.version !== 3 || !s.zones || !s.sms || !s.email) return null;
       return s;
     }catch(e){ return null; }
   }
@@ -681,6 +722,27 @@ ol.steps li{margin-bottom:3px}
     var digits = String(phone).replace(/\D/g, '');
     if(digits.length < 6) return '••••';
     return '+' + digits.slice(0, 2) + ' ••••• ' + digits.slice(-4);
+  }
+  function maskEmail(email){
+    if(!email) return '—';
+    var parts = String(email).split('@');
+    if(parts.length !== 2 || !parts[0] || !parts[1]) return '••••';
+    var domain = parts[1].split('.');
+    return parts[0].slice(0, 1) + '•••@' + domain[0].slice(0, 1) + '•••' + (domain.length > 1 ? '.' + domain[domain.length - 1] : '');
+  }
+  function siteUrl(file){
+    if(location.protocol === 'http:' || location.protocol === 'https:'){
+      return location.origin + location.pathname.replace(/[^/]*$/, '') + file;
+    }
+    return file;
+  }
+  function emailUnsubscribeToken(recipient){
+    if(!recipient || !recipient.email) return null;
+    return 'u' + hash(recipient.id + '|' + recipient.email + '|email').toString(36);
+  }
+  function emailUnsubUrl(recipient){
+    var token = emailUnsubscribeToken(recipient);
+    return token ? siteUrl('heat-response.html') + '#unsubscribe=' + token : '{{UNSUBSCRIBE_URL}}';
   }
   function areaOverlap(recipient, zone){
     var ra = recipient.areas || [], za = zone.areas || [];
@@ -781,6 +843,11 @@ ol.steps li{margin-bottom:3px}
   /* ------------------------------------------------------------------
      SMS composition, segments and cost
   ------------------------------------------------------------------ */
+  function alertVersion(ctx){
+    if(!ctx.zone) return 'v0';
+    var n = state.alerts.filter(function(a){ return a.zoneId === ctx.zone.id; }).length + 1;
+    return 'v' + n + ' (' + LEVELS[ctx.info.level || 1].key + ')';
+  }
   function ensureDraftId(){
     if(!DRAFT.id || Date.now() - DRAFT.at > 10 * 60000){
       DRAFT.id = 'al' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
@@ -798,6 +865,7 @@ ol.steps li{margin-bottom:3px}
     var channels = [];
     if($('#chInapp') && $('#chInapp').checked) channels.push('inapp');
     if($('#chSms') && $('#chSms').checked) channels.push('sms');
+    if($('#chEmail') && $('#chEmail').checked) channels.push('email');
     return channels;
   }
   function smsWindow(zone){
@@ -852,6 +920,193 @@ ol.steps li{margin-bottom:3px}
       cost += lineCost;
     });
     return { byLang:byLang, order:order.filter(function(l){ return !!byLang[l]; }), recipients:recipients.length, totalParts:totalParts, cost:cost, currency:state.sms.currency };
+  }
+
+  /* ------------------------------------------------------------------
+     Email alerts: recipient filtering, unsubscribe, content and preview
+  ------------------------------------------------------------------ */
+  function emailRecipients(zone, audience, langs){
+    return state.recipients.filter(function(r){
+      if(!r.email || r.consent !== true || r.emailOptIn !== true) return false;
+      if(audience !== 'all' && r.audience !== audience) return false;
+      if(langs.indexOf(r.language) < 0) return false;
+      return !!areaOverlap(r, zone);
+    });
+  }
+  function langLabel(l){ return l === 'hi' ? 'हिन्दी' : 'English'; }
+  function emailLevelName(lang, level){
+    if(lang !== 'hi') return LEVELS[level].name;
+    return level === 3 ? 'गंभीर गर्मी' : level === 2 ? 'गर्मी चेतावनी' : 'गर्मी निगरानी';
+  }
+  function emailSteps(lang, level){
+    if(lang === 'hi'){
+      var hi = [
+        'पानी नियमित रूप से पिएं, प्यास लगने से पहले। बाहर जाते समय पानी साथ रखें।',
+        'सबसे ठंडी जगह में रहें; पंखा, गीला कपड़ा या ठंडा पानी शरीर पर लगाएं।',
+        level >= 3 ? 'जरूरी न हो तो दोपहर 12 से 4 बजे तक बाहर न जाएं।' : 'दोपहर में भारी बाहरी काम कम करें।',
+        level >= 2 ? 'बाहर का काम सुबह या शाम को करें और हर 30–45 मिनट में छाया में आराम करें।' : 'गर्मी बढ़ने पर बाहर की गतिविधि कम करें।',
+        'बुज़ुर्गों, छोटे बच्चों, गर्भवती महिलाओं और बीमार लोगों का हाल जानें।',
+        'किसी को खड़ी गाड़ी में अकेला न छोड़ें। शराब और बहुत मीठे पेय न दें।'
+      ];
+      return hi;
+    }
+    var en = [
+      'Drink water regularly, before you feel thirsty, and carry a bottle when you go out.',
+      'Stay in the coolest room you have; use a fan, a damp cloth or cool water on your skin.',
+      level >= 3 ? 'Avoid going outside between 12:00 and 16:00 unless it is essential.' : 'Reduce heavy outdoor work at midday.',
+      level >= 2 ? 'Move outdoor work to early morning or evening and rest in shade every 30–45 minutes.' : 'Limit strenuous outdoor activity as the day heats up.',
+      'Check on older people, young children, pregnant women and anyone who is unwell.',
+      'Do not leave anyone in a parked vehicle. Avoid alcohol and very sweet drinks.'
+    ];
+    return en;
+  }
+  function emailContent(lang, zone, level, alertId, opts){
+    opts = opts || {};
+    var w = zone.weather || {};
+    var app = typeof w.appMax === 'number' ? Math.round(w.appMax) : '—';
+    var thr = thresholdFor(level);
+    var win = windowText(zone);
+    var winShort = w.window && w.window.from ? fmtDay(w.window.from) + '–' + fmtDay(w.window.to) : 'forecast period';
+    var updated = w.fetchedAt ? fmtTime(w.fetchedAt) : 'not recorded';
+    var ageH = w.fetchedAt ? Math.max(0, Math.round((now().getTime() - new Date(w.fetchedAt).getTime()) / HOUR)) : null;
+    var src = smsSourceLabel(w);
+    var fresh = ageH === null ? 'age not recorded' : 'about ' + ageH + ' h old at ' + fmtTime(now());
+    var area = zone.name + (zone.district ? ', ' + zone.district : '');
+    var alertUrl = siteUrl('heat-response.html') + '#alert=' + alertId;
+    var guideUrl = siteUrl('heat-safety.html') + '#during';
+    var hi = lang === 'hi';
+    var lvl = emailLevelName(lang, level);
+    var subject = (hi ? '[डेमो] ' : '[DEMO] ') + lvl + ' — ' + zone.name + ', ' + winShort;
+    var steps = emailSteps(lang, level);
+    var text = hi ? {
+      headline: zone.name + ' में ' + lvl,
+      notOfficial: 'यह एक मॉडल अनुमान है, आधिकारिक IMD चेतावनी नहीं।',
+      labels: { level:'चेतावनी स्तर', area:'प्रभावित क्षेत्र', valid:'अवधि', updated:'अंतिम अपडेट', source:'स्रोत', measure:'अनुमानित माप' },
+      stepsTitle:'अब क्या करें',
+      urgentTitle:'तुरंत मदद लें अगर',
+      urgent:'उलझन, बेहोशी, गर्म और सूखी त्वचा, पसीना बंद होना, दौरा या बुखार कम न हो तो यह हीटस्ट्रोक हो सकता है। व्यक्ति को छाया में ले जाएं, पानी और पंखे से ठंडा करें और तुरंत 112 या 108 पर कॉल करें। बेहोश व्यक्ति को कुछ भी खिलाएं या पिलाएं नहीं।',
+      caution:'दवा या घरेलू इलाज तुरंत इलाज की जगह नहीं हैं। अगर डॉक्टर ने तरल पदार्थ सीमित करने को कहा है, तो उनकी सलाह मानें। यह सामान्य जानकारी है, डॉक्टर की सलाह नहीं।',
+      ctaFull:'पूरा अलर्ट देखें', ctaGuide:'गर्मी से बचाव की जानकारी',
+      footer:'यह ईमेल आपको इसलिए मिला है क्योंकि आपने हीटवाइज़ गर्मी अलर्ट ईमेल के लिए सहमति दी थी।',
+      unsub:'गर्मी अलर्ट ईमेल बंद करें', emergency:'आपातकाल: 112 · एम्बुलेंस: 108',
+      disclaimer:'यह पेज किसी बीमारी का निदान नहीं करता और आधिकारिक चेतावनी या आपातकालीन सेवा की जगह नहीं लेता।',
+      demoTag:'डेमो ईमेल',
+      lead:'मॉडल के अनुसार इस क्षेत्र में दिन का अधिकतम महसूस होने वाला तापमान लगभग ' + app + '°C रहेगा (मॉडल सीमा ' + thr + '°C)।',
+      fresh:'डेटा की उम्र: लगभग ' + ageH + ' घंटे (सीमा ' + state.settings.staleHours + ' घंटे)'
+    } : {
+      headline: lvl + ' in ' + zone.name,
+      notOfficial: 'Model estimate — this is not an official IMD warning.',
+      labels: { level:'Alert level', area:'Affected area', valid:'Valid', updated:'Last updated', source:'Source', measure:'Forecast measure' },
+      stepsTitle:'What to do now',
+      urgentTitle:'Get urgent medical help if',
+      urgent:'someone is confused, fainting, has hot dry skin or has stopped sweating, has a fit, or a temperature that will not come down. Heatstroke is a medical emergency: move them to shade, cool them with water and a fan, and call 112 or 108 immediately. Do not give food or drink to someone who is unconscious.',
+      caution:'Medicines and home remedies are not a substitute for urgent care. If a clinician has told you to limit fluids, follow that advice. This is general information, not medical advice.',
+      ctaFull:'See the full alert', ctaGuide:'Heat safety guidance',
+      footer:'You are receiving this email because you opted in to Heatwise heatwave email alerts.',
+      unsub:'Unsubscribe from heatwave emails', emergency:'Emergency: 112 · Ambulance: 108',
+      disclaimer:'This page does not diagnose illness and does not replace official warnings or emergency services.',
+      demoTag:'DEMO EMAIL',
+      lead:'The forecast model puts the daily maximum feels-like temperature near ' + app + ' °C for this area, against the model ' + thr + ' °C threshold.',
+      fresh:'Data age: about ' + ageH + ' h (limit ' + state.settings.staleHours + ' h)'
+    };
+    var row = function(label, value){
+      return '<tr><td style="padding:7px 12px 7px 0;border-bottom:1px solid #efe9dc;font-size:12px;color:#6a736c;width:42%;vertical-align:top">' + esc(label) + '</td>' +
+        '<td style="padding:7px 0;border-bottom:1px solid #efe9dc;font-size:13px;color:#2b332e;vertical-align:top">' + esc(value) + '</td></tr>';
+    };
+    var rowsHtml = row(text.labels.level, lvl) +
+      row(text.labels.area, area) +
+      row(text.labels.valid, win) +
+      row(text.labels.updated, updated + ' · ' + text.fresh) +
+      row(text.labels.source, src) +
+      row(text.labels.measure, (hi ? 'दिन का अधिकतम महसूस तापमान' : 'Daily maximum apparent temperature') + ' ' + app + ' °C');
+    var html = '<div style="margin:0;padding:0;background:#f6f4ef">' +
+      '<div style="display:none;max-height:0;overflow:hidden;opacity:0">' + esc(lvl + ' · ' + area + ' · ' + win + ' · ' + src) + '</div>' +
+      '<div style="max-width:600px;margin:0 auto;padding:18px 14px 22px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;color:#2b332e">' +
+        '<div style="font-size:12px;font-weight:800;letter-spacing:.6px;color:#b4551f">HEATWISE · ' + esc(text.demoTag) + '</div>' +
+        '<h1 style="font-size:22px;line-height:1.3;margin:8px 0 4px">' + esc(text.headline) + '</h1>' +
+        '<p style="margin:0 0 14px;font-size:14px;line-height:1.55;color:#4c554e">' + esc(text.notOfficial) + '</p>' +
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:#ffffff;border:1px solid #e6dfd0;border-radius:10px">' +
+          '<tr><td style="padding:2px 14px" colspan="2"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">' + rowsHtml + '</table></td></tr>' +
+        '</table>' +
+        '<p style="margin:12px 0 0;font-size:13.5px;line-height:1.6;color:#3d4640">' + esc(text.lead) + '</p>' +
+        '<h2 style="font-size:15px;margin:18px 0 6px">' + esc(text.stepsTitle) + '</h2>' +
+        '<ul style="margin:0;padding-left:20px;font-size:13.5px;line-height:1.6;color:#3d4640">' + steps.map(function(x){ return '<li style="margin-bottom:4px">' + esc(x) + '</li>'; }).join('') + '</ul>' +
+        '<div style="background:#fdf1ec;border:1px solid #efcbbd;border-radius:10px;padding:11px 13px;margin:16px 0;font-size:13.5px;line-height:1.6;color:#7c1f13">' +
+          '<strong style="display:block;margin-bottom:3px">' + esc(text.urgentTitle) + '</strong>' + esc(text.urgent) +
+        '</div>' +
+        '<p style="margin:0 0 16px;font-size:12.5px;line-height:1.6;color:#6a736c">' + esc(text.caution) + '</p>' +
+        '<p style="margin:0">' +
+          '<a href="' + esc(alertUrl) + '" style="display:inline-block;background:#b4551f;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 16px;border-radius:8px;margin:0 8px 8px 0">' + esc(text.ctaFull) + '</a>' +
+          '<a href="' + esc(guideUrl) + '" style="display:inline-block;background:#ffffff;color:#8a3f17;text-decoration:none;font-weight:700;font-size:14px;padding:10px 15px;border-radius:8px;border:1px solid #d8d2c5">' + esc(text.ctaGuide) + '</a>' +
+        '</p>' +
+        '<p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#6a736c">' + esc(text.footer) +
+          ' <a href="{{UNSUBSCRIBE_URL}}" style="color:#8a3f17">' + esc(text.unsub) + '</a>.</p>' +
+        '<p style="margin:8px 0 0;font-size:11.5px;line-height:1.6;color:#7c857e">' + esc(text.emergency) + ' · ' + esc(text.disclaimer) + '</p>' +
+      '</div></div>';
+    var plain = [
+      text.headline,
+      text.notOfficial,
+      '',
+      text.labels.level + ': ' + lvl,
+      text.labels.area + ': ' + area,
+      text.labels.valid + ': ' + win,
+      text.labels.updated + ': ' + updated + ' · ' + text.fresh,
+      text.labels.source + ': ' + src,
+      text.labels.measure + ': ' + app + ' °C',
+      '',
+      text.lead,
+      '',
+      text.stepsTitle + ':',
+      steps.map(function(x){ return '- ' + x; }).join('\n'),
+      '',
+      text.urgentTitle + ': ' + text.urgent,
+      '',
+      text.caution,
+      '',
+      text.ctaFull + ': ' + alertUrl,
+      text.ctaGuide + ': ' + guideUrl,
+      '',
+      text.footer,
+      text.unsub + ': {{UNSUBSCRIBE_URL}}',
+      '',
+      text.emergency + ' · ' + text.disclaimer
+    ].join('\n');
+    return { subject:subject, html:html, text:plain, area:area, window:win, source:src, updated:updated, ageH:ageH, levelName:lvl };
+  }
+  function emailEstimate(zone, level, langs, list){
+    list = list || [];
+    var byLang = {}, order = [];
+    list.forEach(function(r){ if(order.indexOf(r.language) < 0) order.push(r.language); });
+    (langs || []).forEach(function(l){ if(order.indexOf(l) < 0) order.push(l); });
+    order.forEach(function(l){
+      var n = list.filter(function(r){ return r.language === l; }).length;
+      if(!n) return;
+      var c = emailContent(l, zone, level, DRAFT.id || 'al-draft', {});
+      byLang[l] = { count:n, subject:c.subject, html:c.html, text:c.text, area:c.area, window:c.window };
+    });
+    var used = order.filter(function(l){ return !!byLang[l]; });
+    return { byLang:byLang, order:used, recipients:list.length, subjects:used.map(function(l){ return byLang[l].subject; }) };
+  }
+  function emailHoldReasons(zone, info, langs, list){
+    var out = [];
+    var w = zone.weather;
+    var add = function(t){ if(out.indexOf(t) < 0) out.push(t); };
+    if(!w) add('no weather record for this zone');
+    else if(w.status === 'error') add('live weather is unavailable for this zone');
+    else if(info.stale) add(info.reason);
+    if(zone.boundary === 'approximate' && !zone.areaReviewedAt) add('the affected area boundary is approximate and has not been reviewed');
+    if(!w || !w.window || !w.window.from || !w.window.to) add('the forecast window is missing');
+    if(!w || !w.source) add('the data source is missing');
+    if(!w || typeof w.appMax !== 'number') add('the measure value is missing');
+    if(!langs.length) add('no language selected');
+    if(!list.length) add('no registered contact opted in to email whose area overlaps this zone');
+    var dup = duplicateAlert(zone.id, info.level, 'email');
+    if(dup) add('an identical email alert was already sent to this zone at ' + fmtTime(dup.sentAt));
+    var rl = recentAlerts(zone.id, state.email.rateWindowMin, 'email');
+    if(rl.length >= state.email.maxSendsPerZone) add(rl.length + ' email alert(s) already sent to this zone in the last ' + state.email.rateWindowMin + ' min (limit ' + state.email.maxSendsPerZone + ')');
+    if(state.email.mode === 'live' && !state.email.liveConfigured) add('live email mode is on but no server adapter has been confirmed');
+    if(state.email.mode === 'live' && !state.email.sender) add('the sender address is missing');
+    return out;
   }
 
   /* ------------------------------------------------------------------
@@ -966,6 +1221,7 @@ ol.steps li{margin-bottom:3px}
     var audience = $('#alertAudience') ? $('#alertAudience').value : 'all';
     var inapp = zone ? eligibleRecipients(zone.id, audience, langs, ['inapp']) : [];
     var smsList = zone ? smsRecipients(zone, audience, langs) : [];
+    var emailList = zone ? emailRecipients(zone, audience, langs) : [];
     var reasons = [];
     var add = function(t){ if(reasons.indexOf(t) < 0) reasons.push(t); };
     if(zone){
@@ -985,8 +1241,12 @@ ol.steps li{margin-bottom:3px}
         smsHoldReasons(zone, info, langs, smsList).forEach(add);
         if(info.level === 0) add('no current heat level, so no SMS can be justified');
       }
+      if(channels.indexOf('email') >= 0){
+        emailHoldReasons(zone, info, langs, emailList).forEach(add);
+        if(info.level === 0) add('no current heat level, so no email can be justified');
+      }
     }
-    return { zone:zone, info:info, langs:langs, channels:channels, audience:audience, inapp:inapp, sms:smsList, reasons:reasons };
+    return { zone:zone, info:info, langs:langs, channels:channels, audience:audience, inapp:inapp, sms:smsList, email:emailList, reasons:reasons };
   }
 
   function updateComposer(){
@@ -996,6 +1256,11 @@ ol.steps li{margin-bottom:3px}
       modeChip.className = 'simtag';
       modeChip.textContent = state.sms.mode === 'live' ? 'LIVE' : 'SIMULATED';
     }
+    var emailChip = $('#emailModeChip');
+    if(emailChip){
+      emailChip.className = 'simtag';
+      emailChip.textContent = state.email.mode === 'live' ? 'LIVE' : 'DEMO';
+    }
     var ctx = composerContext();
     var zone = ctx.zone;
     var chip = $('#composerChip');
@@ -1004,6 +1269,7 @@ ol.steps li{margin-bottom:3px}
       $('#composerState').textContent = 'Select a zone with current data to continue.';
       $('#msgPreview').innerHTML = '';
       $('#smsPanel').innerHTML = '';
+      if($('#emailPanel')) $('#emailPanel').innerHTML = '';
       $('#sendAlertBtn').disabled = true;
       return;
     }
@@ -1018,6 +1284,9 @@ ol.steps li{margin-bottom:3px}
       var est = smsEstimate(zone, info.level || 1, ctx.langs, ctx.sms);
       summary.push(est.recipients + ' opted-in SMS recipient' + (est.recipients === 1 ? '' : 's') + ' (est. ' + money(est.cost) + ')');
     }
+    if(ctx.channels.indexOf('email') >= 0){
+      summary.push(ctx.email.length + ' opted-in email recipient' + (ctx.email.length === 1 ? '' : 's'));
+    }
     $('#composerState').innerHTML = held
       ? '<strong>Alert held:</strong> ' + esc(ctx.reasons.join('; ')) + '. Nothing will be sent until this is resolved. Official warnings should be checked separately.'
       : '<strong>Ready to send' + (liveSms ? ' (live SMS)' : ' (simulated)') + '.</strong> ' + esc(zone.name) + ' · ' + LEVELS[info.level].name +
@@ -1030,6 +1299,7 @@ ol.steps li{margin-bottom:3px}
       return '<div class="msgpreview"><div class="lang">' + (l === 'hi' ? 'हिन्दी' : 'English') + '</div>' + esc(buildMessage(l, zone, info.level || 1)) + '</div>';
     }).join('');
     $('#smsPanel').innerHTML = ctx.channels.indexOf('sms') < 0 ? '' : smsPanelHTML(ctx);
+    if($('#emailPanel')) $('#emailPanel').innerHTML = ctx.channels.indexOf('email') < 0 ? '' : emailPanelHTML(ctx);
     var extra = $('#composerExtra');
     if(extra){
       extra.innerHTML = (zone.boundary === 'approximate' && !zone.areaReviewedAt)
@@ -1076,6 +1346,45 @@ ol.steps li{margin-bottom:3px}
       '</div>';
   }
 
+  function emailPanelHTML(ctx){
+    var zone = ctx.zone, info = ctx.info, langs = ctx.langs, list = ctx.email;
+    var est = emailEstimate(zone, info.level || 1, langs, list);
+    var live = state.email.mode === 'live';
+    var w = zone.weather || {};
+    var ageH = w.fetchedAt ? Math.max(0, Math.round((now().getTime() - new Date(w.fetchedAt).getTime()) / HOUR)) : null;
+    var check = state.email.checkResult;
+    var matched = list.map(function(r){ return r.name + ' · ' + areaOverlap(r, zone) + ' · ' + (r.language === 'hi' ? 'हिन्दी' : 'English'); });
+    var previews = est.order.map(function(l){
+      var row = est.byLang[l];
+      return '<div class="emailwrap">' +
+        '<div class="costrow"><span><b>' + langLabel(l) + '</b></span><span>' + row.count + ' recipient(s)</span><span><b>Subject:</b> ' + esc(row.subject) + '</span></div>' +
+        '<div class="emailframe"><div class="emailhead"><b>' + esc(state.email.sender) + ' · ' + (live ? 'LIVE EMAIL' : 'DEMO EMAIL') + '</b>' +
+          'To ' + row.count + ' opted-in address(es) whose registered area overlaps ' + esc(zone.name) + ' · addresses hidden<br>' +
+          'Unsubscribe link: signed per recipient by the adapter in a live send; shown here as a placeholder.' +
+        '</div><div class="emailbody">' + row.html + '</div></div></div>';
+    }).join('');
+    return '<div class="smsbox">' +
+      '<div class="inline" style="justify-content:space-between;align-items:flex-start">' +
+        '<h4 style="margin:0">Email preview <span class="simtag">' + (live ? 'LIVE PROVIDER' : 'DEMO') + '</span></h4>' +
+        '<div class="inline"><button type="button" class="btn-quiet" id="checkEmailAdapter">Check server adapter</button>' +
+          '<button type="button" class="btn-quiet" id="toggleEmailMode">' + (live ? 'Switch to DEMO email' : 'Switch to live email') + '</button></div>' +
+      '</div>' +
+      '<div class="costrow">' +
+        '<span><b>Affected area:</b> ' + esc(zone.name) + (zone.district ? ' · ' + esc(zone.district) : '') + '</span>' +
+        '<span><b>Alert level:</b> ' + esc(LEVELS[info.level || 1].name) + '</span>' +
+        '<span><b>Window:</b> ' + esc(windowText(zone)) + '</span>' +
+        '<span><b>Source:</b> ' + esc(smsSourceLabel(w)) + ' · updated ' + (w.fetchedAt ? fmtTime(w.fetchedAt) : '—') + '</span>' +
+        '<span><b>Data freshness:</b> ' + (ageH === null ? 'not recorded' : 'about ' + ageH + ' h old (limit ' + state.settings.staleHours + ' h)') + '</span>' +
+      '</div>' +
+      '<p class="mini" style="margin-top:6px"><b>' + est.recipients + '</b> eligible recipient(s) — general consent, email opt-in, an address on record and a registered area overlapping this zone. No IMD warning feed is ingested: this is a model estimate, never an official warning.</p>' +
+      '<p class="mini">' + (matched.length ? 'Matched: ' + esc(matched.slice(0, 6).join('; ')) + (matched.length > 6 ? ' …' : '') + '.' : 'No registered contact opted in to email for this area yet.') + '</p>' +
+      previews +
+      (check ? '<p class="statusline"><span class="status" data-kind="' + esc(check.kind) + '">' + esc(check.text) + '</span></p>' : '') +
+      '<p class="mini" style="margin-top:6px">Mode: ' + (live ? 'provider adapter (' + esc(state.email.provider) + ')' : 'DEMO, nothing leaves this browser') +
+        '. Each recipient gets one email in their saved language, or English when no preference is stored. Addresses are masked and are never included in another recipient\'s email.</p>' +
+      '</div>';
+  }
+
   function reviewSend(){
     var ctx = composerContext();
     if(!ctx.zone || ctx.info.level === 0) return;
@@ -1086,9 +1395,12 @@ ol.steps li{margin-bottom:3px}
     }
     var zone = ctx.zone;
     var est = ctx.channels.indexOf('sms') >= 0 ? smsEstimate(zone, ctx.info.level, ctx.langs, ctx.sms) : null;
+    var eEst = ctx.channels.indexOf('email') >= 0 ? emailEstimate(zone, ctx.info.level, ctx.langs, ctx.email) : null;
     var needSecond = state.settings.reviewLevel3 && ctx.info.level === 3;
     var liveSms = state.sms.mode === 'live' && ctx.channels.indexOf('sms') >= 0;
-    var body = '<p>' + (liveSms ? '<span class="chip warn">LIVE SMS</span>' : '<span class="chip demo">DEMO</span>') +
+    var liveEmail = state.email.mode === 'live' && ctx.channels.indexOf('email') >= 0;
+    var liveAny = liveSms || liveEmail;
+    var body = '<p>' + (liveAny ? '<span class="chip warn">LIVE</span> <span class="chip demo">DEMO</span>' : '<span class="chip demo">DEMO</span>') +
       ' Alert for <strong>' + esc(zone.name) + '</strong> in ' + esc(zone.district || 'the demo area') + '.</p>' +
       '<ul style="font-size:12.5px;line-height:1.6;padding-left:18px">' +
         '<li><strong>Measure:</strong> daily maximum apparent temperature (feels-like) ' + zone.weather.appMax + ' °C</li>' +
@@ -1106,23 +1418,32 @@ ol.steps li{margin-bottom:3px}
         }).join('') +
         '<p class="mini" style="margin-top:6px">Opt-out keyword: ' + esc(state.sms.optOutKeyword) + '. Numbers stay masked and are not included in this confirmation. Duplicates within 6 hours and the per-zone SMS rate limit are enforced on send.</p></div>';
     }
+    if(eEst){
+      body += '<div class="smsbox"><h4>Email <span class="simtag">' + (liveEmail ? 'LIVE' : 'DEMO') + '</span> ' + eEst.recipients + ' recipient(s)</h4>' +
+        '<p class="mini">' + esc(zone.name) + (zone.district ? ' · ' + esc(zone.district) : '') + ' · ' + esc(windowText(zone)) + ' · source ' + esc(smsSourceLabel(zone.weather)) + ' · updated ' + fmtTime(zone.weather.fetchedAt) + '</p>' +
+        '<ul style="margin:6px 0 0;padding-left:18px;font-size:12.5px;line-height:1.55">' + eEst.order.map(function(l){
+          return '<li><strong>' + langLabel(l) + '</strong> · ' + eEst.byLang[l].count + ' recipient(s) · subject: ' + esc(eEst.byLang[l].subject) + '</li>';
+        }).join('') + '</ul>' +
+        '<p class="mini" style="margin-top:6px">Every email includes an unsubscribe link and no recipient address appears in the message. The full body is in the composer preview above.</p></div>';
+    }
     if(ctx.channels.indexOf('inapp') >= 0) body += '<p class="mini" style="margin-top:8px">In-app: ' + ctx.inapp.length + ' DEMO recipient(s) in this browser.</p>';
-    body += '<p class="mini">' + (liveSms ? 'This sends real SMS through the configured server adapter.' : 'No real phone, email or messaging service is contacted.') + ' This is not an official IMD warning.</p>';
+    body += '<p class="mini">' + (liveAny ? 'This sends real messages through the configured server adapter.' : 'No real phone, email or messaging service is contacted.') + ' This is not an official IMD warning.</p>';
     body += needSecond ? '<label class="inline" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="secondReview"> I confirm a second reviewer checked this severe alert</label>' : '';
-    body += liveSms
-      ? '<label class="inline" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="liveAck"> I am authorised to send real SMS to these ' + est.recipients + ' recipient(s)</label>'
+    body += liveAny
+      ? '<label class="inline" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="liveAck"> I am authorised to send real ' + (liveSms && liveEmail ? 'SMS and email' : liveSms ? 'SMS' : 'email') + ' to these recipients</label>'
       : '<label class="inline" style="margin-top:8px;font-size:12.5px"><input type="checkbox" id="sendAck"> I understand this is a simulation</label>';
-    openModal(liveSms ? 'Confirm live SMS alert' : 'Confirm simulated alert', body, liveSms ? 'Send SMS' : 'Send simulated alert', function(){
-      if(liveSms){
+    openModal(liveAny ? 'Confirm live alert' : 'Confirm simulated alert', body, liveAny ? 'Send alert' : 'Send simulated alert', function(){
+      if(liveAny){
         if(!$('#liveAck') || !$('#liveAck').checked){ setStatus('Alert not sent: the live-send authorisation was not checked.', 'warn'); return; }
       } else if(!$('#sendAck') || !$('#sendAck').checked){
         setStatus('Alert not sent: the simulation acknowledgement was not checked.', 'warn'); return;
       }
       if(needSecond && (!$('#secondReview') || !$('#secondReview').checked)){ setStatus('Severe alert held: the second-reviewer confirmation is required.', 'warn'); return; }
       closeModal();
-      audit('Alert approved (' + (liveSms ? 'live SMS' : 'simulated') + ')',
+      audit('Alert approved (' + (liveAny ? 'live send' : 'simulated') + ')',
         zone.name + ' · ' + LEVELS[ctx.info.level].name + ' · channels ' + ctx.channels.join('+') +
         (est ? ' · ' + est.recipients + ' SMS recipient(s), est. ' + money(est.cost) : '') +
+        (eEst ? ' · ' + eEst.recipients + ' email recipient(s), alert version ' + alertVersion(ctx) : '') +
         (needSecond ? ' · second reviewer confirmed' : ''));
       sendAlert(ctx, {});
     });
@@ -1137,10 +1458,11 @@ ol.steps li{margin-bottom:3px}
     var alert = {
       id:alertId, zoneId:zone.id, zoneName:zone.name, district:zone.district, level:level, lang:langs,
       audience:ctx.audience, channels:channels, status:'sent', sentAt:stamp,
+      approvedBy:ROLE_LABEL[state.role], version:alertVersion(ctx),
       window:zone.weather.window, measure:{ name:'Daily maximum apparent temperature', value:zone.weather.appMax, unit:'°C', threshold:thresholdFor(level) },
       source:zone.weather.source, sourceUpdatedAt:zone.weather.fetchedAt, confidence:zone.weather.confidence,
-      simulated: !(channels.indexOf('sms') >= 0 && state.sms.mode === 'live'),
-      correctionOf: opts.correctionOf || null, recipients:[], sms:null
+      simulated: !((channels.indexOf('sms') >= 0 && state.sms.mode === 'live') || (channels.indexOf('email') >= 0 && state.email.mode === 'live')),
+      correctionOf: opts.correctionOf || null, recipients:[], sms:null, email:null
     };
     var delivered = 0, failed = 0;
 
@@ -1191,9 +1513,59 @@ ol.steps li{margin-bottom:3px}
       }
     }
 
+    if(channels.indexOf('email') >= 0){
+      var eEst = emailEstimate(zone, level, langs, ctx.email);
+      var subjects = {}, htmls = {}, texts = {};
+      eEst.order.forEach(function(l){
+        subjects[l] = eEst.byLang[l].subject;
+        htmls[l] = eEst.byLang[l].html;
+        texts[l] = eEst.byLang[l].text;
+      });
+      alert.email = {
+        mode: state.email.mode, provider: state.email.mode === 'live' ? state.email.provider : 'simulated',
+        sender: state.email.sender, status:'queued', recipients:ctx.email.length,
+        languages:eEst.order, subjects:subjects, html:htmls, text:texts,
+        link: smsPageLink(alertId), sentAt:stamp, version: alertVersion(ctx),
+        facts:{ zoneName:zone.name, district:zone.district || '', level:LEVELS[level].name,
+          window:windowText(zone), source:smsSourceLabel(zone.weather), dataUpdatedAt:zone.weather.fetchedAt }
+      };
+      if(state.email.mode === 'live'){
+        alert.email.status = 'sending';
+      } else {
+        var mailOk = 0, mailBad = 0;
+        ctx.email.forEach(function(r){
+          var ok = simulateDelivery(alertId, r.id, 'email', 1);
+          alert.recipients.push({ id:r.id, name:r.name, channel:'email', status: ok ? 'delivered' : 'failed', contactMasked:maskEmail(r.email), language:r.language });
+          state.deliveries.push({
+            id:'d' + Date.now() + Math.random().toString(16).slice(2,5), alertId:alertId, recipientId:r.id,
+            channel:'email', mode:'simulate', status: ok ? 'delivered' : 'failed', attempts:1, ts:stamp, simulated:true,
+            contactMasked:maskEmail(r.email),
+            providerMessageId: ok ? 'SIM-EMAIL-' + hash(alertId + '|' + r.id).toString(36).toUpperCase().slice(0, 6) : null,
+            error: ok ? null : 'Simulated mailbox rejection'
+          });
+          if(ok) mailOk++; else mailBad++;
+        });
+        alert.email.delivered = mailOk;
+        alert.email.failed = mailBad;
+        alert.email.status = mailBad ? (mailOk ? 'partial' : 'failed') : 'sent';
+      }
+    }
+
     state.alerts.unshift(alert);
     save();
     DRAFT.id = null;
+
+    if(alert.email && alert.email.mode === 'live'){
+      audit('Email alert approved (live)', zone.name + ' · ' + alert.email.recipients + ' recipient IDs sent to the email adapter · provider ' + alert.email.provider + ' · version ' + alert.email.version);
+      setStatus('Sending ' + alert.email.recipients + ' email(s) through the server adapter…', 'info');
+      renderAll();
+      sendLiveEmail(alert, zone, ctx.email).catch(function(err){
+        alert.email.status = 'failed';
+        audit('Email provider error', zone.name + ' · ' + err.message + ' (no addresses logged)');
+        save(); renderAll();
+        setStatus('Email could not be sent: ' + err.message, 'error');
+      });
+    }
 
     if(alert.sms && state.sms.mode === 'live'){
       audit('SMS alert approved (live)', zone.name + ' · ' + alert.sms.recipients + ' recipient IDs sent to the server adapter · est. ' + money(alert.sms.cost));
@@ -1209,13 +1581,18 @@ ol.steps li{margin-bottom:3px}
     }
 
     var smsNote = alert.sms ? ' · SMS ' + alert.sms.delivered + ' delivered, ' + alert.sms.failed + ' failed (simulated)' : '';
-    audit(channels.indexOf('sms') >= 0 ? 'SMS alert sent (SIMULATED)' : 'Alert sent (simulated)',
+    var mailNote = alert.email && alert.email.mode !== 'live' ? ' · email ' + alert.email.delivered + ' delivered, ' + alert.email.failed + ' failed (simulated)' : '';
+    var mailLive = alert.email && alert.email.mode === 'live';
+    audit(mailLive ? 'Alert recorded · email sent via provider adapter' : (channels.indexOf('email') >= 0 && !alert.sms ? 'Email alert sent (SIMULATED)' : (channels.indexOf('sms') >= 0 ? 'SMS alert sent (SIMULATED)' : 'Alert sent (simulated)')),
       zone.name + ' · level ' + LEVELS[level].name + ' · ' + langs.join('+') +
-      (channels.indexOf('inapp') >= 0 ? ' · in-app ' + delivered + ' delivered, ' + failed + ' failed' : '') + smsNote);
+      (channels.indexOf('inapp') >= 0 ? ' · in-app ' + delivered + ' delivered, ' + failed + ' failed' : '') + smsNote + mailNote);
     if(alert.sms) audit('SMS cost estimate', alert.sms.recipients + ' recipient(s) · ' + alert.sms.parts + ' part(s) · est. ' + money(alert.sms.cost) + ' · ' + alert.sms.provider);
-    setStatus('Simulated alert recorded for ' + zone.name + ': ' + delivered + ' in-app delivered, ' + failed + ' failed' +
-      (alert.sms ? ' · SMS ' + alert.sms.delivered + ' delivered, ' + alert.sms.failed + ' failed' : '') + '.',
-      (failed || (alert.sms && alert.sms.failed)) ? 'warn' : 'ok');
+    if(alert.email) audit(alert.email.mode === 'live' ? 'Email batch handed to adapter' : 'Email alert recorded (SIMULATED)',
+      zone.name + ' · version ' + alert.email.version + ' · ' + alert.email.recipients + ' recipient(s) · ' + alert.email.languages.join('+') + ' · provider ' + alert.email.provider);
+    setStatus((mailLive ? 'Alert recorded for ' + zone.name + '; email is being sent by the adapter' : 'Simulated alert recorded for ' + zone.name) + ': ' + delivered + ' in-app delivered, ' + failed + ' failed' +
+      (alert.sms ? ' · SMS ' + alert.sms.delivered + ' delivered, ' + alert.sms.failed + ' failed' : '') +
+      (alert.email && alert.email.mode !== 'live' ? ' · email ' + alert.email.delivered + ' delivered, ' + alert.email.failed + ' failed' : '') + '.',
+      (failed || (alert.sms && alert.sms.failed) || (alert.email && alert.email.failed)) ? 'warn' : 'ok');
     renderAll();
     if(SCENARIO.active) finishScenario(alert);
   }
@@ -1256,6 +1633,60 @@ ol.steps li{margin-bottom:3px}
     if(SCENARIO.active) finishScenario(alert);
   }
 
+  async function postEmail(payload){
+    var res = await fetch('./api/email/send', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(payload) });
+    var json = null;
+    try{ json = await res.json(); } catch(e){}
+    if(!res.ok) throw new Error((json && (json.error || json.message)) || ('Email adapter returned HTTP ' + res.status));
+    return json || {};
+  }
+
+  async function sendLiveEmail(alert, zone, list){
+    var messages = {};
+    alert.email.languages.forEach(function(l){
+      messages[l] = { subject: alert.email.subjects[l], html: alert.email.html[l], text: alert.email.text[l] };
+    });
+    var res = await postEmail({
+      alertId: alert.id, zoneId: zone.id, zoneAreas: zone.areas || [], district: zone.district,
+      languages: alert.email.languages, messages: messages, facts: alert.email.facts,
+      version: alert.email.version,
+      recipients: list.map(function(r){ return { id:r.id, language:r.language }; }),
+      idempotencyKey: alert.id
+    });
+    var byId = {};
+    (res.results || []).forEach(function(x){ byId[x.id] = x; });
+    var ok = 0, bad = 0;
+    list.forEach(function(r){
+      var x = byId[r.id] || { status:'failed', error:'no result from the adapter' };
+      var status = x.status || 'failed';
+      if(status === 'failed') bad++; else ok++;
+      alert.recipients.push({ id:r.id, name:r.name, channel:'email', status:status, contactMasked:maskEmail(r.email), language:r.language });
+      state.deliveries.push({ id:'d' + Date.now() + Math.random().toString(16).slice(2,5), alertId:alert.id, recipientId:r.id,
+        channel:'email', mode:'live', status:status, attempts:1, ts:iso(now()), contactMasked:maskEmail(r.email),
+        providerMessageId: x.providerMessageId || null, error: x.error || null });
+    });
+    alert.email.delivered = ok;
+    alert.email.failed = bad;
+    alert.email.dryRun = !!res.dryRun;
+    alert.email.status = bad ? (ok ? 'partial' : 'failed') : (res.dryRun ? 'dry run' : 'sent');
+    audit('Email batch handled by adapter (' + (state.email.provider || 'adapter') + ')',
+      zone.name + ' · ' + ok + ' accepted, ' + bad + ' failed' + (res.dryRun ? ' · dry run, no email actually sent' : ' · no addresses logged'));
+    save(); renderAll();
+    setStatus('Email adapter accepted ' + ok + ' message(s)' + (bad ? ', ' + bad + ' failed' : '') + (res.dryRun ? ' (dry run: nothing was actually sent).' : '.'), bad ? 'warn' : 'ok');
+    if(SCENARIO.active) finishScenario(alert);
+  }
+
+  function recountAlert(a){
+    ['sms','email'].forEach(function(ch){
+      if(!a[ch]) return;
+      var rows = a.recipients.filter(function(r){ return r.channel === ch; });
+      var okN = rows.filter(function(r){ return r.status !== 'failed'; }).length;
+      a[ch].delivered = okN;
+      a[ch].failed = rows.length - okN;
+      a[ch].status = a[ch].failed ? (okN ? 'partial' : 'failed') : 'sent';
+    });
+  }
+
   function simulateDelivery(alertId, recipientId, channel, attempt){
     /* Deterministic-ish so the demo is reproducible: SMS fails more often. */
     var h = hash(alertId + '|' + recipientId + '|' + channel + '|' + attempt) % 100;
@@ -1263,10 +1694,44 @@ ol.steps li{margin-bottom:3px}
     return h < threshold;
   }
 
-  function retryDelivery(alertId, recipientId){
-    var d = state.deliveries.filter(function(x){ return x.alertId === alertId && x.recipientId === recipientId; })[0];
+  function retryDelivery(alertId, recipientId, channel){
+    var d = state.deliveries.filter(function(x){ return x.alertId === alertId && x.recipientId === recipientId && (!channel || x.channel === channel); })[0];
     var a = state.alerts.filter(function(x){ return x.id === alertId; })[0];
     if(!d || !a) return;
+    if(d.mode === 'live' && d.channel === 'email'){
+      var mailPerson = state.recipients.filter(function(r){ return r.id === recipientId; })[0];
+      if(!mailPerson || !a.email){ setStatus('This recipient cannot be retried from the browser.', 'warn'); return; }
+      var mailAttempt = d.attempts + 1;
+      var mailLang = mailPerson.language;
+      var mailMessages = {};
+      mailMessages[mailLang] = { subject:a.email.subjects[mailLang], html:a.email.html[mailLang], text:a.email.text[mailLang] };
+      setStatus('Retrying through the email adapter…', 'info');
+      postEmail({
+        alertId: alertId, zoneId: a.zoneId, zoneAreas: (zoneById(a.zoneId) || {}).areas || [],
+        languages: [mailLang], messages: mailMessages, facts: a.email.facts, version: a.email.version,
+        recipients: [{ id: mailPerson.id, language: mailLang }],
+        idempotencyKey: alertId + ':email:' + mailPerson.id + ':' + mailAttempt
+      }).then(function(res){
+        var x = (res && res.results && res.results[0]) || { status:'failed', error:'no result' };
+        d.attempts = mailAttempt;
+        d.status = x.status || 'failed';
+        d.providerMessageId = x.providerMessageId || d.providerMessageId;
+        d.error = x.error || null;
+        var recMail = a.recipients.filter(function(r){ return r.id === mailPerson.id && r.channel === 'email'; })[0];
+        if(recMail) recMail.status = d.status;
+        recountAlert(a);
+        audit('Email retry (' + d.status + ')', 'Alert ' + alertId.slice(-4) + ' · recipient ' + mailPerson.id + ' · attempt ' + mailAttempt + ' · address masked');
+        save(); renderAll();
+        setStatus('Retry attempt ' + mailAttempt + ': ' + d.status + '.', d.status === 'failed' ? 'warn' : 'ok');
+      }).catch(function(err){
+        d.attempts = mailAttempt;
+        d.status = 'failed';
+        audit('Email retry failed', 'Alert ' + alertId.slice(-4) + ' · ' + err.message + ' (no address logged)');
+        save(); renderAll();
+        setStatus('Retry failed: ' + err.message, 'error');
+      });
+      return;
+    }
     if(d.mode === 'live'){
       var person = state.recipients.filter(function(r){ return r.id === recipientId; })[0];
       if(!person || !a.sms){ setStatus('This recipient cannot be retried from the browser.', 'warn'); return; }
@@ -1284,10 +1749,7 @@ ol.steps li{margin-bottom:3px}
         d.error = x.error || null;
         var rec = a.recipients.filter(function(r){ return r.id === person.id && r.channel === 'sms'; })[0];
         if(rec) rec.status = d.status;
-        var rows = a.recipients.filter(function(r){ return r.channel === 'sms'; });
-        var okN = rows.filter(function(r){ return r.status !== 'failed'; }).length;
-        a.sms.delivered = okN; a.sms.failed = rows.length - okN;
-        a.sms.status = a.sms.failed ? (okN ? 'partial' : 'failed') : 'sent';
+        recountAlert(a);
         audit('SMS retry (' + d.status + ')', 'Alert ' + alertId.slice(-4) + ' · recipient ' + person.id + ' · attempt ' + attempt);
         save(); renderAll();
         setStatus('Retry attempt ' + attempt + ': ' + d.status + '.', d.status === 'failed' ? 'warn' : 'ok');
@@ -1304,15 +1766,9 @@ ol.steps li{margin-bottom:3px}
     d.attempts += 1;
     d.status = ok ? 'delivered' : 'failed';
     if(ok) d.providerMessageId = 'SIM-' + hash(alertId + '|' + recipientId + '|' + d.attempts).toString(36).toUpperCase().slice(0, 8);
-    var rec2 = a.recipients.filter(function(r){ return r.id === recipientId; })[0];
+    var rec2 = a.recipients.filter(function(r){ return r.id === recipientId && r.channel === d.channel; })[0];
     if(rec2) rec2.status = d.status;
-    if(a.sms){
-      var smsRows = a.recipients.filter(function(r){ return r.channel === 'sms'; });
-      var okCount = smsRows.filter(function(r){ return r.status === 'delivered'; }).length;
-      a.sms.delivered = okCount;
-      a.sms.failed = smsRows.length - okCount;
-      a.sms.status = a.sms.failed ? (okCount ? 'partial' : 'failed') : 'sent';
-    }
+    recountAlert(a);
     audit(ok ? 'Delivery retried (simulated)' : 'Delivery retry failed (simulated)',
       d.channel.toUpperCase() + ' · alert ' + alertId.slice(-4) + ' · recipient ' + recipientId + ' · attempt ' + d.attempts);
     save();
@@ -1515,28 +1971,33 @@ ol.steps li{margin-bottom:3px}
     }).join('') + '</ul>';
 
     $('#subListWrap').innerHTML = '<h3 style="margin-top:14px">Subscriptions in this demo</h3>' +
-      '<div class="tablewrap wide"><table><caption>DEMO contacts, stored only in this browser. Numbers are masked and never shown on the map or in alert text.</caption>' +
-      '<thead><tr><th scope="col">Person</th><th scope="col">Zone</th><th scope="col">Registered area</th><th scope="col">Language</th><th scope="col">Number</th><th scope="col">In-app</th><th scope="col">SMS</th><th scope="col">Action</th></tr></thead><tbody>' +
+      '<div class="tablewrap wide"><table><caption>DEMO registered contacts, stored only in this browser. Phone numbers and email addresses are masked and never shown on the map or in alert text.</caption>' +
+      '<thead><tr><th scope="col">Person</th><th scope="col">Zone</th><th scope="col">Registered area</th><th scope="col">Language</th><th scope="col">Phone</th><th scope="col">Email</th><th scope="col">In-app</th><th scope="col">SMS</th><th scope="col">Email alerts</th><th scope="col">Action</th></tr></thead><tbody>' +
       state.recipients.map(function(r){
         var smsState = !r.phone ? '<span class="chip">no number</span>' : (r.smsOptIn ? '<span class="chip ok">opted in</span>' : '<span class="chip">opted out</span>');
-        return '<tr><td>' + esc(r.name) + '</td><td>' + esc((zoneById(r.zoneId) || {}).name || '—') + '</td><td>' + esc((r.areas || []).join(', ') || '—') + '</td><td>' + (r.language === 'hi' ? 'हिन्दी' : 'English') + '</td><td>' + esc(maskPhone(r.phone)) + '</td>' +
+        var emailState = !r.email ? '<span class="chip">no address</span>' : (r.emailOptIn ? '<span class="chip ok">opted in</span>' : '<span class="chip">opted out</span>');
+        return '<tr><td>' + esc(r.name) + '</td><td>' + esc((zoneById(r.zoneId) || {}).name || '—') + '</td><td>' + esc((r.areas || []).join(', ') || '—') + '</td><td>' + (r.language === 'hi' ? 'हिन्दी' : 'English') + '</td><td>' + esc(maskPhone(r.phone)) + '</td><td>' + esc(maskEmail(r.email)) + '</td>' +
           '<td>' + (r.consent ? '<span class="chip ok">on</span>' : '<span class="chip">off</span>') + '</td>' +
           '<td>' + smsState + '</td>' +
+          '<td>' + emailState + '</td>' +
           '<td>' + (r.consent ? '<button type="button" class="btn-danger" data-optout="' + r.id + '">Opt out</button>' : '<button type="button" class="btn-quiet" data-optin="' + r.id + '">Opt back in</button>') +
-            (r.phone ? (r.smsOptIn ? ' <button type="button" class="btn-quiet" data-smsoptout="' + r.id + '">Stop SMS</button>' : ' <button type="button" class="btn-quiet" data-smsoptin="' + r.id + '">Opt in to SMS</button>') : '') + '</td></tr>';
+            (r.phone ? (r.smsOptIn ? ' <button type="button" class="btn-quiet" data-smsoptout="' + r.id + '">Stop SMS</button>' : ' <button type="button" class="btn-quiet" data-smsoptin="' + r.id + '">Opt in to SMS</button>') : '') +
+            (r.email ? (r.emailOptIn ? ' <button type="button" class="btn-quiet" data-emailoptout="' + r.id + '">Stop email</button>' : ' <button type="button" class="btn-quiet" data-emailoptin="' + r.id + '">Opt in to email</button>') : '') + '</td></tr>';
       }).join('') + '</tbody></table></div>';
 
     $('#subFormWrap').innerHTML = '<div class="row">' +
       '<div class="field"><label for="subName">Name (optional)</label><input type="text" id="subName" placeholder="Resident K"></div>' +
       '<div class="field"><label for="subPhone">Mobile number (synthetic in this demo)</label><input type="text" id="subPhone" placeholder="+91 90000 00000" autocomplete="off"></div>' +
+      '<div class="field"><label for="subEmail">Email (synthetic in this demo)</label><input type="email" id="subEmail" placeholder="resident@example.invalid" autocomplete="off"></div>' +
       '<div class="field"><label for="subZone">Zone</label><select id="subZone">' + state.zones.map(function(z){ return '<option value="' + z.id + '">' + esc(z.name) + '</option>'; }).join('') + '</select></div>' +
       '<div class="field"><label for="subArea">Registered area</label><select id="subArea"></select></div>' +
       '<div class="field"><label for="subLang">Language</label><select id="subLang"><option value="en">English</option><option value="hi">हिन्दी</option></select></div>' +
       '</div>' +
       '<label class="inline" style="font-size:12.5px;margin:4px 0 4px"><input type="checkbox" id="subConsent"> I agree to receive DEMO heat alerts in this browser and understand nothing is sent externally.</label>' +
-      '<label class="inline" style="font-size:12.5px;margin:0 0 8px"><input type="checkbox" id="subSmsConsent"> Also opt in to DEMO SMS alerts (simulated; a number is required)</label>' +
+      '<label class="inline" style="font-size:12.5px;margin:0 0 4px"><input type="checkbox" id="subSmsConsent"> Also opt in to DEMO SMS alerts (simulated; a number is required)</label>' +
+      '<label class="inline" style="font-size:12.5px;margin:0 0 8px"><input type="checkbox" id="subEmailConsent"> Also opt in to DEMO heatwave email alerts (simulated; an address is required)</label>' +
       '<div><button type="button" class="btn" id="subBtn">Add demo subscription</button></div>' +
-      '<p class="mini" style="margin-top:6px">Only zone, area, language and one contact are requested. SMS opt-in is separate and can be withdrawn from the table above or by replying "' + esc(state.sms.optOutKeyword) + '" to a message. In production this form would be served over HTTPS, numbers encrypted at rest, and consent recorded with a timestamp.</p>';
+      '<p class="mini" style="margin-top:6px">Only zone, area, language and the contact details you choose are requested. SMS and email opt-in are separate and can be withdrawn from the table above, by replying "' + esc(state.sms.optOutKeyword) + '" to an SMS, or through the unsubscribe link in any email. In production this form would be served over HTTPS, contact details encrypted at rest, and consent recorded with a timestamp.</p>';
     fillSubAreas();
   }
 
@@ -1585,17 +2046,24 @@ ol.steps li{margin-bottom:3px}
       var failed = inappRows.filter(function(r){ return r.status === 'failed'; }).length;
       return '<div class="hz"><h3><span>' + esc(a.zoneName) + ' · ' + LEVELS[a.level].name + ' <span class="chip demo">DEMO</span>' +
         (a.status === 'cancelled' ? ' <span class="chip warn">cancelled</span>' : '') + (a.correctionOf ? ' <span class="chip warn">correction</span>' : '') +
-        (a.channels.indexOf('sms') >= 0 ? ' <span class="chip demo">SMS</span>' : '') + '</span>' +
+        (a.channels.indexOf('sms') >= 0 ? ' <span class="chip demo">SMS</span>' : '') +
+        (a.channels.indexOf('email') >= 0 ? ' <span class="chip demo">EMAIL</span>' : '') + '</span>' +
         '<span class="mini">' + fmtTime(a.sentAt) + '</span></h3>' +
-        '<div class="facts"><span><b>Measure:</b> ' + a.measure.value + ' °C</span><span><b>Threshold:</b> ' + a.measure.threshold + ' °C</span><span><b>Window:</b> ' + (a.window ? fmtDay(a.window.from) + '–' + fmtDay(a.window.to) : '—') + '</span><span><b>Source:</b> ' + esc(a.source) + '</span><span><b>Channels:</b> ' + esc(a.channels.join(' + ')) + '</span><span><b>In-app:</b> ' + delivered + ' delivered / ' + failed + ' failed</span></div>' +
+        '<div class="facts"><span><b>Measure:</b> ' + a.measure.value + ' °C</span><span><b>Threshold:</b> ' + a.measure.threshold + ' °C</span><span><b>Window:</b> ' + (a.window ? fmtDay(a.window.from) + '–' + fmtDay(a.window.to) : '—') + '</span><span><b>Source:</b> ' + esc(a.source) + '</span><span><b>Channels:</b> ' + esc(a.channels.join(' + ')) + '</span><span><b>In-app:</b> ' + delivered + ' delivered / ' + failed + ' failed</span><span><b>Approved by:</b> ' + esc(a.approvedBy || 'not recorded') + '</span><span><b>Version:</b> ' + esc(a.version || '—') + '</span></div>' +
         (a.sms ? '<div class="smsbox"><h4>SMS <span class="simtag">' + (a.sms.mode === 'live' ? 'LIVE' : 'SIMULATED') + '</span></h4>' +
           '<div class="facts"><span><b>Recipients:</b> ' + a.sms.recipients + '</span><span><b>Parts:</b> ' + a.sms.parts + '</span><span><b>Est. cost:</b> ' + money(a.sms.cost) + '</span><span><b>Status:</b> ' + esc(a.sms.status) + '</span><span><b>Opt-out:</b> ' + esc(a.sms.optOutKeyword) + '</span><span><b>Provider:</b> ' + esc(a.sms.provider) + '</span></div>' +
           '<p class="mini">Full alert link: ' + esc(a.sms.link) + ' · numbers masked · ' + (a.sms.mode === 'live' ? 'sent by the server adapter' : 'simulated delivery only, no provider contacted') + '</p></div>' : '') +
-        '<details><summary>Recipients, status and retries</summary><div class="tablewrap" style="margin-top:8px"><table><thead><tr><th scope="col">Recipient</th><th scope="col">Channel</th><th scope="col">Number</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>' +
+        (a.email ? '<div class="smsbox"><h4>Email <span class="simtag">' + (a.email.mode === 'live' ? 'LIVE' : 'DEMO') + '</span></h4>' +
+          '<div class="facts"><span><b>Recipients:</b> ' + a.email.recipients + '</span><span><b>Delivered:</b> ' + (a.email.delivered || 0) + '</span><span><b>Failed:</b> ' + (a.email.failed || 0) + '</span><span><b>Status:</b> ' + esc(a.email.status) + '</span><span><b>Languages:</b> ' + esc((a.email.languages || []).join(' + ')) + '</span><span><b>Sender:</b> ' + esc(a.email.sender) + '</span><span><b>Unsubscribe:</b> included</span></div>' +
+          '<p class="mini">Subject: ' + esc((a.email.languages || []).map(function(l){ return a.email.subjects[l]; }).join(' · ')) + ' · addresses masked · ' + (a.email.mode === 'live' ? 'handled by the server adapter' + (a.email.dryRun ? ' (dry run, nothing sent)' : '') : 'simulated delivery only, no provider contacted') + '</p></div>' : '') +
+        '<details><summary>Recipients, status and retries</summary><div class="tablewrap" style="margin-top:8px"><table><thead><tr><th scope="col">Recipient</th><th scope="col">Channel</th><th scope="col">Contact (masked)</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>' +
         a.recipients.map(function(r){
-          var statusChip = r.status === 'delivered' ? '<span class="chip ok">delivered' + (a.sms && a.sms.mode === 'live' && r.channel === 'sms' ? '' : ' (simulated)') + '</span>' : '<span class="chip warn">' + esc(r.status) + '</span>';
+          var liveChannel = (r.channel === 'sms' && a.sms && a.sms.mode === 'live') || (r.channel === 'email' && a.email && a.email.mode === 'live');
+          var statusChip = r.status === 'failed'
+            ? '<span class="chip warn">failed</span>'
+            : '<span class="chip ok">' + esc(r.status) + (liveChannel ? '' : ' (simulated)') + '</span>';
           return '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.channel) + '</td><td>' + esc(r.contactMasked || '—') + '</td><td>' + statusChip + '</td>' +
-            '<td>' + (r.status === 'failed' ? '<button type="button" class="btn-quiet" data-retry="' + a.id + '|' + r.id + '">Retry</button>' : '—') + '</td></tr>';
+            '<td>' + (r.status === 'failed' ? '<button type="button" class="btn-quiet" data-retry="' + a.id + '|' + r.id + '|' + r.channel + '">Retry</button>' : '—') + '</td></tr>';
         }).join('') + '</tbody></table></div></details>' +
         '<div class="inline" style="margin-top:8px">' + (a.status === 'sent' ? '<button type="button" class="btn-danger" data-cancel="' + a.id + '">Cancel alert</button><button type="button" class="btn-quiet" data-correct="' + a.id + '">Send correction</button>' : '<span class="mini">No further action available.</span>') + '</div></div>';
     }).join('') : '<p class="mini">No alerts yet. Compose one above; it will appear here with delivery results and an audit entry.</p>';
@@ -1703,7 +2171,7 @@ ol.steps li{margin-bottom:3px}
       '<thead><tr><th scope="col">Channel</th><th scope="col">Status in this demo</th><th scope="col">What a live deployment needs</th></tr></thead><tbody>' +
       '<tr><td>In-app (this browser)</td><td><span class="chip ok">works, DEMO data</span></td><td>Nothing external; a real app would use push or a signed-in session.</td></tr>' +
       '<tr><td>SMS</td><td><span class="chip warn">not configured</span></td><td>Server-side provider credentials in environment variables such as <code>HEATWISE_SMS_API_KEY</code> and <code>HEATWISE_SMS_SENDER</code>, plus opt-in records and a delivery webhook.</td></tr>' +
-      '<tr><td>Email</td><td><span class="chip warn">not configured</span></td><td><code>HEATWISE_EMAIL_API_KEY</code> and <code>HEATWISE_EMAIL_FROM</code> on the server, with bounce handling.</td></tr>' +
+      '<tr><td>Email</td><td><span class="chip demo">DEMO, adapter available</span></td><td><code>server/email-adapter.mjs</code> with <code>HEATWISE_EMAIL_PROVIDER</code>, <code>HEATWISE_EMAIL_API_KEY</code> and <code>HEATWISE_EMAIL_FROM</code> in the server environment. Unverified until a provider account is connected.</td></tr>' +
       '<tr><td>Messaging app</td><td><span class="chip warn">not configured</span></td><td>A bot or business account token in <code>HEATWISE_MESSAGING_TOKEN</code>, message templates approved by the provider, and user opt-in.</td></tr>' +
       '<tr><td>Weather</td><td><span class="chip ok">live when enabled</span></td><td>Open-Meteo forecast API with no key; a deployment should add its own key and a monitored contract.</td></tr>' +
       '</tbody></table></div>' +
@@ -1780,6 +2248,54 @@ ol.steps li{margin-bottom:3px}
     save(); renderAll();
   }
 
+  async function checkEmailAdapter(){
+    state.email.checkResult = { kind:'info', text:'Checking ./api/email/status…' };
+    updateComposer();
+    try{
+      var res = await fetch('./api/email/status', { headers:{ 'Accept':'application/json' } });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      var json = await res.json();
+      state.email.liveConfigured = !!(json && json.configured);
+      state.email.provider = (json && json.provider) || state.email.provider;
+      state.email.sender = (json && (json.from || json.sender)) || state.email.sender;
+      state.email.dryRun = !!(json && json.dryRun);
+      state.email.lastCheck = iso(now());
+      state.email.checkResult = state.email.liveConfigured
+        ? { kind:'ok', text:'Adapter configured · provider ' + state.email.provider + (state.email.dryRun ? ' · dry run: the adapter accepts the batch but no email leaves the server' : ' · live sends enabled') }
+        : { kind:'warn', text:'Adapter reachable but no email provider credentials are set. Email stays DEMO.' };
+      audit('Email adapter checked', state.email.liveConfigured ? ('Configured · ' + state.email.provider + (state.email.dryRun ? ' · dry run' : '')) : 'No credentials configured; DEMO mode only');
+    }catch(err){
+      state.email.liveConfigured = false;
+      state.email.mode = 'simulate';
+      state.email.checkResult = { kind:'warn', text:'No email adapter reachable on this host. Email stays DEMO.' };
+      audit('Email adapter check failed', 'No /api/email/status endpoint; DEMO mode retained');
+    }
+    save(); updateComposer();
+  }
+
+  function openUnsubscribe(){
+    var m = /(?:^#|&)unsubscribe=([A-Za-z0-9]+)/.exec(location.hash || '');
+    if(!m) return;
+    var r = state.recipients.filter(function(x){ return emailUnsubscribeToken(x) === m[1]; })[0];
+    if(!r){
+      openModal('Unsubscribe link', '<p class="mini">This unsubscribe link does not match any contact in this demo. A live system would reject an expired or altered token.</p>', 'Close', closeModal);
+      return;
+    }
+    state.role = 'public';
+    renderAll();
+    openModal('Unsubscribe from heatwave emails?',
+      '<p><strong>' + esc(r.name) + '</strong> (' + esc(maskEmail(r.email)) + ') will stop receiving heatwave email alerts for ' + esc((r.areas || []).join(', ') || 'their registered area') + '.</p>' +
+      '<p class="mini">In-app and SMS preferences are not changed. In a live deployment this link is signed, single-purpose and works without signing in.</p>' +
+      '<label class="inline" style="font-size:12.5px"><input type="checkbox" id="unsubAck"> Yes, stop heatwave emails to this address</label>', 'Unsubscribe', function(){
+        if(!$('#unsubAck') || !$('#unsubAck').checked){ setStatus('Unsubscribe not confirmed.', 'warn'); return; }
+        r.emailOptIn = false;
+        r.emailOptOutAt = iso(now());
+        audit('Email unsubscribed via link', r.name + ' · address masked · no sign-in required');
+        save(); closeModal(); renderAll();
+        setStatus(r.name + ' will not receive heatwave emails. The opt-out is recorded.', 'warn');
+      });
+  }
+
   function renderAudit(){
     $('#auditLog').innerHTML = state.audit.length
       ? '<ul class="timeline">' + state.audit.slice(0, 30).map(function(a){
@@ -1810,7 +2326,7 @@ ol.steps li{margin-bottom:3px}
       state.activeZone = e.target.value;
       save(); renderResponse();
     });
-    ['alertAudience','langEn','langHi','chInapp','chSms'].forEach(function(id){
+    ['alertAudience','langEn','langHi','chInapp','chSms','chEmail'].forEach(function(id){
       var el = $('#' + id);
       if(el) el.addEventListener('change', updateComposer);
     });
@@ -1826,7 +2342,7 @@ ol.steps li{margin-bottom:3px}
       if(btn){
         if(btn.dataset.openZone){ state.activeZone = btn.dataset.openZone; $('#alertZone').value = state.activeZone; save(); renderResponse(); }
         if(btn.dataset.planZone){ state.activeZone = btn.dataset.planZone; $('#alertZone').value = state.activeZone; save(); renderResponse(); renderAll(); setStatus('Supply plan loaded for ' + (zoneById(state.activeZone) || {}).name + '.', 'info'); }
-        if(btn.dataset.retry){ var parts = btn.dataset.retry.split('|'); retryDelivery(parts[0], parts[1]); }
+        if(btn.dataset.retry){ var parts = btn.dataset.retry.split('|'); retryDelivery(parts[0], parts[1], parts[2]); }
         if(btn.dataset.cancel){ cancelAlert(btn.dataset.cancel); }
         if(btn.dataset.correct){ correctAlert(btn.dataset.correct); }
         if(btn.dataset.approve){ approvePlan(btn.dataset.approve); }
@@ -1834,7 +2350,21 @@ ol.steps li{margin-bottom:3px}
         if(btn.dataset.optin){ var r2 = state.recipients.filter(function(x){ return x.id === btn.dataset.optin; })[0]; if(r2){ r2.consent = true; audit('Subscription opted in', r2.name + ' · in-app only · number masked'); save(); renderAll(); setStatus('In-app opt-in recorded for ' + r2.name + '. SMS opt-in is separate.', 'ok'); } }
         if(btn.dataset.smsoptout){ var r3 = state.recipients.filter(function(x){ return x.id === btn.dataset.smsoptout; })[0]; if(r3){ r3.smsOptIn = false; r3.smsOptOutAt = iso(now()); audit('SMS opted out', r3.name + ' · self-serve · number masked'); save(); renderAll(); setStatus('SMS opt-out recorded for ' + r3.name + '. No further SMS will be sent.', 'warn'); } }
         if(btn.dataset.smsoptin){ var r4 = state.recipients.filter(function(x){ return x.id === btn.dataset.smsoptin; })[0]; if(r4 && r4.phone && r4.consent){ r4.smsOptIn = true; delete r4.smsOptOutAt; audit('SMS opted in', r4.name + ' · self-serve · number masked'); save(); renderAll(); setStatus('SMS opt-in recorded for ' + r4.name + '.', 'ok'); } }
+        if(btn.dataset.emailoptout){ var r5 = state.recipients.filter(function(x){ return x.id === btn.dataset.emailoptout; })[0]; if(r5){ r5.emailOptIn = false; r5.emailOptOutAt = iso(now()); audit('Email opted out', r5.name + ' · self-serve · address masked'); save(); renderAll(); setStatus('Email opt-out recorded for ' + r5.name + '. No further heatwave email will be sent.', 'warn'); } }
+        if(btn.dataset.emailoptin){ var r6 = state.recipients.filter(function(x){ return x.id === btn.dataset.emailoptin; })[0]; if(r6 && r6.email && r6.consent){ r6.emailOptIn = true; delete r6.emailOptOutAt; audit('Email opted in', r6.name + ' · self-serve · address masked'); save(); renderAll(); setStatus('Email opt-in recorded for ' + r6.name + '.', 'ok'); } }
         if(btn.id === 'smsScenarioBtn'){ runSmsScenario(); }
+        if(btn.id === 'emailScenarioBtn'){ runEmailScenario(); }
+        if(btn.id === 'checkEmailAdapter'){ checkEmailAdapter(); }
+        if(btn.id === 'toggleEmailMode'){
+          if(state.email.mode === 'simulate'){
+            if(!state.email.liveConfigured){ setStatus('Live email is unavailable: no server adapter has been confirmed. Check the adapter first.', 'warn'); }
+            else { state.email.mode = 'live'; audit('Email mode changed', 'Live provider mode enabled (' + state.email.provider + ')'); }
+          } else {
+            state.email.mode = 'simulate';
+            audit('Email mode changed', 'DEMO email mode enabled');
+          }
+          save(); renderAll();
+        }
         if(btn.id === 'reviewAreaBtn'){ reviewArea(zoneById(state.activeZone)); }
         if(btn.id === 'saveSmsSettings'){ saveSmsSettings(); }
         if(btn.id === 'checkSmsAdapter'){ checkSmsAdapter(); }
@@ -1881,6 +2411,7 @@ ol.steps li{margin-bottom:3px}
     $('#modalCancel').addEventListener('click', closeModal);
     $('#modalOk').addEventListener('click', function(){ if(modalAction) modalAction(); else closeModal(); });
     $('#modal').addEventListener('click', function(e){ if(e.target.id === 'modal') closeModal(); });
+    window.addEventListener('hashchange', function(){ openUnsubscribe(); openLinkedAlert(); });
 
     var search = $('#placeSearch');
     if(search) search.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); } });
@@ -1890,20 +2421,26 @@ ol.steps li{margin-bottom:3px}
     var consent = $('#subConsent').checked;
     if(!consent){ setStatus('Subscription not added: general consent is required.', 'warn'); return; }
     var phone = $('#subPhone').value.trim();
+    var email = $('#subEmail').value.trim();
     var smsConsent = $('#subSmsConsent').checked;
+    var emailConsent = $('#subEmailConsent').checked;
     if(smsConsent && !phone){ setStatus('Subscription not added: SMS opt-in needs a number.', 'warn'); return; }
+    if(emailConsent && !email){ setStatus('Subscription not added: email opt-in needs an email address.', 'warn'); return; }
     if(phone && !/^\+?[0-9][0-9\s-]{7,}$/.test(phone)){ setStatus('Subscription not added: that does not look like a phone number.', 'warn'); return; }
+    if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setStatus('Subscription not added: that does not look like an email address.', 'warn'); return; }
     var zone = zoneById($('#subZone').value);
     var r = {
       id:'p' + Date.now(), name:($('#subName').value.trim() || 'New DEMO resident'),
       zoneId:$('#subZone').value, audience:'resident', language:$('#subLang').value,
-      phone: phone || null, areas:[$('#subArea').value].filter(Boolean), district: zone ? zone.district : '',
-      consent:true, smsOptIn: !!(smsConsent && phone), subscribedAt:iso(now()), note:'DEMO contact added in this browser'
+      phone: phone || null, email: email || null,
+      areas:[$('#subArea').value].filter(Boolean), district: zone ? zone.district : '',
+      consent:true, smsOptIn: !!(smsConsent && phone), emailOptIn: !!(emailConsent && email),
+      subscribedAt:iso(now()), note:'DEMO contact added in this browser'
     };
     state.recipients.push(r);
-    audit('Subscription added', r.name + ' · areas ' + (r.areas.join(', ') || '—') + ' · in-app yes · SMS ' + (r.smsOptIn ? 'opted in' : 'not opted in'));
+    audit('Subscription added', r.name + ' · areas ' + (r.areas.join(', ') || '—') + ' · in-app yes · SMS ' + (r.smsOptIn ? 'opted in' : 'not opted in') + ' · email ' + (r.emailOptIn ? 'opted in' : 'not opted in'));
     save(); renderAll();
-    setStatus('Demo subscription added. The number is masked everywhere and stored only in this browser.', 'ok');
+    setStatus('Demo subscription added. Contact details are masked everywhere and stored only in this browser.', 'ok');
   }
 
   function saveInventory(){
@@ -1991,7 +2528,10 @@ ol.steps li{margin-bottom:3px}
      Init
   ------------------------------------------------------------------ */
   function finishScenario(alert){
+    if(!SCENARIO.active) return;
+    var channel = SCENARIO.channel || 'sms';
     SCENARIO.active = false;
+    if(channel === 'email'){ finishEmailScenario(alert); return; }
     var out = $('#smsScenarioOut');
     if(!out) return;
     var rows = alert.recipients.filter(function(r){ return r.channel === 'sms'; });
@@ -2050,7 +2590,73 @@ ol.steps li{margin-bottom:3px}
       return;
     }
     SCENARIO.active = true;
+    SCENARIO.channel = 'sms';
     setStatus('Sample SMS scenario: review the preview, recipient count and cost, then confirm.', 'info');
+    reviewSend();
+  }
+
+  function renderEmailScenarioOut(ctx){
+    var out = $('#emailScenarioOut');
+    if(!out) return;
+    var zone = ctx.zone;
+    if(!zone){ out.innerHTML = ''; return; }
+    var est = emailEstimate(zone, ctx.info.level || 1, ctx.langs, ctx.email);
+    out.innerHTML = '<div class="smsbox"><h4>Preview <span class="simtag">DEMO</span></h4>' +
+      '<div class="costrow"><span><b>Zone:</b> ' + esc(zone.name) + '</span><span><b>Level:</b> ' + LEVELS[ctx.info.level].name + '</span>' +
+      '<span><b>Eligible email recipients:</b> ' + est.recipients + '</span><span><b>Languages:</b> ' + esc(est.order.map(langLabel).join(' + ')) + '</span></div>' +
+      (ctx.reasons.length
+        ? '<p class="mini" style="margin-top:6px"><strong>Held:</strong> ' + esc(ctx.reasons.join('; ')) + '</p>'
+        : '<p class="mini" style="margin-top:6px">The confirmation dialog repeats the area, level, source, window and recipient count. Nothing is recorded until you confirm it.</p>') +
+      '</div>';
+  }
+
+  function finishEmailScenario(alert){
+    var out = $('#emailScenarioOut');
+    if(!out) return;
+    var rows = alert.recipients.filter(function(r){ return r.channel === 'email'; });
+    var audits = state.audit.slice(0, 6);
+    out.innerHTML = '<div class="smsbox"><h4>Scenario result <span class="simtag">' + (alert.email && alert.email.mode === 'live' ? 'LIVE' : 'DEMO') + '</span></h4>' +
+      '<div class="costrow"><span><b>Alert:</b> ' + esc(alert.id) + '</span><span><b>Version:</b> ' + esc(alert.email ? alert.email.version : '—') + '</span><span><b>Recipients:</b> ' + rows.length + '</span>' +
+      '<span><b>Status:</b> ' + esc(alert.email ? alert.email.status : '—') + '</span><span><b>Approved by:</b> ' + esc(alert.approvedBy || '—') + '</span></div>' +
+      '<div class="tablewrap" style="margin-top:8px"><table><caption>Delivery status per demo recipient. Addresses stay masked.</caption><thead><tr><th scope="col">Recipient</th><th scope="col">Email</th><th scope="col">Language</th><th scope="col">Status</th></tr></thead><tbody>' +
+      rows.map(function(r){
+        var person = state.recipients.filter(function(x){ return x.id === r.id; })[0] || {};
+        return '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.contactMasked || '—') + '</td><td>' + langLabel(person.language || r.language) + '</td><td>' +
+          (r.status === 'failed' ? '<span class="chip warn">failed</span>' : '<span class="chip ok">' + esc(r.status) + (alert.email && alert.email.mode === 'live' ? '' : ' (simulated)') + '</span>') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<h4 style="margin-top:10px">Audit trail</h4><ul class="timeline">' + audits.map(function(a){
+        return '<li class="demo"><div class="t">' + fmtTime(a.ts) + ' · DEMO</div><div class="d"><span class="a">' + esc(a.action) + '</span> — ' + esc(a.detail) + '</div></li>';
+      }).join('') + '</ul>' +
+      '<p class="mini">This run is in the alert log above and the audit log below. No email address appears in either.</p></div>';
+    out.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function runEmailScenario(){
+    var zone = zoneById('z-suryapur');
+    if(!zone){ setStatus('Sample zone is missing. Reset the demo data.', 'warn'); return; }
+    state.role = 'response';
+    state.activeZone = zone.id;
+    save();
+    renderAll();
+    $('#alertZone').value = zone.id;
+    $('#alertAudience').value = 'all';
+    $('#chInapp').checked = false;
+    $('#chSms').checked = false;
+    $('#chEmail').checked = true;
+    $('#langEn').checked = true;
+    $('#langHi').checked = true;
+    updateComposer();
+    var ctx = composerContext();
+    audit('Sample email scenario started', zone.name + ' · ' + ctx.email.length + ' opted-in demo email recipient(s) · ' + state.email.mode + ' mode');
+    save(); renderEmailScenarioOut(ctx);
+    if(ctx.reasons.length || !ctx.email.length){
+      setStatus('Sample email scenario held: ' + (ctx.reasons.join('; ') || 'no opted-in email recipient'), 'warn');
+      renderAll();
+      return;
+    }
+    SCENARIO.active = true;
+    SCENARIO.channel = 'email';
+    setStatus('Sample email scenario: review the subject, body and eligible recipients, then confirm.', 'info');
     reviewSend();
   }
 
@@ -2086,6 +2692,7 @@ ol.steps li{margin-bottom:3px}
     renderAll();
     setStatus(state.settings.live ? 'Demo loaded. Live weather can be refreshed per zone.' : 'Demo loaded with a synthetic heat event. Open Response team to run the scenario.', 'info');
     openLinkedAlert();
+    openUnsubscribe();
   }
   init();
 })();

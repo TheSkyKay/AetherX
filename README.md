@@ -27,7 +27,7 @@ Everything in the alert and response page is a simulation, labelled **DEMO**:
 
 - Three fictional wards, twelve synthetic contacts, four storage units with demo stock.
 - Alerts are delivered only to those synthetic recipients, inside the page.
-- SMS goes to synthetic numbers and is simulated. Every message is prefixed `[SIMULATED]`, and numbers are masked everywhere they are displayed.
+- SMS goes to synthetic numbers and email goes to synthetic `.invalid` addresses. Both are simulated. SMS messages are prefixed `[SIMULATED]`, email is labelled `DEMO EMAIL`, and numbers and addresses are masked everywhere they are displayed.
 - Dispatch deducts demo inventory and appends a simulated record. No order is placed and no supplier is contacted.
 - All demo data lives in this browser's `localStorage`; "Reset demo data" clears it.
 
@@ -40,7 +40,8 @@ Everything in the alert and response page is a simulation, labelled **DEMO**:
 5. Or click **Preview the sample SMS** in the *Sample SMS test scenario* card: it selects the demo ward, opens the preview and cost, and after confirmation simulates delivery and shows per-recipient status plus the audit entries.
 6. Scroll to **Supply plan**, review quantities (clearly estimates), then **Review and approve plan** → simulated dispatch and inventory reduction.
 7. Switch to **Storage operator** to see the request and edit stock; switch to **Public** to see the alert, guidance and SMS opt-in/out controls.
-8. **Administrator** changes thresholds, stale limits, rate limits, cost per SMS part and the severe-alert second-review rule.
+8. Or click **Preview the sample email** in the *Sample email test scenario* card: it selects the demo ward, shows the eligible opted-in email recipients and the full message per language, and after confirmation simulates delivery and shows per-recipient status plus the audit entries.
+9. **Administrator** changes thresholds, stale limits, rate limits, cost per SMS part and the severe-alert second-review rule.
 
 ## What is live vs simulated
 
@@ -49,7 +50,7 @@ Everything in the alert and response page is a simulation, labelled **DEMO**:
 | Weather (Open-Meteo) | Live when "Live weather" is enabled in the admin view; otherwise a clearly labelled demo snapshot. |
 | In-app alerts | Works in the browser, with DEMO recipients. |
 | SMS | **Simulated** until a responder clicks *Check server adapter* and the adapter reports credentials. Then live via `server/sms-adapter.mjs`. |
-| Email | **Not configured.** Simulated adapter only. |
+| Email | **DEMO in the page.** Live delivery via `server/email-adapter.mjs` once a provider, credentials and a sender are configured; the adapter defaults to a dry run. |
 | Messaging app | **Not configured.** Simulated adapter only. |
 | Supply ordering / dispatch | **Simulated.** No external system is contacted. |
 | Official IMD warnings | **Not ingested.** The page never claims to show one. |
@@ -60,8 +61,10 @@ The page contains no credentials. A production deployment would need a server th
 HEATWISE_SMS_PROVIDER=
 HEATWISE_SMS_API_KEY=
 HEATWISE_SMS_SENDER=
+HEATWISE_EMAIL_PROVIDER=
 HEATWISE_EMAIL_API_KEY=
 HEATWISE_EMAIL_FROM=
+HEATWISE_EMAIL_UNSUBSCRIBE_SECRET=
 HEATWISE_MESSAGING_TOKEN=
 ```
 
@@ -89,6 +92,53 @@ SMS is a channel of its own, with its own consent, limits and audit trail.
 - live mode is selected but no adapter has been confirmed.
 
 **Privacy.** Demo numbers are synthetic and always rendered masked (`+91 ••••• 4821`). In live mode the browser sends recipient **IDs** and the message text only; the adapter looks each number up in its own consent store, so numbers never reach the browser, the page, the map or the audit log. The adapter never logs a full number either.
+
+## Email alerts
+
+Email is its own channel inside the **Alert and Response** tab, next to in-app and SMS. It has its own opt-in, its own rate limit and its own audit entries.
+
+**Who receives it.** Only registered contacts who (a) gave general consent, (b) opted in to email separately, (c) have an address on record, and (d) are registered in an area that overlaps the affected zone. Language comes from the contact's saved preference, falling back to English. Contacts with no address, an opt-out, or an area outside the zone are excluded and the composer shows the eligible count.
+
+**What the responder sees before approving.** The affected area and district, the alert level, the model measure and threshold, the forecast window, the data source, the data age against the stale limit, the number of eligible opted-in recipients, and the subject plus full HTML/text body per language. A banner in the email itself states that a model estimate is not an official IMD warning; the composer repeats that no IMD warning feed is ingested.
+
+**What the email contains.** Subject with the level and area; alert level, affected area, valid window, last-updated time (with data age), source and measure; level-specific heat-safety steps; when to seek urgent medical help and the cooling-first instruction; a link to the full alert (`heat-response.html#alert=<id>`) and to the public guidance (`heat-safety.html#during`); and an unsubscribe link. No recipient ever sees another recipient's address.
+
+**When sending is blocked.** Stale or missing weather, an unreviewed approximate boundary, a missing forecast window/source/measure, no selected language, no eligible opted-in recipient, an identical alert for the same zone and level within six hours, the per-zone email rate limit, or live mode selected without a confirmed adapter. The reason is shown in the composer and nothing is recorded as sent.
+
+**Approval and audit.** Confirming records who approved, the alert version, the recipient count, the timestamp, per-recipient delivery results, retries and failures. The same idempotency key prevents a repeated request from sending the same alert twice. Demo addresses are masked everywhere (`r•••@example.invalid`).
+
+**Managing the preference and unsubscribing.** In the public view each contact's email opt-in can be changed, and the email carries a one-click unsubscribe link with a signed, single-purpose token that needs no sign-in. Opening the demo link (`heat-response.html#unsubscribe=<token>`) asks for confirmation and records the opt-out.
+
+**DEMO vs live.** With no adapter, the page simulates delivery to synthetic `.invalid` addresses, marks every result as simulated and sends no email. With the adapter running and confirmed, the page switches to live mode: it posts recipient **IDs** and the rendered message parts, and the adapter re-checks consent and overlap, adds the signed unsubscribe link and `List-Unsubscribe` headers, calls the provider, retries 429/5xx responses with backoff, and returns a status only after the provider answers. The page reports `sent`/`accepted` as the provider's answer, and never claims delivery unless the provider accepted the message. A dry run is labelled as such and sends nothing.
+
+### Running the email adapter
+
+```bash
+HEATWISE_EMAIL_PROVIDER=resend \
+HEATWISE_EMAIL_API_KEY=<provider key> \
+HEATWISE_EMAIL_FROM=alerts@your-verified-domain.example \
+HEATWISE_EMAIL_UNSUBSCRIBE_SECRET=<long random string> \
+HEATWISE_CONTACTS_FILE=/secure/path/contacts.json \
+HEATWISE_APP_ORIGIN=https://your-origin.example \
+HEATWISE_EMAIL_AUDIT_FILE=/secure/path/email-audit.jsonl \
+node server/email-adapter.mjs
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `HEATWISE_EMAIL_PROVIDER` | `resend`, `postmark` or `sendgrid`. |
+| `HEATWISE_EMAIL_API_KEY` | Provider secret. Required. |
+| `HEATWISE_EMAIL_FROM` | Verified sender address. Required. |
+| `HEATWISE_EMAIL_FROM_NAME`, `HEATWISE_EMAIL_REPLY_TO` | Optional display name and reply-to address. |
+| `HEATWISE_EMAIL_UNSUBSCRIBE_SECRET` | Signs per-recipient unsubscribe tokens. Required for live use. |
+| `HEATWISE_CONTACTS_FILE` | Consent store. Required. Use `server/contacts.example.json` as the shape. |
+| `HEATWISE_APP_ORIGIN` | Exact site origin; used for cross-origin checks and absolute unsubscribe links. |
+| `HEATWISE_EMAIL_DRY_RUN` | Defaults to on. Set to `0` only when you mean to send real email. |
+| `HEATWISE_EMAIL_MAX_PER_ZONE`, `HEATWISE_EMAIL_WINDOW_MIN` | Server-side rate limit, independent of the page. |
+| `HEATWISE_EMAIL_AUDIT_FILE` | Optional append-only JSONL audit file (masked addresses only). |
+| `HEATWISE_EMAIL_PORT` | Default `8789`. |
+
+The adapter exposes `GET /api/email/status`, `POST /api/email/send`, and `GET|POST /api/email/unsubscribe?token=…`. Route the page's `./api/email/*` calls to it with a reverse proxy on the same origin; the browser never receives a provider credential. In demo mode the page does not call the adapter at all.
 
 ### Running the adapter
 

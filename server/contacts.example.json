@@ -1,45 +1,57 @@
 {
-  "_note": "Example consent store for server/sms-adapter.mjs. All numbers are fictitious. Copy outside version control, replace with real consented records, and point HEATWISE_CONTACTS_FILE at it. The adapter matches 'areas' against the affected zone's area list and re-checks consent on every send.",
+  "_note": "Example consent store for server/sms-adapter.mjs and server/email-adapter.mjs. All numbers and addresses are fictitious; the email domain .invalid is reserved by RFC 2606 and can never receive mail. Copy outside version control, replace with real consented records, and point HEATWISE_CONTACTS_FILE at it. Both adapters match 'areas' against the affected zone's area list and re-check consent on every send.",
   "recipients": [
     {
       "id": "p1",
       "phone": "+919000004821",
+      "email": "resident.a@example.invalid",
       "language": "en",
       "areas": ["Suryapur east ward"],
       "district": "Suryapur",
       "consent": true,
       "smsOptIn": true,
-      "optedOutAt": null
+      "emailOptIn": true,
+      "optedOutAt": null,
+      "emailOptOutAt": null
     },
     {
       "id": "p2",
       "phone": "+919000007310",
+      "email": "resident.b@example.invalid",
       "language": "hi",
       "areas": ["East colony"],
       "district": "Suryapur",
       "consent": true,
       "smsOptIn": true,
-      "optedOutAt": null
+      "emailOptIn": true,
+      "optedOutAt": null,
+      "emailOptOutAt": null
     },
     {
       "id": "p3",
       "phone": "+919000001194",
+      "email": "resident.c@example.invalid",
       "language": "en",
       "areas": ["Bus stand area"],
       "district": "Suryapur",
       "consent": true,
       "smsOptIn": false,
-      "optedOutAt": "2026-05-02T09:10:00Z"
+      "emailOptIn": false,
+      "optedOutAt": "2026-05-02T09:10:00Z",
+      "emailOptOutAt": "2026-05-02T09:10:00Z"
     },
     {
       "id": "p12",
       "phone": "+919000006399",
+      "email": "resident.l@example.invalid",
       "language": "en",
       "areas": ["Old town"],
       "district": "Suryapur",
       "consent": true,
       "smsOptIn": true,
-      "optedOutAt": null
+      "emailOptIn": true,
+      "optedOutAt": null,
+      "emailOptOutAt": null
     }
   ]
 }
