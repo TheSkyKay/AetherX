@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f4ef">
+<title>Heatwise — Stay safe in extreme heat</title>
+<meta name="description" content="Plain-language heat safety guidance for India: prepare before the heat, stay cool during it, recognise heat illness, first aid while help comes, and where official alerts come from.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a84a17'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23fdf6ec'/%3E%3C/svg%3E">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
+
+*{box-sizing:border-box}
+:root{
+  --ink:#202a25;--muted:#4f5952;--paper:#f6f4ef;--card:#fffefa;--line:#e2ddd0;
+  --accent:#a84a17;--accent-dark:#7e3510;--green:#355b45;--green-bg:#eef4ef;
+  --red:#8f2418;--red-dark:#6b1a10;--red-bg:#fdf1ec;--amber:#6b4a00;--amber-bg:#fff7e3;
+  --focus:#123d2c;--radius:14px;
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 "DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-lang="hi"]{font-family:"Noto Sans Devanagari","DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+[hidden]{display:none!important}
+h1,h2,h3,h4{font-family:"Manrope",system-ui,sans-serif;line-height:1.25;margin:0;letter-spacing:-.2px}
+h3{font-size:17px}h4{font-size:15px}
+p{margin:0 0 10px}p:last-child{margin-bottom:0}
+a{color:var(--accent-dark)}
+a:hover{color:var(--red-dark)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 18px}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;color:var(--ink);padding:10px 14px;z-index:60;font-weight:700}
+.skip:focus{left:12px;top:10px;outline:3px solid var(--focus)}
+
+/* header */
+.top{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.topin{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:9px 0}
+.brand{display:flex;align-items:center;gap:9px;font:800 18px Manrope,sans-serif;text-decoration:none;color:var(--ink);letter-spacing:-.5px}
+.brand .mark{width:26px;height:26px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:15px;flex:none}
+.brand small{font:600 11.5px "DM Sans",sans-serif;color:var(--muted);letter-spacing:0}
+.nav{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;font-size:12.5px;max-width:100%;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{text-decoration:none;color:#414b44;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;white-space:nowrap}
+.nav a:hover{background:#f6f2e8;color:var(--ink)}
+.nav a[aria-current=page]{background:#f1eadb;border-color:#d3c7ae;color:#2c332e;font-weight:700}
+.call112{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:var(--red);color:#fff;text-decoration:none;font-weight:700;font-size:13px;border-radius:9px;padding:11px 14px;min-height:44px;border:1px solid var(--red)}
+.call112:hover{background:var(--red-dark);color:#fff}
+
+/* hero */
+.hero{padding:30px 0 6px}
+.eyebrow{margin:0 0 8px;text-transform:uppercase;letter-spacing:1.4px;color:var(--accent);font-size:11px;font-weight:700}
+.hero h1{font-size:clamp(27px,5vw,40px);letter-spacing:-1.2px;max-width:24ch}
+.lead{color:var(--muted);font-size:16px;margin-top:10px;max-width:68ch}
+.meta{color:var(--muted);font-size:12.5px;margin-top:10px}
+.langrow{margin-top:14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13px;font-weight:700}
+.langrow select{width:auto;min-width:150px}
+select,input[type=search]{font:inherit;font-size:14px;padding:10px 11px;border:1px solid #c9c3b3;border-radius:9px;background:#fff;color:var(--ink);min-height:44px}
+select{max-width:100%}
+
+/* emergency strip */
+.emg{background:var(--red-dark);color:#fff;border-radius:var(--radius);padding:16px 18px;margin:20px 0 0;display:grid;grid-template-columns:1fr auto;gap:12px 18px;align-items:center;border:2px solid #4d120b}
+.emg h2{color:#fff;font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.emg .tag{background:#fff;color:var(--red-dark);font:800 10.5px "DM Sans",sans-serif;letter-spacing:1px;text-transform:uppercase;border-radius:5px;padding:3px 7px}
+.emg p{color:#fdeee9;font-size:14px;margin:6px 0 0;max-width:62ch}
+.emg .actions{display:flex;gap:9px;flex-wrap:wrap}
+.emg .btn.white{background:#fff;color:var(--red-dark);border-color:#fff}
+.emg .btn.ghost{background:transparent;color:#fff;border-color:#f0b9a9}
+.emg .btn.ghost:hover{background:#7d2014}
+
+/* sections */
+.sec{margin-top:36px}
+.sec>h2{font-size:clamp(21px,3.4vw,26px);display:flex;align-items:center;gap:11px;letter-spacing:-.7px}
+.num{flex:none;width:32px;height:32px;border-radius:50%;background:#efe7d6;color:#7a3c13;font:800 14px "Manrope",sans-serif;display:grid;place-items:center}
+.sec>.lead{margin:8px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:17px 18px;margin:14px 0}
+.card>h3{margin-bottom:10px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.grid.two{grid-template-columns:1fr 1fr}
+@media(max-width:720px){.grid.two{grid-template-columns:1fr}}
+
+ul.ticks{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:14.5px}
+ul.ticks li{position:relative;padding-left:28px}
+ul.ticks li::before{content:"✓";position:absolute;left:0;top:0;width:19px;height:19px;border-radius:50%;background:#e8f0e9;color:var(--green);font-size:12px;font-weight:800;display:grid;place-items:center;margin-top:2px}
+ul.ticks.warn li::before{content:"!";background:#fbeecb;color:var(--amber)}
+ul.ticks.danger li::before{content:"!";background:#8f2418;color:#fff}
+ul.ticks li strong{color:var(--ink)}
+ul.ticks.plain li::before{background:#f0ece1;color:#6a5641;content:"•"}
+
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:st;display:grid;gap:12px;font-size:14.5px}
+ol.steps li{position:relative;padding-left:36px;counter-increment:st}
+ol.steps li::before{content:counter(st);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font:800 13px "Manrope",sans-serif;display:grid;place-items:center}
+ol.steps li strong{color:var(--ink)}
+
+.small{font-size:13px;color:var(--muted)}
+.chip{display:inline-block;border-radius:999px;padding:4px 10px;font:800 10.5px "DM Sans",sans-serif;letter-spacing:.7px;text-transform:uppercase;border:1px solid #d8d0bd;background:#f6f1e6;color:#4b4436;margin-bottom:9px}
+.chip.emergency{background:var(--red);border-color:var(--red);color:#fff}
+.chip.watch{background:#fbeecb;border-color:#dfc98a;color:var(--amber)}
+.chip.model{background:#fdf1e8;border-color:#e7c8b2;color:#7c3a15}
+.card.watch{border:2px solid #e0c788;background:var(--amber-bg)}
+.card.alert{border:2px solid #c05a45;background:var(--red-bg)}
+.card.alert h3{color:#5e1a11}
+.callout{border-left:5px solid #c9a227;background:var(--amber-bg);padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14.5px;color:#4a3c12}
+.callout.danger{border-color:var(--red);background:var(--red-bg);color:#58180f}
+.callout.info{border-color:var(--green);background:var(--green-bg);color:#233d2c}
+.callout strong{color:inherit}
+
+/* local help */
+.cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.cardhead h3{margin:0}
+.field{display:grid;gap:5px;margin-bottom:10px}
+.field label{font-size:12.5px;font-weight:700;color:#38423b}
+.locrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.locrow{grid-template-columns:1fr}}
+.inline{display:flex;gap:8px;flex-wrap:wrap}
+.inline input{flex:1 1 150px;min-width:0}
+.btn{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--accent-dark);background:var(--accent);color:#fff;border-radius:9px;padding:11px 15px;min-height:44px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn:hover{background:var(--accent-dark);color:#fff}
+.btn.ghost{background:#fff;color:#414b44;border-color:#c9c3b3}
+.btn.ghost:hover{background:#f6f2e8;color:var(--ink)}
+.btn.emergency{background:var(--red);border-color:var(--red-dark)}
+.btn.emergency:hover{background:var(--red-dark)}
+.status{font-size:13.5px;color:var(--muted);margin:10px 0 0;min-height:1.4em}
+.status[data-kind=warn]{color:#6b4a00}
+.status[data-kind=error]{color:var(--red);font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}
+@media(max-width:560px){.metrics{grid-template-columns:1fr}}
+.metric{background:#f8f5ec;border:1px solid var(--line);border-radius:10px;padding:9px 11px;display:grid;gap:1px}
+.metric span{font-size:11.5px;color:var(--muted);font-weight:600}
+.metric strong{font:800 21px "Manrope",sans-serif;letter-spacing:-.6px}
+.signal{font-size:14px;font-weight:700;margin:4px 0 0}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.day{background:#f8f5ec;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:12px}
+.day b{display:block;font:700 12px "DM Sans",sans-serif;color:#38423b}
+.day strong{display:block;font:800 18px "Manrope",sans-serif;margin:2px 0}
+.day small{color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:12px}
+.src{font-size:11.5px;color:var(--muted);margin:10px 0 0}
+.links{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px;font-size:14.5px}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:12px}
+details summary{cursor:pointer;font-weight:700;font-size:14px}
+details[open] summary{margin-bottom:8px}
+.srclist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:9px;font-size:13.5px}
+.srclist li{border-left:3px solid var(--line);padding-left:11px}
+footer{margin:40px 0 0;border-top:1px solid var(--line);padding:20px 0 34px;color:var(--muted);font-size:12.5px}
+footer p{margin-bottom:7px}
+footer a{color:inherit}
+@media(max-width:600px){
+  .wrap{padding:0 14px}
+  .hero{padding-top:22px}
+  .card{padding:15px 14px}
+  .emg{grid-template-columns:1fr;padding:15px}
+  .emg .actions .btn{flex:1 1 auto}
+  .days{grid-template-columns:1fr 1fr 1fr}
+  .day strong{font-size:16px}
+}
+@media(prefers-reduced-motion:no-preference){
+  .btn,.nav a,.call112{transition:background-color .15s ease,color .15s ease}
+}
+@media print{
+  .top,.emg .actions,.langrow,#geoBtn,.inline .btn{display:none}
+  body{background:#fff}
+  .card,.emg{border:1px solid #999;break-inside:avoid}
+}
+</style>
+</head>
+<body data-lang="en">
+<a class="skip" href="#main" data-i18n="skip">Skip to main content</a>
+
+<header class="top">
+  <div class="wrap topin">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">☼</span>heatwise <small data-i18n="brand.sub">heat safety</small></a>
+    <nav class="nav" aria-label="Pages" data-i18n-aria="nav.label">
+      <a href="index.html" data-i18n="nav.home">Home</a>
+      <a href="heat-safety.html" aria-current="page" data-i18n="nav.safety">Heat safety</a>
+      <a href="heat-risk-model.html" data-i18n="nav.risk">Risk model</a>
+      <a href="heatwave-outlook.html" data-i18n="nav.outlook">Season outlook</a>
+      <a href="heat-response.html" data-i18n="nav.response">Alert &amp; response</a>
+    </nav>
+    <a class="call112" href="tel:112"><span aria-hidden="true">☎</span><span data-i18n="nav.help">Call 112</span></a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="hero">
+      <p class="eyebrow" data-i18n="hero.eyebrow">Heat safety · India</p>
+      <h1 data-i18n="hero.h1">Stay safe in extreme heat</h1>
+      <p class="lead" data-i18n="hero.lead">Extreme heat can make anyone unwell. This page explains, in plain language, how to prepare, what to do on a hot day, and when to get help fast.</p>
+      <p class="meta" data-i18n="hero.meta">Health advice checked 20 November 2026 · Weather shown live from Open-Meteo where marked</p>
+      <div class="langrow">
+        <label for="langSelect" data-i18n="lang.label">Language</label>
+        <select id="langSelect">
+          <option value="en" selected>English</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="emg" role="note" aria-labelledby="emgTitle">
+      <div>
+        <h2 id="emgTitle"><span class="tag" data-i18n="emg.tag">Emergency</span><span data-i18n="emg.title">Heatstroke is a medical emergency</span></h2>
+        <p data-i18n="emg.body">If someone is confused, has a seizure, faints or is unconscious, or has very hot skin — call 112 now. Do not wait to see if they improve.</p>
+      </div>
+      <div class="actions">
+        <a class="btn white" href="tel:112">☎ <span data-i18n="emg.call">Call 112</span></a>
+        <a class="btn ghost" href="#what-to-do" data-i18n="emg.how">What to do while help comes →</a>
+      </div>
+    </div>
+
+    <!-- 1. BEFORE -->
+    <section class="sec" id="before" aria-labelledby="before-h">
+      <h2 id="before-h"><span class="num" aria-hidden="true">1</span><span data-i18n="s1.title">Before the heat peaks</span></h2>
+      <p class="lead" data-i18n="s1.lead">A few small jobs done in advance make the hottest days much easier to get through.</p>
+
+      <div class="card">
+        <h3 data-i18n="s1.prep.h">Prepare in advance</h3>
+        <ul class="ticks" data-i18n="s1.prep">
+          <li><strong>Check official local alerts.</strong> Look at the India Meteorological Department (IMD) warning for your district before you plan the day. A weather app's forecast is not an official warning.</li>
+          <li><strong>Plan outdoor work for cooler hours.</strong> Do most outdoor work, errands and travel early in the morning or in the evening, when it is usually cooler.</li>
+          <li><strong>Keep water available.</strong> Keep drinking water at home, at work and in your bag, and refill it during the day.</li>
+          <li><strong>Identify a nearby cool place.</strong> Choose the coolest room at home, a shaded spot, or a local cool space. Ask locally which public places are open — this page has no verified list of cooling centres.</li>
+          <li><strong>Check on people who may need help.</strong> Older adults living alone, people with a disability or a long-term illness, pregnant women, babies, and people who work outdoors.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s1.home.h">Keep your home cooler</h3>
+        <ul class="ticks plain" data-i18n="s1.home">
+          <li>During the day, close windows, curtains and shutters when it is hotter outside than inside, especially in direct sun. Open them again at night when the outside air is cooler.</li>
+          <li>Turn off lights and electrical equipment you are not using — they add heat to a room.</li>
+          <li>Use a fan to move air, but above about 40 °C a fan can make the body hotter (WHO). At those temperatures, wet a cloth or your skin with cool water instead.</li>
+          <li>Wipe your face and body with a damp cloth, take a cool shower, or put your feet in cool water.</li>
+          <li>When cooking, open a window or use an exhaust fan to send steam and heat outside, and cook in the cooler part of the day when you can.</li>
+          <li>Keep the room where you sleep ventilated, and use light cotton bedding.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s1.plan.h">Make a simple plan</h3>
+        <p data-i18n="s1.plan">Decide who you will call, whose room is coolest, where medicines are kept, and what you will do if the power goes out. Make sure children and older adults know 112 and your family's phone numbers.</p>
+      </div>
+    </section>
+
+    <!-- 2. DURING -->
+    <section class="sec" id="during" aria-labelledby="during-h">
+      <h2 id="during-h"><span class="num" aria-hidden="true">2</span><span data-i18n="s2.title">During extreme heat</span></h2>
+      <p class="lead" data-i18n="s2.lead">The aim is simple: keep the body cool and keep drinking. Change what you do, not just what you wear.</p>
+
+      <div class="card">
+        <h3 data-i18n="s2.core.h">Everyday actions</h3>
+        <ul class="ticks" data-i18n="s2.core">
+          <li><strong>Rest in shade or a cool place.</strong> Spending 2–3 hours of the day somewhere cool helps the body recover (WHO).</li>
+          <li><strong>Drink water regularly</strong> through the day, before you feel thirsty, and keep water within reach.</li>
+          <li><strong>Wear light, loose clothing</strong> in light colours. Cover your head, and carry an umbrella or cap.</li>
+          <li><strong>Reduce strenuous activity</strong> during the hottest hours. Take frequent breaks in shade, and do not push through dizziness or weakness.</li>
+          <li><strong>Avoid alcohol</strong> in the heat — it increases fluid loss.</li>
+          <li><strong>Never leave children or pets in a parked vehicle</strong>, even for a few minutes with the windows down.</li>
+        </ul>
+      </div>
+
+      <div class="callout" data-i18n="s2.water"><strong>There is no single water amount that suits everyone.</strong> How much you need depends on your body, your work, the weather, your age and your medicines. That is why this page does not give one fixed amount.</div>
+      <div class="callout danger" data-i18n="s2.fluid"><strong>Medical fluid restrictions:</strong> if a clinician has told you to limit fluids because of a heart, kidney or liver condition, follow their advice rather than general guidance.</div>
+
+      <div class="grid">
+        <div class="card">
+          <h3><span aria-hidden="true">👷</span> <span data-i18n="s2.workers.h">Outdoor workers</span></h3>
+          <p data-i18n="s2.workers">Start early or work in the evening, take a shade break every hour, and work in pairs so you can watch each other. Stop and cool down if you feel dizzy, weak or headachy. Take oral rehydration solution only as advised by a health worker.</p>
+        </div>
+        <div class="card">
+          <h3><span aria-hidden="true">🚌</span> <span data-i18n="s2.travel.h">Travelling</span></h3>
+          <p data-i18n="s2.travel">Carry water, avoid travelling in the hottest part of the day, and never leave children or pets alone in a vehicle. On buses and trains, check on older people and children around you.</p>
+        </div>
+        <div class="card">
+          <h3><span aria-hidden="true">🧒</span> <span data-i18n="s2.children.h">Children</span></h3>
+          <p data-i18n="s2.children">Encourage play in shade and away from midday sun, offer water often, and watch for unusual tiredness, irritability or drowsiness. Children can overheat faster than adults.</p>
+        </div>
+        <div class="card">
+          <h3><span aria-hidden="true">🧓</span> <span data-i18n="s2.older.h">Older adults and people with disabilities</span></h3>
+          <p data-i18n="s2.older">Check on them twice a day. Keep water within reach, help them get to a cooler place, store medicines somewhere cool, and remind anyone who cannot get water themselves to drink.</p>
+        </div>
+        <div class="card">
+          <h3><span aria-hidden="true">🐕</span> <span data-i18n="s2.pets.h">Pets and animals</span></h3>
+          <p data-i18n="s2.pets">Provide shade and clean water, walk them on cooler surfaces rather than hot pavement, never leave them in a vehicle, and skip long walks in the hottest hours.</p>
+        </div>
+        <div class="card">
+          <h3><span aria-hidden="true">💊</span> <span data-i18n="s2.meds.h">Medicines and health conditions</span></h3>
+          <p data-i18n="s2.meds">Some medicines affect sweating or fluid balance. If you take regular medicines or have a chronic condition, ask your clinician how to manage the heat, and keep medicines below about 25–30 °C where the label says so.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RECOGNISE -->
+    <section class="sec" id="recognise" aria-labelledby="recognise-h">
+      <h2 id="recognise-h"><span class="num" aria-hidden="true">3</span><span data-i18n="s3.title">Recognise heat illness</span></h2>
+      <p class="lead" data-i18n="s3.lead">Early signs need cooling straight away. Confusion, a seizure or unconsciousness means call 112 immediately.</p>
+
+      <div class="grid two">
+        <div class="card watch">
+          <span class="chip watch" data-i18n="s3.early.chip">Early signs</span>
+          <h3 data-i18n="s3.early.h">Heat exhaustion</h3>
+          <ul class="ticks warn" data-i18n="s3.early">
+            <li>Heavy sweating, with skin that feels cool and clammy</li>
+            <li>Weakness and unusual tiredness</li>
+            <li>Dizziness or feeling light-headed</li>
+            <li>Headache</li>
+            <li>Nausea or vomiting</li>
+            <li>Cramps in the arms, legs or stomach</li>
+            <li>Being very thirsty</li>
+            <li>Irritability</li>
+          </ul>
+          <p class="small" style="margin-top:10px" data-i18n="s3.early.note">Skin colour changes are harder to see on brown or black skin, so go by the symptoms. If someone is not better after 30 minutes of cooling, get medical advice.</p>
+        </div>
+
+        <div class="card alert">
+          <span class="chip emergency" data-i18n="s3.em.chip">Emergency</span>
+          <h3 data-i18n="s3.em.h">Heatstroke — call 112 now</h3>
+          <ul class="ticks danger" data-i18n="s3.em">
+            <li>Confusion, slurred speech or strange behaviour</li>
+            <li>Seizure (fit) or body stiffness</li>
+            <li>Fainting or unconsciousness</li>
+            <li>Very hot skin — whether sweating or dry</li>
+            <li>Fast heartbeat or fast breathing</li>
+            <li>Body temperature of 40 °C or more</li>
+            <li>No improvement after 30 minutes of cooling</li>
+          </ul>
+          <p class="small" style="margin-top:10px" data-i18n="s3.em.note">Not everyone sweats. Skin can be very hot and dry. Heatstroke can worsen quickly and needs emergency care.</p>
+          <p style="margin-top:12px"><a class="btn emergency" href="tel:112">☎ <span data-i18n="emg.call">Call 112</span></a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. WHAT TO DO -->
+    <section class="sec" id="what-to-do" aria-labelledby="act-h">
+      <h2 id="act-h"><span class="num" aria-hidden="true">4</span><span data-i18n="s4.title">What to do</span></h2>
+      <p class="lead" data-i18n="s4.lead">With heatstroke, every minute matters. Call for help first, then start cooling while you wait.</p>
+
+      <div class="card">
+        <h3 data-i18n="s4.steps.h">While help is on the way</h3>
+        <ol class="steps" data-i18n="s4.steps">
+          <li><strong>Call 112</strong> or the nearest emergency department. Say where you are, how many people are affected, and what you can see.</li>
+          <li><strong>Move the person</strong> to the coolest shaded place you can reach.</li>
+          <li><strong>Loosen or remove unnecessary clothing</strong> such as a jacket, shoes or socks.</li>
+          <li><strong>Cool the skin</strong> with cool wet cloths, a sponge or spray of water, and fanning. Wrapped cold packs at the neck, armpits or groin help too.</li>
+          <li><strong>Give small sips of water</strong> only if the person is fully awake and can swallow safely.</li>
+          <li><strong>If they are unconscious but breathing</strong>, place them on their side in the recovery position. If they are not breathing normally, start CPR and tell 112.</li>
+          <li><strong>Stay with them</strong> and keep cooling until help arrives.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s4.dont.h">Do not</h3>
+        <ul class="ticks danger" data-i18n="s4.dont">
+          <li>Give food or drink to someone who is unconscious, drowsy, or unable to swallow safely.</li>
+          <li>Give medicines, paracetamol, alcohol or home remedies instead of urgent medical care.</li>
+          <li>Put ice directly on the skin — wrap it in a cloth first.</li>
+          <li>Leave the person alone, or send them away on their own.</li>
+          <li>Make them walk, work or return to the heat before they have recovered.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s4.mild.h">If the signs are mild and the person is awake</h3>
+        <p data-i18n="s4.mild">Rest them in a cool place, loosen clothing, cool the skin and offer small sips of water or an oral rehydration drink. They should start to feel better within about 30 minutes. If they do not improve, get worse, or are older, pregnant, a young child or living with a long-term illness, seek medical advice straight away. Avoid heavy work in the heat the next day.</p>
+        <div class="callout info" data-i18n="s4.meds"><strong>No medicine or home remedy replaces urgent medical care.</strong> This page does not recommend any medicine or treatment for heat illness.</div>
+      </div>
+    </section>
+
+    <!-- 5. LOCAL HELP -->
+    <section class="sec" id="local" aria-labelledby="local-h">
+      <h2 id="local-h"><span class="num" aria-hidden="true">5</span><span data-i18n="s5.title">Local help and alerts</span></h2>
+      <p class="lead" data-i18n="s5.lead">Choose your area to see a forecast estimate. You never have to share your location.</p>
+
+      <div class="card">
+        <h3 data-i18n="s5.loc.h">Choose your area</h3>
+        <p class="small" data-i18n="s5.loc.note">Location is requested once, only when you press the button, and only to show a forecast. It is not saved and is not sent to our server.</p>
+        <div class="locrow">
+          <div class="field">
+            <label for="citySelect" data-i18n="s5.loc.city">City or district</label>
+            <select id="citySelect">
+              <option value="" data-i18n="s5.loc.choose">Select…</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="placeQuery" data-i18n="s5.loc.searchLabel">Or search for a place in India</label>
+            <div class="inline">
+              <input id="placeQuery" type="search" autocomplete="off" enterkeyhint="search" placeholder="e.g. Nagpur" data-i18n-placeholder="s5.loc.placeholder" aria-describedby="geoStatus">
+              <button class="btn ghost" id="searchBtn" type="button" data-i18n="s5.loc.searchBtn">Search</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn" id="geoBtn" type="button" data-i18n="s5.loc.geo">Use my location</button>
+        <p class="status" id="geoStatus" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="card" id="wxCard" aria-labelledby="wxH">
+        <div class="cardhead">
+          <div>
+            <h3 id="wxH" data-i18n="s5.wx.h">Forecast heat estimate</h3>
+            <p class="small" id="wxPlace" data-i18n="s5.wx.none">No area selected yet</p>
+          </div>
+          <span class="chip model" data-i18n="s5.wx.chip">Model estimate</span>
+        </div>
+        <p class="status" id="wxStatus" role="status" aria-live="polite"></p>
+        <div id="wxBody" hidden>
+          <div class="metrics">
+            <div class="metric"><span data-i18n="wx.feels">Feels like now</span><strong id="wxNow">—</strong></div>
+            <div class="metric"><span data-i18n="wx.max">Today's forecast high</span><strong id="wxMax">—</strong></div>
+            <div class="metric"><span data-i18n="wx.feelMax">Today's max feels-like</span><strong id="wxFeelMax">—</strong></div>
+          </div>
+          <p class="signal" id="wxSignal"></p>
+          <div class="days" id="wxDays"></div>
+          <p class="src" id="wxUpdated"></p>
+        </div>
+        <p class="note" data-i18n="s5.wx.note">This is a forecast from a weather model for an area roughly 25 km wide — not a measurement at your address, and not an official warning. For official warnings, check IMD.</p>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s5.official.h">Official alerts (IMD)</h3>
+        <p data-i18n="s5.official">Official heat warnings are issued by the India Meteorological Department (IMD). This page does not display IMD warnings and does not create them. Check IMD for your district's current status.</p>
+        <p><a class="btn ghost" href="https://mausam.imd.gov.in/index_en.php" target="_blank" rel="noopener" data-i18n="s5.official.link">Open the IMD website ↗</a></p>
+        <h4 style="margin-top:14px" data-i18n="s5.compare.h">Estimate and official warning are different</h4>
+        <ul class="ticks plain" data-i18n="s5.compare">
+          <li><strong>On this page:</strong> a forecast of how hot it may feel, calculated from the Open-Meteo weather model. Use it to plan your day, not as an alert.</li>
+          <li><strong>IMD:</strong> the official heatwave or heat warning for a district. Local authorities, hospitals and the media act on these.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="s5.help.h">Emergency and local help</h3>
+        <ul class="ticks plain" data-i18n="s5.help">
+          <li><strong>112</strong> — India's national emergency number for police, fire and ambulance. It is free and works 24 hours a day.</li>
+          <li><strong>108 / 102</strong> — the National Ambulance Service numbers. They operate in most states and union territories, but availability and response vary by district. You can also ask 112 for an ambulance.</li>
+          <li><strong>Cooling centres, shelters or local helplines:</strong> this page has no verified information for your area, so it does not list any. Ask your municipal office, district health office, or call 112.</li>
+        </ul>
+        <h4 style="margin-top:14px" data-i18n="s5.links.h">Official resources</h4>
+        <ul class="links">
+          <li><a href="https://mausam.imd.gov.in/index_en.php" target="_blank" rel="noopener">India Meteorological Department (IMD) — warnings and district forecasts ↗</a></li>
+          <li><a href="https://ndma.gov.in/Natural-Hazards/Heat-Wave" target="_blank" rel="noopener">National Disaster Management Authority (NDMA) — heat wave guidance ↗</a></li>
+          <li><a href="https://ncdc.mohfw.gov.in/wp-content/uploads/2024/03/NPCCHH_Public-health-advisory_Extreme-heat_Heatwave_2024.pdf" target="_blank" rel="noopener">MoHFW / NCDC — public health advisory on extreme heat (PDF, 2024) ↗</a></li>
+          <li><a href="https://112.gov.in/" target="_blank" rel="noopener">Emergency Response Support System — 112 ↗</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6. ABOUT -->
+    <section class="sec" id="about" aria-labelledby="about-h">
+      <h2 id="about-h"><span class="num" aria-hidden="true">6</span><span data-i18n="s6.title">About this page</span></h2>
+      <div class="card">
+        <p data-i18n="s6.about">This page gives general safety information for the public. It is not a diagnosis, not personalised medical advice, and it does not replace a clinician, emergency services or instructions from local authorities. Following it cannot guarantee that someone stays well.</p>
+
+        <h4 style="margin-top:14px" data-i18n="s6.sources.h">Sources for the health advice</h4>
+        <p class="small" data-i18n="s6.sources">Health advice was checked against these sources on 20 November 2026. Each item links to the original.</p>
+        <ul class="srclist">
+          <li><a href="https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health" target="_blank" rel="noopener">World Health Organization — <em>Heat and health</em> fact sheet</a> (updated 31 July 2026): who is at risk, cool places, home cooling, fan use above 40 °C, protecting children.</li>
+          <li><a href="https://www.nhs.uk/conditions/heat-exhaustion-heatstroke/" target="_blank" rel="noopener">NHS — <em>Heat exhaustion and heatstroke</em></a> (reviewed 28 May 2026): signs, cooling steps, what to do while waiting for an ambulance.</li>
+          <li><a href="https://ndma.gov.in/Natural-Hazards/Heat-Wave" target="_blank" rel="noopener">National Disaster Management Authority — <em>Heat Wave</em></a> (India): heat cramps, heat exhaustion and heatstroke definitions, first aid, emergency kit.</li>
+          <li><a href="https://ncdc.mohfw.gov.in/wp-content/uploads/2024/03/NPCCHH_Public-health-advisory_Extreme-heat_Heatwave_2024.pdf" target="_blank" rel="noopener">MoHFW / NCDC — <em>Public health advisory: extreme heat / heatwave</em></a> (2024, PDF).</li>
+          <li><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — forecast weather data (CC BY 4.0), used for the estimate on this page.</li>
+        </ul>
+
+        <h4 style="margin-top:16px" data-i18n="s6.notdo.h">What this page does not do</h4>
+        <ul class="ticks plain" data-i18n="s6.notdo">
+          <li>It does not show official IMD warnings, and it never presents a model forecast as an official alert.</li>
+          <li>It does not list helplines, cooling centres or services it cannot verify. Where local information is missing, it says so.</li>
+          <li>It does not predict deaths, hospitalisations or how many people will fall ill.</li>
+          <li>It does not give fixed water amounts, medicines or home treatments for heat illness.</li>
+        </ul>
+
+        <details>
+          <summary data-i18n="s6.lang.h">Languages and adding a new one</summary>
+          <p class="small" data-i18n="s6.lang">English and Hindi are available now. To add another Indian language, add an option to the language menu and a matching set of translated strings in this file; any line without a translation falls back to English. Have a native speaker review the wording before publishing. The Hindi text here is a first draft and has not been checked by a professional translator.</p>
+        </details>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-i18n="footer.text"><strong>Heatwise · heat safety for the public.</strong> General information only, not medical advice. In an emergency call 112.</p>
+    <p><a href="index.html" data-i18n="nav.home">Home</a> · <a href="heat-risk-model.html" data-i18n="nav.risk">Risk model</a> · <a href="heatwave-outlook.html" data-i18n="nav.outlook">Season outlook</a> · <a href="heat-response.html" data-i18n="nav.response">Alert &amp; response</a></p>
+    <p data-i18n="footer.src">Weather: Open-Meteo (CC BY 4.0). Health guidance: WHO, NHS, NDMA, MoHFW/NCDC. Reviewed 20 November 2026.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     LANGUAGE FRAMEWORK
+     To add another Indian language (for example Bengali or Tamil):
+       1. Add an option to #langSelect, e.g. <option value="bn">বাংলা</option>.
+       2. Add LANGS entry and an I18N.bn = { 'key': 'text', ... } object below,
+          plus TEXT.bn for the live weather messages.
+       3. Any key you do not translate falls back to the English text that is
+          already written in the HTML, so a partial translation still works.
+     Keep the same keys, and have a native speaker review before publishing.
+  ------------------------------------------------------------------ */
+  var LANGS = ['en','hi'];
+  var STORE = 'heatwise.safety.lang';
+
+  var TEXT = {
+    en: {
+      title: 'Heatwise — Stay safe in extreme heat',
+      prompt: 'Choose your city or district to see a forecast heat estimate.',
+      loading: 'Loading forecast…',
+      error: 'Forecast could not load. Check your internet connection and try again. Official warnings are still available from IMD.',
+      none: 'No area selected yet',
+      feels: 'Feels like now',
+      max: "Today's forecast high",
+      feelMax: "Today's max feels-like",
+      updated: 'Forecast fetched',
+      modelTime: 'model time',
+      signal: 'Forecast heat signal',
+      lower: 'Lower', elevated: 'Elevated', high: 'High', veryHigh: 'Very high',
+      signalNote: 'This is a model estimate, not an official IMD heatwave warning.',
+      feelsShort: 'feels',
+      geoRequest: 'Requesting your location once. It is used only for this forecast and is not stored.',
+      geoOk: 'Using your current location. Coordinates are shown because the area name cannot be read from them — choose your city above if you want the district name.',
+      geoDenied: 'Location permission was denied. Nothing was stored. Choose your city or search for a place instead.',
+      geoUnsupported: 'This browser does not provide location. Choose your city or search for a place instead.',
+      geoFailed: 'Your location could not be determined. Choose your city or search for a place instead.',
+      geoLabel: 'Your location',
+      searching: 'Searching…',
+      searchNone: 'No place found in India with that name. Check the spelling, or choose a city from the list.',
+      searchFailed: 'Search failed. Check your internet connection, or choose a city from the list.',
+      found: 'Showing the forecast for'
+    },
+    hi: {
+      title: 'हीटवाइज़ — भीषण गर्मी में सुरक्षित रहें',
+      prompt: 'अनुमानित गर्मी देखने के लिए अपना शहर या जिला चुनें।',
+      loading: 'मौसम का अनुमान लोड हो रहा है…',
+      error: 'मौसम का अनुमान लोड नहीं हो सका। इंटरनेट जाँचें और फिर कोशिश करें। आधिकारिक चेतावनियाँ IMD पर उपलब्ध हैं।',
+      none: 'कोई इलाका नहीं चुना गया',
+      feels: 'अभी महसूस हो रही गर्मी',
+      max: 'आज का अनुमानित अधिकतम तापमान',
+      feelMax: 'आज अधिकतम कितनी गर्मी महसूस होगी',
+      updated: 'अनुमान लिया गया',
+      modelTime: 'मॉडल समय',
+      signal: 'अनुमानित गर्मी का संकेत',
+      lower: 'कम', elevated: 'बढ़ी हुई', high: 'ज़्यादा', veryHigh: 'बहुत ज़्यादा',
+      signalNote: 'यह मॉडल का अनुमान है, IMD की आधिकारिक लू चेतावनी नहीं।',
+      feelsShort: 'महसूस',
+      geoRequest: 'आपकी लोकेशन एक बार माँगी जा रही है। यह सिर्फ इस अनुमान के लिए है और सहेजी नहीं जाती।',
+      geoOk: 'आपकी वर्तमान लोकेशन का उपयोग हो रहा है। निर्देशांक दिख रहे हैं क्योंकि इनसे इलाके का नाम नहीं पढ़ा जा सकता — जिले का नाम चाहिए तो ऊपर से शहर चुनें।',
+      geoDenied: 'लोकेशन की अनुमति नहीं मिली। कुछ भी सहेजा नहीं गया। शहर चुनें या जगह खोजें।',
+      geoUnsupported: 'यह ब्राउज़र लोकेशन नहीं देता। शहर चुनें या जगह खोजें।',
+      geoFailed: 'आपकी लोकेशन पता नहीं चल सकी। शहर चुनें या जगह खोजें।',
+      geoLabel: 'आपकी लोकेशन',
+      searching: 'खोजा जा रहा है…',
+      searchNone: 'भारत में इस नाम की जगह नहीं मिली। वर्तनी जाँचें या सूची से शहर चुनें।',
+      searchFailed: 'खोज नहीं हो सकी। इंटरनेट जाँचें या सूची से शहर चुनें।',
+      found: 'मौसम का अनुमान दिखाया जा रहा है'
+    }
+  };
+
+  var I18N = {
+    hi: {
+      'skip': 'मुख्य सामग्री पर जाएँ',
+      'brand.sub': 'गर्मी से सुरक्षा',
+      'nav.label': 'पृष्ठ',
+      'nav.home': 'होम',
+      'nav.safety': 'गर्मी से सुरक्षा',
+      'nav.risk': 'जोखिम मॉडल',
+      'nav.outlook': 'मौसम का अनुमान',
+      'nav.response': 'अलर्ट और प्रतिक्रिया',
+      'nav.help': '112 पर कॉल करें',
+      'hero.eyebrow': 'गर्मी से सुरक्षा · भारत',
+      'hero.h1': 'भीषण गर्मी में सुरक्षित रहें',
+      'hero.lead': 'गर्मी किसी को भी बीमार कर सकती है। यह पृष्ठ सरल भाषा में बताता है कि तैयारी कैसे करें, गर्म दिन में क्या करें, और कब तुरंत मदद लें।',
+      'hero.meta': 'स्वास्थ्य सलाह की अंतिम जाँच: 20 नवंबर 2026 · मौसम की जानकारी जहाँ दिखाई गई है वहाँ Open-Meteo से लाइव',
+      'lang.label': 'भाषा',
+      'emg.tag': 'आपातकाल',
+      'emg.title': 'हीटस्ट्रोक (लू) एक आपात स्थिति है',
+      'emg.body': 'अगर किसी को भ्रम है, दौरा पड़ा है, वह बेहोश हो गया है, या उसकी त्वचा बहुत गर्म है — तुरंत 112 पर कॉल करें। सुधार का इंतज़ार न करें।',
+      'emg.call': '112 पर कॉल करें',
+      'emg.how': 'मदद आने तक क्या करें →',
+
+      's1.title': 'गर्मी चरम पर पहुँचने से पहले',
+      's1.lead': 'पहले से किए कुछ छोटे काम सबसे गर्म दिनों को बहुत आसान बना देते हैं।',
+      's1.prep.h': 'पहले से तैयारी करें',
+      's1.prep': '<li><strong>आधिकारिक स्थानीय अलर्ट देखें।</strong> दिन की योजना बनाने से पहले अपने जिले के लिए भारत मौसम विज्ञान विभाग (IMD) की चेतावनी देखें। किसी मौसम ऐप का अनुमान आधिकारिक चेतावनी नहीं होता।</li><li><strong>बाहर के काम ठंडे समय में रखें।</strong> ज़्यादातर बाहरी काम, खरीदारी और यात्रा सुबह जल्दी या शाम को करें, जब गर्मी कम होती है।</li><li><strong>पानी उपलब्ध रखें।</strong> घर, काम की जगह और बैग में पीने का पानी रखें और दिन में भरते रहें।</li><li><strong>पास की ठंडी जगह पहचानें।</strong> घर का सबसे ठंडा कमरा, पेड़ की छाया, या मोहल्ले की ठंडी जगह चुनें। कौन-सी सार्वजनिक जगह खुली है, यह स्थानीय स्तर पर पूछें — इस पृष्ठ पर ऐसी सत्यापित सूची नहीं है।</li><li><strong>जिन्हें मदद चाहिए उनका हाल पूछें।</strong> अकेले रहने वाले बुज़ुर्ग, दिव्यांग या लंबी बीमारी वाले लोग, गर्भवती महिलाएँ, छोटे बच्चे और बाहर काम करने वाले लोग।</li>',
+      's1.home.h': 'घर को ठंडा रखें',
+      's1.home': '<li>दिन में खिड़कियाँ, पर्दे और शटर बंद रखें जब बाहर अंदर से ज़्यादा गर्मी हो, खासकर सीधी धूप में। रात में बाहर का तापमान कम होने पर उन्हें फिर खोलें।</li><li>बत्तियाँ और बिना ज़रूरत के बिजली के उपकरण बंद रखें — ये कमरे को गर्म करते हैं।</li><li>हवा चलाने के लिए पंखा इस्तेमाल करें, लेकिन लगभग 40 °C से ऊपर पंखा शरीर को और गर्म कर सकता है (WHO)। ऐसे समय कपड़े को ठंडे पानी से गीला करें।</li><li>चेहरा और शरीर गीले कपड़े से पोंछें, ठंडे पानी से नहाएँ, या पैर ठंडे पानी में रखें।</li><li>खाना बनाते समय खिड़की या एग्जॉस्ट खोलकर भाप और गर्मी बाहर निकालें, और जब संभव हो ठंडे समय में खाना बनाएँ।</li><li>जिस कमरे में सोते हैं उसे हवादार रखें और हल्की सूती चादर इस्तेमाल करें।</li>',
+      's1.plan.h': 'एक सरल योजना बनाएँ',
+      's1.plan': 'तय करें कि किसे फोन करेंगे, किसका कमरा सबसे ठंडा है, दवाइयाँ कहाँ रखी हैं, और बिजली जाने पर क्या करेंगे। बच्चों और बुज़ुर्गों को 112 और घर के फोन नंबर याद कराएँ।',
+
+      's2.title': 'भीषण गर्मी के दौरान',
+      's2.lead': 'मकसद सरल है: शरीर ठंडा रहे और पानी पीते रहें। सिर्फ कपड़े नहीं, अपने काम का तरीका भी बदलें।',
+      's2.core.h': 'हर दिन ये करें',
+      's2.core': '<li><strong>छाया या ठंडी जगह में आराम करें।</strong> दिन में 2–3 घंटे ठंडी जगह बिताने से शरीर को राहत मिलती है (WHO)।</li><li><strong>पानी नियमित पिएँ</strong> — प्यास लगने से पहले, और पानी हाथ के पास रखें।</li><li><strong>हल्के, ढीले कपड़े</strong> पहनें और रंग हल्के रखें। सिर ढकें, छाता या टोपी साथ रखें।</li><li><strong>सबसे गर्म समय में भारी मेहनत कम करें।</strong> छाया में बार-बार ब्रेक लें, और चक्कर या कमजोरी होने पर ज़ोर न लगाएँ।</li><li><strong>गर्मी में शराब से बचें</strong> — यह शरीर से पानी की कमी बढ़ाती है।</li><li><strong>बच्चों या पालतू जानवरों को खड़ी गाड़ी में कभी न छोड़ें</strong>, चाहे खिड़कियाँ खुली हों और कुछ ही मिनट हों।</li>',
+      's2.water': '<strong>पानी की कोई एक मात्रा सबके लिए सही नहीं होती।</strong> कितना पानी चाहिए, यह शरीर, काम, मौसम, उम्र और दवाओं पर निर्भर करता है। इसीलिए यह पृष्ठ कोई तय मात्रा नहीं देता।',
+      's2.fluid': '<strong>पानी की सीमा वाली स्थिति:</strong> अगर किसी डॉक्टर ने हृदय, किडनी या लिवर की बीमारी के कारण पानी सीमित करने को कहा है, तो सामान्य सलाह के बजाय उनकी सलाह मानें।',
+      's2.workers.h': 'बाहर काम करने वाले लोग',
+      's2.workers': 'सुबह जल्दी या शाम को काम शुरू करें, हर घंटे छाया में ब्रेक लें, और जोड़ी में काम करें ताकि एक-दूसरे पर नज़र रहे। चक्कर, कमजोरी या सिरदर्द हो तो रुककर ठंडा हों। ORS तभी लें जब स्वास्थ्य कर्मी सलाह दें।',
+      's2.travel.h': 'यात्रा करते समय',
+      's2.travel': 'पानी साथ रखें, दिन के सबसे गर्म समय में यात्रा टालें, और बच्चों या पालतू जानवरों को गाड़ी में अकेला न छोड़ें। बस या ट्रेन में अपने आसपास के बुज़ुर्गों और बच्चों का हाल पूछें।',
+      's2.children.h': 'बच्चे',
+      's2.children': 'छाया में और दोपहर की धूप से दूर खेलने के लिए प्रोत्साहित करें, बार-बार पानी दें, और असामान्य थकान, चिड़चिड़ापन या सुस्ती पर ध्यान दें। बच्चों का शरीर बड़ों से जल्दी गर्म होता है।',
+      's2.older.h': 'बुज़ुर्ग और दिव्यांग लोग',
+      's2.older': 'दिन में दो बार हाल पूछें। पानी हाथ के पास रखें, ठंडी जगह तक पहुँचने में मदद करें, दवाइयाँ ठंडी जगह रखें, और जो खुद पानी नहीं ले सकते उन्हें बार-बार याद दिलाएँ।',
+      's2.pets.h': 'पालतू जानवर',
+      's2.pets': 'छाया और साफ पानी दें, गर्म फर्श के बजाय ठंडी सतह पर घुमाएँ, गाड़ी में कभी न छोड़ें, और सबसे गर्म समय में लंबी सैर न कराएँ।',
+      's2.meds.h': 'दवाइयाँ और लंबी बीमारियाँ',
+      's2.meds': 'कुछ दवाइयाँ पसीना या शरीर में पानी के संतुलन को बदलती हैं। अगर आप नियमित दवा लेते हैं या कोई लंबी बीमारी है, तो डॉक्टर से पूछें कि गर्मी में क्या सावधानी रखें, और जहाँ लेबल पर लिखा हो वहाँ दवाइयाँ लगभग 25–30 °C से नीचे रखें।',
+
+      's3.title': 'गर्मी से बीमारी पहचानें',
+      's3.lead': 'शुरुआती लक्षण दिखें तो तुरंत ठंडा करें। भ्रम, दौरा या बेहोशी हो तो बिना देर 112 पर कॉल करें।',
+      's3.early.chip': 'शुरुआती लक्षण',
+      's3.early.h': 'लू लगना (हीट एग्जॉशन)',
+      's3.early': '<li>बहुत पसीना आना, त्वचा ठंडी और चिपचिपी लगना</li><li>कमजोरी और असामान्य थकान</li><li>चक्कर आना या सिर हल्का लगना</li><li>सिरदर्द</li><li>जी मिचलाना या उल्टी</li><li>हाथ, पैर या पेट में मांसपेशियों की ऐंठन</li><li>बहुत प्यास लगना</li><li>चिड़चिड़ापन</li>',
+      's3.early.note': 'भूरी या काली त्वचा पर रंग बदलना कम दिखता है, इसलिए लक्षणों को देखें। 30 मिनट ठंडा करने के बाद भी सुधार न हो तो डॉक्टर से सलाह लें।',
+      's3.em.chip': 'आपातकाल',
+      's3.em.h': 'हीटस्ट्रोक — तुरंत 112 पर कॉल करें',
+      's3.em': '<li>भ्रम, अस्पष्ट बोली या अजीब व्यवहार</li><li>दौरा (फिट) या शरीर का अकड़ना</li><li>बेहोश होना</li><li>त्वचा बहुत गर्म — पसीना हो या न हो</li><li>तेज़ धड़कन या तेज़ साँस</li><li>शरीर का तापमान 40 °C या ज़्यादा</li><li>ठंडा करने के 30 मिनट बाद भी सुधार न होना</li>',
+      's3.em.note': 'हर व्यक्ति को पसीना नहीं आता। त्वचा बहुत गर्म और सूखी भी हो सकती है। हीटस्ट्रोक जल्दी बिगड़ सकता है और उसमें आपातकालीन इलाज ज़रूरी है।',
+
+      's4.title': 'क्या करें',
+      's4.lead': 'हीटस्ट्रोक में हर मिनट मायने रखता है। पहले मदद बुलाएँ, फिर इंतज़ार के दौरान ठंडा करना शुरू करें।',
+      's4.steps.h': 'मदद आने तक',
+      's4.steps': '<li><strong>112 पर कॉल करें</strong> या नज़दीकी आपातकालीन विभाग। बताएँ कि आप कहाँ हैं, कितने लोग प्रभावित हैं और क्या दिख रहा है।</li><li><strong>व्यक्ति को</strong> सबसे ठंडी छाया वाली जगह पर ले जाएँ।</li><li><strong>ज़रूरत से ज़्यादा कपड़े</strong> जैसे जैकेट, जूते या मोज़े ढीले करें या हटा दें।</li><li><strong>त्वचा ठंडी करें</strong> — गीले ठंडे कपड़े, पानी का छींटा या स्पंज, और पंखे से हवा। गर्दन, बगल या कमर के पास कपड़े में लपेटा ठंडा पैक भी मदद करता है।</li><li><strong>थोड़ा-थोड़ा पानी पिलाएँ</strong> — सिर्फ तब जब व्यक्ति पूरी तरह होश में हो और सुरक्षित रूप से निगल सकता हो।</li><li><strong>अगर बेहोश है पर साँस चल रही है</strong>, तो करवट (रिकवरी पोज़िशन) में लिटाएँ। साँस सामान्य न चल रही हो तो CPR शुरू करें और 112 को बताएँ।</li><li><strong>साथ रहें</strong> और मदद आने तक ठंडा करते रहें।</li>',
+      's4.dont.h': 'ये न करें',
+      's4.dont': '<li>बेहोश, अधिक सुस्त, या सुरक्षित रूप से निगलने में असमर्थ व्यक्ति को खाना या पानी न दें।</li><li>तुरंत इलाज के बजाय दवा, पैरासिटामोल, शराब या घरेलू नुस्खे न दें।</li><li>बर्फ सीधे त्वचा पर न रखें — पहले कपड़े में लपेटें।</li><li>व्यक्ति को अकेला न छोड़ें या अकेले भेजें नहीं।</li><li>ठीक होने से पहले उन्हें चलने, काम करने या गर्मी में लौटने के लिए न कहें।</li>',
+      's4.mild.h': 'अगर लक्षण हल्के हैं और व्यक्ति होश में है',
+      's4.mild': 'ठंडी जगह आराम कराएँ, कपड़े ढीले करें, शरीर ठंडा करें और थोड़ा-थोड़ा पानी या ओआरएस दें। लगभग 30 मिनट में सुधार दिखना चाहिए। सुधार न हो, हालत बिगड़े, या व्यक्ति बुज़ुर्ग, गर्भवती, छोटा बच्चा या लंबी बीमारी वाला हो — तुरंत डॉक्टर से सलाह लें। अगले दिन गर्मी में भारी काम न करें।',
+      's4.meds': '<strong>कोई भी दवा या घरेलू उपाय तुरंत इलाज की जगह नहीं है।</strong> यह पृष्ठ गर्मी से होने वाली बीमारी के लिए कोई दवा या इलाज नहीं बताता।',
+
+      's5.title': 'स्थानीय मदद और अलर्ट',
+      's5.lead': 'अनुमान देखने के लिए अपना इलाका चुनें। लोकेशन साझा करना ज़रूरी नहीं है।',
+      's5.loc.h': 'अपना इलाका चुनें',
+      's5.loc.note': 'लोकेशन सिर्फ बटन दबाने पर, एक बार, और सिर्फ मौसम का अनुमान दिखाने के लिए माँगी जाती है। यह सहेजी नहीं जाती और हमारे सर्वर पर नहीं भेजी जाती।',
+      's5.loc.city': 'शहर या जिला',
+      's5.loc.choose': 'चुनें…',
+      's5.loc.searchLabel': 'या भारत में कहीं भी खोजें',
+      's5.loc.placeholder': 'जैसे नागपुर',
+      's5.loc.searchBtn': 'खोजें',
+      's5.loc.geo': 'मेरी लोकेशन का उपयोग करें',
+      's5.wx.h': 'अनुमानित गर्मी',
+      's5.wx.chip': 'मॉडल अनुमान',
+      's5.wx.none': 'कोई इलाका नहीं चुना गया',
+      'wx.feels': 'अभी महसूस हो रही गर्मी',
+      'wx.max': 'आज का अनुमानित अधिकतम तापमान',
+      'wx.feelMax': 'आज अधिकतम कितनी गर्मी महसूस होगी',
+      's5.wx.note': 'यह लगभग 25 किलोमीटर के इलाके के लिए मौसम मॉडल का अनुमान है — आपके पते पर नापी गई गर्मी नहीं, और आधिकारिक चेतावनी नहीं। आधिकारिक चेतावनी के लिए IMD देखें।',
+      's5.official.h': 'आधिकारिक अलर्ट (IMD)',
+      's5.official': 'आधिकारिक लू चेतावनी भारत मौसम विज्ञान विभाग (IMD) जारी करता है। यह पृष्ठ IMD की चेतावनियाँ नहीं दिखाता और कोई चेतावनी नहीं बनाता। अपने जिले की वर्तमान स्थिति IMD पर देखें।',
+      's5.official.link': 'IMD वेबसाइट खोलें ↗',
+      's5.compare.h': 'अनुमान और आधिकारिक चेतावनी अलग हैं',
+      's5.compare': '<li><strong>इस पृष्ठ पर:</strong> Open-Meteo मौसम मॉडल से यह अनुमान कि गर्मी कैसी महसूस हो सकती है। इसे दिन की योजना के लिए मानें, अलर्ट के रूप में नहीं।</li><li><strong>IMD:</strong> जिले के लिए आधिकारिक लू या गर्मी की चेतावनी। स्थानीय प्रशासन, अस्पताल और मीडिया इसी पर काम करते हैं।</li>',
+      's5.help.h': 'आपातकालीन और स्थानीय मदद',
+      's5.help': '<li><strong>112</strong> — भारत का राष्ट्रीय आपातकालीन नंबर: पुलिस, फायर और एम्बुलेंस। यह मुफ़्त है और 24 घंटे काम करता है।</li><li><strong>108 / 102</strong> — राष्ट्रीय एम्बुलेंस सेवा के नंबर। ये अधिकांश राज्यों और केंद्र शासित प्रदेशों में हैं, पर उपलब्धता और पहुँच हर जिले में एक जैसी नहीं। 112 से भी एम्बुलेंस माँगी जा सकती है।</li><li><strong>कूलिंग सेंटर, शेल्टर या स्थानीय हेल्पलाइन:</strong> इस पृष्ठ के पास आपके इलाके की सत्यापित जानकारी नहीं है, इसलिए यह कोई सूची नहीं देता। नगर पालिका, जिला स्वास्थ्य कार्यालय या 112 से पूछें।</li>',
+      's5.links.h': 'आधिकारिक संसाधन',
+
+      's6.title': 'इस पृष्ठ के बारे में',
+      's6.about': 'यह पृष्ठ आम लोगों के लिए सामान्य सुरक्षा जानकारी देता है। यह निदान, व्यक्तिगत चिकित्सकीय सलाह, या डॉक्टर, आपातकालीन सेवाओं और स्थानीय प्रशासन के निर्देशों का विकल्प नहीं है। इसे मानने से किसी के ठीक रहने की गारंटी नहीं मिलती।',
+      's6.sources.h': 'स्वास्थ्य सलाह के स्रोत',
+      's6.sources': 'स्वास्थ्य सलाह 20 नवंबर 2026 को इन स्रोतों से मिलाई गई। हर प्रविष्टि मूल पृष्ठ से जुड़ी है।',
+      's6.notdo.h': 'यह पृष्ठ क्या नहीं करता',
+      's6.notdo': '<li>यह IMD की आधिकारिक चेतावनियाँ नहीं दिखाता, और किसी मॉडल अनुमान को आधिकारिक अलर्ट के रूप में नहीं दिखाता।</li><li>जिन हेल्पलाइन, कूलिंग सेंटर या सेवाओं की पुष्टि नहीं हो सकती, उनकी सूची यह नहीं देता। जहाँ स्थानीय जानकारी नहीं है, वह साफ़ बताता है।</li><li>यह मौतों, अस्पताल में भर्ती होने या कितने लोग बीमार पड़ेंगे — इनका अनुमान नहीं लगाता।</li><li>यह पानी की तय मात्रा, दवाइयाँ या घरेलू इलाज नहीं बताता।</li>',
+      's6.lang.h': 'भाषाएँ और नई भाषा जोड़ना',
+      's6.lang': 'अभी अंग्रेज़ी और हिंदी उपलब्ध हैं। नई भारतीय भाषा जोड़ने के लिए भाषा सूची में एक विकल्प और इस फ़ाइल में उसी कुंजियों वाली अनुवाद सूची जोड़ें; जिस पंक्ति का अनुवाद नहीं होगा वह अंग्रेज़ी में दिखेगी। प्रकाशन से पहले मातृभाषी से शब्द जाँच कराएँ। यहाँ का हिंदी पाठ पहला प्रारूप है और पेशेवर अनुवादक से जाँचा नहीं गया है।',
+      'footer.text': '<strong>हीटवाइज़ · आम लोगों के लिए गर्मी से सुरक्षा।</strong> सिर्फ सामान्य जानकारी, चिकित्सकीय सलाह नहीं। आपात स्थिति में 112 पर कॉल करें।',
+      'footer.src': 'मौसम: Open-Meteo (CC BY 4.0)। स्वास्थ्य सलाह: WHO, NHS, NDMA, MoHFW/NCDC। जाँच: 20 नवंबर 2026।'
+    }
+  };
+
+  var CITIES = [
+    {en:'Delhi',hi:'दिल्ली',lat:28.6139,lon:77.2090},
+    {en:'Mumbai',hi:'मुंबई',lat:19.0760,lon:72.8777},
+    {en:'Kolkata',hi:'कोलकाता',lat:22.5726,lon:88.3639},
+    {en:'Chennai',hi:'चेन्नई',lat:13.0827,lon:80.2707},
+    {en:'Bengaluru',hi:'बेंगालुरु',lat:12.9716,lon:77.5946},
+    {en:'Hyderabad',hi:'हैदराबाद',lat:17.3850,lon:78.4867},
+    {en:'Ahmedabad',hi:'अहमदाबाद',lat:23.0225,lon:72.5714},
+    {en:'Pune',hi:'पुणे',lat:18.5204,lon:73.8567},
+    {en:'Jaipur',hi:'जयपुर',lat:26.9124,lon:75.7873},
+    {en:'Lucknow',hi:'लखनऊ',lat:26.8467,lon:80.9462},
+    {en:'Patna',hi:'पटना',lat:25.5941,lon:85.1376},
+    {en:'Bhopal',hi:'भोपाल',lat:23.2599,lon:77.4126},
+    {en:'Nagpur',hi:'नागपुर',lat:21.1458,lon:79.0882},
+    {en:'Raipur',hi:'रायपुर',lat:21.2514,lon:81.6296},
+    {en:'Kanpur',hi:'कानपुर',lat:26.4499,lon:80.3319},
+    {en:'Varanasi',hi:'वाराणसी',lat:25.3176,lon:82.9739},
+    {en:'Surat',hi:'सूरत',lat:21.1702,lon:72.8311},
+    {en:'Visakhapatnam',hi:'विशाखापत्तनम',lat:17.6868,lon:83.2185},
+    {en:'Bhubaneswar',hi:'भुवनेश्वर',lat:20.2961,lon:85.8245},
+    {en:'Guwahati',hi:'गुवाहाटी',lat:26.1445,lon:91.7362},
+    {en:'Kochi',hi:'कोच्चि',lat:9.9312,lon:76.2673},
+    {en:'Thiruvananthapuram',hi:'तिरुवनंतपुरम',lat:8.5241,lon:76.9366},
+    {en:'Chandigarh',hi:'चंडीगढ़',lat:30.7333,lon:76.7794},
+    {en:'Srinagar',hi:'श्रीनगर',lat:34.0837,lon:74.7973},
+    {en:'Shimla',hi:'शिमला',lat:31.1048,lon:77.1734},
+    {en:'Dehradun',hi:'देहरादून',lat:30.3165,lon:78.0322},
+    {en:'Jodhpur',hi:'जोधपुर',lat:26.2389,lon:73.0243},
+    {en:'Indore',hi:'इंदौर',lat:22.7196,lon:75.8577}
+  ];
+
+  var lang = 'en';
+  var snapshots = [];       // {el, html, key}
+  var attrSnapshots = [];   // {el, attr, value, key}
+  var current = null;       // {kind:'city'|'geo'|'search', ...}
+  var lastWx = null;
+  var geoStatus = {key:'s5.loc.status', text:null, kind:''};
+  var wxStatus = {key:'wx.prompt', text:null, kind:''};
+  var reqId = 0;
+  var controller = null;
+
+  function $(sel){ return document.querySelector(sel); }
+  function t(key){ return (TEXT[lang] && TEXT[lang][key]) || TEXT.en[key] || key; }
+
+  /* Snapshot the English text that is already in the HTML, so switching
+     languages can always fall back to it. */
+  function capture(){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      snapshots.push({ el:el, html:el.innerHTML, key:el.getAttribute('data-i18n') });
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el){
+      attrSnapshots.push({ el:el, attr:'aria-label', value:el.getAttribute('aria-label')||'', key:el.getAttribute('data-i18n-aria') });
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      attrSnapshots.push({ el:el, attr:'placeholder', value:el.getAttribute('placeholder')||'', key:el.getAttribute('data-i18n-placeholder') });
+    });
+  }
+
+  function applyLanguage(next){
+    lang = LANGS.indexOf(next) >= 0 ? next : 'en';
+    var dict = I18N[lang] || {};
+    document.documentElement.lang = lang;
+    document.body.setAttribute('data-lang', lang);
+    document.title = t('title');
+    snapshots.forEach(function(s){
+      var translated = dict[s.key];
+      s.el.innerHTML = translated || s.html;
+    });
+    attrSnapshots.forEach(function(a){
+      var translated = dict[a.key];
+      a.el.setAttribute(a.attr, translated || a.value);
+    });
+    try { localStorage.setItem(STORE, lang); } catch(e){}
+    buildCities();
+    if(current) renderPlaceLabel();
+    if(lastWx) renderWx(lastWx);
+    renderGeoStatus();
+    renderWxStatus();
+  }
+
+  function buildCities(){
+    var sel = $('#citySelect');
+    if(!sel) return;
+    var chosen = sel.value;
+    sel.innerHTML = '';
+    var ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = (I18N[lang] && I18N[lang]['s5.loc.choose']) || 'Select…';
+    sel.appendChild(ph);
+    CITIES.forEach(function(c, i){
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = lang === 'hi' ? c.hi : c.en;
+      sel.appendChild(o);
+    });
+    sel.value = chosen;
+  }
+
+  function setGeoStatus(key, text, kind){
+    geoStatus = { key:key, text:text || null, kind:kind || '' };
+    renderGeoStatus();
+  }
+  function renderGeoStatus(){
+    var el = $('#geoStatus');
+    if(!el) return;
+    el.textContent = geoStatus.text || t(geoStatus.key);
+    if(geoStatus.kind) el.setAttribute('data-kind', geoStatus.kind);
+    else el.removeAttribute('data-kind');
+  }
+  function setWxStatus(key, text, kind){
+    wxStatus = { key:key, text:text || null, kind:kind || '' };
+    renderWxStatus();
+  }
+  function renderWxStatus(){
+    var el = $('#wxStatus');
+    if(!el) return;
+    el.textContent = wxStatus.text || t(wxStatus.key);
+    if(wxStatus.kind) el.setAttribute('data-kind', wxStatus.kind);
+    else el.removeAttribute('data-kind');
+  }
+
+  function renderPlaceLabel(){
+    var el = $('#wxPlace');
+    if(!el) return;
+    if(!current){ el.textContent = t('none'); return; }
+    if(current.kind === 'city'){
+      var c = CITIES[current.index];
+      el.textContent = (lang === 'hi' ? c.hi : c.en);
+    } else if(current.kind === 'search'){
+      el.textContent = current.label;
+    } else {
+      el.textContent = t('geoLabel') + ' · ' + current.lat.toFixed(2) + '°N, ' + current.lon.toFixed(2) + '°E';
+    }
+  }
+
+  function levelFor(feels){
+    if(feels >= 45) return 'veryHigh';
+    if(feels >= 40) return 'high';
+    if(feels >= 35) return 'elevated';
+    return 'lower';
+  }
+
+  function renderWx(d){
+    var body = $('#wxBody');
+    if(!d || !d.current || !d.daily) return;
+    $('#wxNow').textContent = Math.round(d.current.apparent_temperature) + '°C';
+    $('#wxMax').textContent = Math.round(d.daily.temperature_2m_max[0]) + '°C';
+    var peak = d.daily.apparent_temperature_max[0];
+    $('#wxFeelMax').textContent = Math.round(peak) + '°C';
+
+    var level = levelFor(peak);
+    $('#wxSignal').textContent = t('signal') + ': ' + t(level) + ' · ' + Math.round(peak) + '°C ' + t('feelsShort') + '. ' + t('signalNote');
+
+    var days = $('#wxDays');
+    days.innerHTML = '';
+    for(var i=0;i<3;i++){
+      if(!d.daily.time[i]) break;
+      var dt = new Date(d.daily.time[i] + 'T12:00:00');
+      var name = new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-IN', {weekday:'short', day:'numeric'}).format(dt);
+      var cell = document.createElement('div');
+      cell.className = 'day';
+      var b = document.createElement('b'); b.textContent = name;
+      var strong = document.createElement('strong'); strong.textContent = Math.round(d.daily.apparent_temperature_max[i]) + '°C';
+      var small = document.createElement('small'); small.textContent = t('feelsShort') + ' · ' + Math.round(d.daily.temperature_2m_min[i]) + '°C–' + Math.round(d.daily.temperature_2m_max[i]) + '°C';
+      cell.appendChild(b); cell.appendChild(strong); cell.appendChild(small);
+      days.appendChild(cell);
+    }
+
+    var fetched = new Date();
+    var timeText = new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-IN', {hour:'2-digit', minute:'2-digit'}).format(fetched);
+    $('#wxUpdated').textContent = t('updated') + ' ' + timeText + ' (' + (d.timezone_abbreviation || d.timezone) + ') · '
+      + t('modelTime') + ' ' + String(d.current.time || '').replace('T', ' ');
+    body.hidden = false;
+  }
+
+  function loadForecast(place){
+    current = place;
+    renderPlaceLabel();
+    setWxStatus('wx.loading', null, '');
+    var lat, lon;
+    if(place.kind === 'city'){ lat = CITIES[place.index].lat; lon = CITIES[place.index].lon; }
+    else { lat = place.lat; lon = place.lon; }
+
+    var id = ++reqId;
+    if(controller) controller.abort();
+    controller = ('AbortController' in window) ? new AbortController() : null;
+
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat)
+      + '&longitude=' + encodeURIComponent(lon)
+      + '&current=temperature_2m,relative_humidity_2m,apparent_temperature'
+      + '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max'
+      + '&timezone=auto&forecast_days=4';
+
+    var opts = controller ? { signal: controller.signal } : {};
+    fetch(url, opts).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(d){
+      if(id !== reqId) return;
+      lastWx = d;
+      renderWx(d);
+      setWxStatus('', '', '');
+    }).catch(function(err){
+      if(err && err.name === 'AbortError') return;
+      if(id !== reqId) return;
+      lastWx = null;
+      $('#wxBody').hidden = true;
+      setWxStatus('wx.error', null, 'error');
+    });
+  }
+
+  function placeFromCity(value){
+    var idx = parseInt(value, 10);
+    if(isNaN(idx) || !CITIES[idx]) return;
+    loadForecast({kind:'city', index:idx});
+  }
+
+  function searchPlace(){
+    var input = $('#placeQuery');
+    var q = (input.value || '').trim();
+    if(q.length < 2){
+      setGeoStatus('', (lang === 'hi' ? 'कम से कम दो अक्षर लिखें।' : 'Type at least two letters.'), 'warn');
+      input.focus();
+      return;
+    }
+    setGeoStatus('searching', null, '');
+    fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=1&language=en&format=json&countryCode=IN')
+      .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(j){
+        var hit = j && j.results && j.results[0];
+        if(!hit){
+          setGeoStatus('searchNone', null, 'warn');
+          return;
+        }
+        var label = [hit.name, hit.admin1].filter(Boolean).join(', ');
+        setGeoStatus('', t('found') + ' ' + label + '.', 'ok');
+        $('#citySelect').value = '';
+        loadForecast({kind:'search', label:label, lat:hit.latitude, lon:hit.longitude});
+      })
+      .catch(function(){
+        setGeoStatus('searchFailed', null, 'error');
+      });
+  }
+
+  function useLocation(){
+    if(!navigator.geolocation){
+      setGeoStatus('geoUnsupported', null, 'warn');
+      return;
+    }
+    setGeoStatus('geoRequest', null, '');
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var lat = pos.coords.latitude, lon = pos.coords.longitude;
+      $('#citySelect').value = '';
+      loadForecast({kind:'geo', lat:lat, lon:lon});
+      setGeoStatus('geoOk', null, 'ok');
+    }, function(err){
+      if(err && err.code === 1) setGeoStatus('geoDenied', null, 'warn');
+      else setGeoStatus('geoFailed', null, 'warn');
+    }, { enableHighAccuracy:false, timeout:12000, maximumAge:600000 });
+  }
+
+  function init(){
+    capture();
+    var stored = null;
+    try { stored = localStorage.getItem(STORE); } catch(e){}
+    lang = (stored && LANGS.indexOf(stored) >= 0) ? stored : 'en';
+    $('#langSelect').value = lang;
+    applyLanguage(lang);
+    setGeoStatus('s5.loc.status', null, '');
+    setWxStatus('wx.prompt', null, '');
+
+    $('#langSelect').addEventListener('change', function(e){ applyLanguage(e.target.value); });
+    $('#citySelect').addEventListener('change', function(e){ if(e.target.value !== '') placeFromCity(e.target.value); });
+    $('#searchBtn').addEventListener('click', searchPlace);
+    $('#placeQuery').addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); searchPlace(); }
+    });
+    $('#geoBtn').addEventListener('click', useLocation);
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>

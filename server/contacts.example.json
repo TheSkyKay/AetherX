@@ -1,0 +1,45 @@
+{
+  "_note": "Example consent store for server/sms-adapter.mjs. All numbers are fictitious. Copy outside version control, replace with real consented records, and point HEATWISE_CONTACTS_FILE at it. The adapter matches 'areas' against the affected zone's area list and re-checks consent on every send.",
+  "recipients": [
+    {
+      "id": "p1",
+      "phone": "+919000004821",
+      "language": "en",
+      "areas": ["Suryapur east ward"],
+      "district": "Suryapur",
+      "consent": true,
+      "smsOptIn": true,
+      "optedOutAt": null
+    },
+    {
+      "id": "p2",
+      "phone": "+919000007310",
+      "language": "hi",
+      "areas": ["East colony"],
+      "district": "Suryapur",
+      "consent": true,
+      "smsOptIn": true,
+      "optedOutAt": null
+    },
+    {
+      "id": "p3",
+      "phone": "+919000001194",
+      "language": "en",
+      "areas": ["Bus stand area"],
+      "district": "Suryapur",
+      "consent": true,
+      "smsOptIn": false,
+      "optedOutAt": "2026-05-02T09:10:00Z"
+    },
+    {
+      "id": "p12",
+      "phone": "+919000006399",
+      "language": "en",
+      "areas": ["Old town"],
+      "district": "Suryapur",
+      "consent": true,
+      "smsOptIn": true,
+      "optedOutAt": null
+    }
+  ]
+}

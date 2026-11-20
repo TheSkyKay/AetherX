@@ -9,7 +9,8 @@ Static, framework-free prototypes for heat preparedness in India. No build step 
 | `index.html` | Original Heatwise landing page (unchanged apart from navigation links). |
 | `heat-risk-model.html` | H + E + V risk score for any city worldwide, with the calculation shown and a historical comparison. |
 | `heatwave-outlook.html` | India season outlook: IMD-criteria heatwave days for a city and season, historical baseline, climatological likelihood, "what changed" evidence, hindcast validation. |
-| `heat-response.html` | **DEMO** alert and supply coordination: heat zones, role-based views, bilingual alert preview, simulated delivery, supply plan, simulated dispatch and audit log. |
+| `heat-response.html` | **DEMO** alert and supply coordination: heat zones, role-based views, bilingual in-app and SMS alerts, simulated delivery, supply plan, simulated dispatch and audit log. |
+| `heat-safety.html` | Public heat safety guidance: preparing for heat, staying cool, recognising heat illness, first aid, and forecast estimates kept separate from official IMD warnings. English and Hindi, no build step. |
 
 ## Run locally
 
@@ -24,8 +25,9 @@ Weather data comes from the public [Open-Meteo](https://open-meteo.com/) API (CC
 
 Everything in the alert and response page is a simulation, labelled **DEMO**:
 
-- Three fictional wards, ten synthetic contacts, four storage units with demo stock.
+- Three fictional wards, twelve synthetic contacts, four storage units with demo stock.
 - Alerts are delivered only to those synthetic recipients, inside the page.
+- SMS goes to synthetic numbers and is simulated. Every message is prefixed `[SIMULATED]`, and numbers are masked everywhere they are displayed.
 - Dispatch deducts demo inventory and appends a simulated record. No order is placed and no supplier is contacted.
 - All demo data lives in this browser's `localStorage`; "Reset demo data" clears it.
 
@@ -34,9 +36,11 @@ Everything in the alert and response page is a simulation, labelled **DEMO**:
 1. Open **Response team**. Suryapur east ward shows a model **Severe** level from a demo feels-like snapshot.
 2. Select a zone, preview the English and Hindi messages, then **Review & send alert**. Confirm the DEMO acknowledgement.
 3. Delivery results, retries and duplicate/rate-limit holds appear in **Alert log and delivery**.
-4. Scroll to **Supply plan**, review quantities (clearly estimates), then **Review and approve plan** → simulated dispatch and inventory reduction.
-5. Switch to **Storage operator** to see the request and edit stock; switch to **Public** to see the alert and guidance.
-6. **Administrator** changes thresholds, stale limits, rate limits and the severe-alert second-review rule.
+4. Tick the **SMS** channel to see the synthetic-number preview, the opted-in recipient count, the number of SMS parts per language and the estimated cost. **Review & send alert** shows the same summary before anything is recorded.
+5. Or click **Preview the sample SMS** in the *Sample SMS test scenario* card: it selects the demo ward, opens the preview and cost, and after confirmation simulates delivery and shows per-recipient status plus the audit entries.
+6. Scroll to **Supply plan**, review quantities (clearly estimates), then **Review and approve plan** → simulated dispatch and inventory reduction.
+7. Switch to **Storage operator** to see the request and edit stock; switch to **Public** to see the alert, guidance and SMS opt-in/out controls.
+8. **Administrator** changes thresholds, stale limits, rate limits, cost per SMS part and the severe-alert second-review rule.
 
 ## What is live vs simulated
 
@@ -44,7 +48,7 @@ Everything in the alert and response page is a simulation, labelled **DEMO**:
 | --- | --- |
 | Weather (Open-Meteo) | Live when "Live weather" is enabled in the admin view; otherwise a clearly labelled demo snapshot. |
 | In-app alerts | Works in the browser, with DEMO recipients. |
-| SMS | **Not configured.** Simulated adapter only. |
+| SMS | **Simulated** until a responder clicks *Check server adapter* and the adapter reports credentials. Then live via `server/sms-adapter.mjs`. |
 | Email | **Not configured.** Simulated adapter only. |
 | Messaging app | **Not configured.** Simulated adapter only. |
 | Supply ordering / dispatch | **Simulated.** No external system is contacted. |
@@ -53,6 +57,7 @@ Everything in the alert and response page is a simulation, labelled **DEMO**:
 The page contains no credentials. A production deployment would need a server that reads, for example:
 
 ```
+HEATWISE_SMS_PROVIDER=
 HEATWISE_SMS_API_KEY=
 HEATWISE_SMS_SENDER=
 HEATWISE_EMAIL_API_KEY=
@@ -62,7 +67,71 @@ HEATWISE_MESSAGING_TOKEN=
 
 along with authentication and role assignment, a database with consent records and encrypted contact storage, and an append-only audit store.
 
+## SMS alerts
+
+SMS is a channel of its own, with its own consent, limits and audit trail.
+
+**Who receives it.** Only contacts who (a) gave general consent, (b) opted in to SMS separately, (c) have a number on record, and (d) are registered in an area that overlaps the affected zone. Overlap is a shared locality name (for example `East colony` inside *Suryapur east ward*), not just the same ward ID, so a contact registered outside every zone is excluded. Language comes from the contact, so each person gets one message in their preferred language.
+
+**What it contains.** Area and district, level, feels-like value, forecast window, one short safety step, the data source, a link to the full alert, and the opt-out keyword. The message states that it is a model estimate and not an official IMD warning. The link is `heat-response.html#alert=<id>` and opens the full alert record in the page.
+
+**Before sending.** The composer shows the text per language, the opted-in recipient count, the number of 160/70-character parts, and the estimated cost (parts × recipients × the configured price per part). The same summary with an explicit confirmation is required again in the dialog. Live sends additionally require a separate authorisation checkbox.
+
+**When it is held.** The composer refuses to send and shows the reason when:
+
+- weather is missing, unavailable or older than the stale limit;
+- the zone boundary is approximate and has not been reviewed;
+- the forecast window, data source or measure value is missing;
+- the message would exceed the configured part limit;
+- no opted-in contact overlaps the zone;
+- an identical SMS for the same zone and level went out in the last 6 hours;
+- the per-zone SMS rate limit is reached (default 3 per 30 minutes);
+- live mode is selected but no adapter has been confirmed.
+
+**Privacy.** Demo numbers are synthetic and always rendered masked (`+91 ••••• 4821`). In live mode the browser sends recipient **IDs** and the message text only; the adapter looks each number up in its own consent store, so numbers never reach the browser, the page, the map or the audit log. The adapter never logs a full number either.
+
+### Running the adapter
+
+The page works without it: SMS stays simulated. To enable live delivery, run the adapter next to a server that serves the static files over the same origin:
+
+```bash
+HEATWISE_SMS_PROVIDER=twilio \
+HEATWISE_SMS_API_KEY=<auth token> \
+HEATWISE_SMS_ACCOUNT_ID=<account sid> \
+HEATWISE_SMS_SENDER=<sender id or number> \
+HEATWISE_CONTACTS_FILE=/secure/path/contacts.json \
+HEATWISE_APP_ORIGIN=https://your-origin.example \
+HEATWISE_SMS_AUDIT_FILE=/secure/path/sms-audit.jsonl \
+node server/sms-adapter.mjs
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `HEATWISE_SMS_PROVIDER` | `twilio` or `msg91`. |
+| `HEATWISE_SMS_API_KEY` | Provider secret. Required. |
+| `HEATWISE_SMS_ACCOUNT_ID` | Twilio account SID (unused for MSG91). |
+| `HEATWISE_SMS_SENDER` | Sender ID or from-number. Required. |
+| `HEATWISE_SMS_TEMPLATE_ID` | Optional MSG91/DLT template ID. |
+| `HEATWISE_CONTACTS_FILE` | Path to the consent store. Required. Use `server/contacts.example.json` as the shape. |
+| `HEATWISE_APP_ORIGIN` | Exact site origin. Cross-origin posts are refused when set. |
+| `HEATWISE_SMS_DRY_RUN` | Defaults to on. Set to `0` only when you mean to send real messages. |
+| `HEATWISE_SMS_COST_PER_SEGMENT`, `HEATWISE_SMS_CURRENCY` | Cost used for the estimate. |
+| `HEATWISE_SMS_OPT_OUT_KEYWORD` | Default `STOP`; appended to any message missing it. |
+| `HEATWISE_SMS_MAX_PER_ZONE`, `HEATWISE_SMS_WINDOW_MIN` | Server-side rate limit, independent of the page. |
+| `HEATWISE_SMS_AUDIT_FILE` | Optional append-only JSONL audit file. |
+| `HEATWISE_SMS_PORT` | Default `8788`. |
+
+`server/contacts.example.json` shows the consent-store shape. Every entry carries its own consent flags, language and registered areas; numbers are fictitious. Keep the real file outside version control.
+
+The adapter exposes `GET /api/sms/status` (no secrets, just whether credentials are complete) and `POST /api/sms/send`. It re-checks consent and area overlap per recipient, refuses opted-out or non-overlapping IDs, deduplicates by alert and recipient, applies its own rate limit, retries provider 429/5xx responses with backoff, and returns per-recipient status. Redirect the page's `./api/sms/*` calls to it with a reverse proxy on the same origin — the browser is never given a provider credential.
+
+Banking on SMS in India also needs DLT registration of the sender and the message template; the adapter accepts `HEATWISE_SMS_TEMPLATE_ID` for that. Provider payloads should be checked against current documentation before production use.
+
 ## Limits
+
+- The SMS cost is an estimate from character segments and the configured price. Real operator pricing, taxes and provider fees differ.
+- The adapter was exercised in dry-run mode only; no live provider account was used, so its Twilio/MSG91 payload shapes are unverified against a real account.
+- The full-alert link is a relative path to this static page. A production deployment would use a public URL with signed, non-guessable alert identifiers.
 
 - Model zones use apparent temperature thresholds configured in the demo, not official IMD criteria. The IMD reference shown is a grid-cell entry-threshold check only.
 - Reanalysis and forecast data are ~25 km grid estimates, not station observations.
