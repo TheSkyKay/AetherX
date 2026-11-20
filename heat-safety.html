@@ -708,6 +708,38 @@ footer a{color:inherit}
   function $(sel){ return document.querySelector(sel); }
   function t(key){ return (TEXT[lang] && TEXT[lang][key]) || TEXT.en[key] || key; }
 
+  var OM_BASE = {
+    forecast: 'https://api.open-meteo.com/v1/forecast',
+    archive: 'https://archive-api.open-meteo.com/v1/archive',
+    geocoding: 'https://geocoding-api.open-meteo.com/v1/search'
+  };
+
+  // Prefer the site's own /api/open-meteo route so a browser that blocks
+  // third-party requests still gets the forecast; fall back to the host itself
+  // on a plain static server that has no such route.
+  function omFetch(kind, query, timeoutMs, signal){
+    var targets = ['/api/open-meteo?kind=' + kind + '&' + query, OM_BASE[kind] + '?' + query];
+    function attempt(i){
+      if(i >= targets.length) return Promise.reject(new Error('Open-Meteo could not be reached'));
+      var ctrl = ('AbortController' in window) ? new AbortController() : null;
+      var useSignal = signal || (ctrl ? ctrl.signal : null);
+      if(signal && ctrl && typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function'){
+        useSignal = AbortSignal.any([signal, ctrl.signal]);
+      }
+      var timer = setTimeout(function(){ if(ctrl) ctrl.abort(); }, timeoutMs || 12000);
+      return fetch(targets[i], useSignal ? { signal: useSignal } : {}).then(function(r){
+        clearTimeout(timer);
+        if(r.ok) return r;
+        if(r.status >= 400 && r.status < 500 && r.status !== 404) return r;
+        return attempt(i + 1);
+      }, function(){
+        clearTimeout(timer);
+        return attempt(i + 1);
+      });
+    }
+    return attempt(0);
+  }
+
   /* Snapshot the English text that is already in the HTML, so switching
      languages can always fall back to it. */
   function capture(){
@@ -842,7 +874,7 @@ footer a{color:inherit}
   function loadForecast(place){
     current = place;
     renderPlaceLabel();
-    setWxStatus('wx.loading', null, '');
+    setWxStatus('loading', null, '');
     var lat, lon;
     if(place.kind === 'city'){ lat = CITIES[place.index].lat; lon = CITIES[place.index].lon; }
     else { lat = place.lat; lon = place.lon; }
@@ -851,14 +883,13 @@ footer a{color:inherit}
     if(controller) controller.abort();
     controller = ('AbortController' in window) ? new AbortController() : null;
 
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat)
+    var query = 'latitude=' + encodeURIComponent(lat)
       + '&longitude=' + encodeURIComponent(lon)
       + '&current=temperature_2m,relative_humidity_2m,apparent_temperature'
       + '&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max'
       + '&timezone=auto&forecast_days=4';
 
-    var opts = controller ? { signal: controller.signal } : {};
-    fetch(url, opts).then(function(r){
+    omFetch('forecast', query, 12000, controller ? controller.signal : null).then(function(r){
       if(!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     }).then(function(d){
@@ -871,7 +902,7 @@ footer a{color:inherit}
       if(id !== reqId) return;
       lastWx = null;
       $('#wxBody').hidden = true;
-      setWxStatus('wx.error', null, 'error');
+      setWxStatus('error', null, 'error');
     });
   }
 
@@ -890,7 +921,7 @@ footer a{color:inherit}
       return;
     }
     setGeoStatus('searching', null, '');
-    fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=1&language=en&format=json&countryCode=IN')
+    omFetch('geocoding', 'name=' + encodeURIComponent(q) + '&count=1&language=en&format=json&countryCode=IN', 12000)
       .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(j){
         var hit = j && j.results && j.results[0];
@@ -933,7 +964,12 @@ footer a{color:inherit}
     $('#langSelect').value = lang;
     applyLanguage(lang);
     setGeoStatus('s5.loc.status', null, '');
-    setWxStatus('wx.prompt', null, '');
+    if(CITIES.length){
+      $('#citySelect').value = '0';
+      loadForecast({kind:'city', index:0});
+    } else {
+      setWxStatus('prompt', null, '');
+    }
 
     $('#langSelect').addEventListener('change', function(e){ applyLanguage(e.target.value); });
     $('#citySelect').addEventListener('change', function(e){ if(e.target.value !== '') placeFromCity(e.target.value); });
